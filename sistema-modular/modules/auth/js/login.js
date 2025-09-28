@@ -4,6 +4,7 @@
 import bcrypt from "https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm";
 import { supabaseClient } from "../../../lib/supabaseClient.js";
 import { saveSession } from "../../../lib/authGuard.js";
+import { gotoFromModule } from "../../../lib/pathUtil.js";
 
 let loginForm = null;
 let usernameInput = null;
@@ -12,7 +13,10 @@ let rememberMeInput = null;
 let usernameFeedback = null;
 let passwordFeedback = null;
 let generalFeedback = null;
-let navigationTarget = null;
+let navigationHandler = (relativeTarget) => {
+  // Navega utilizando rutas relativas calculadas desde este módulo.
+  gotoFromModule(import.meta.url, relativeTarget);
+};
 
 if (typeof document !== "undefined") {
   loginForm = document.querySelector("#loginForm");
@@ -22,10 +26,6 @@ if (typeof document !== "undefined") {
   usernameFeedback = document.querySelector("#usernameFeedback");
   passwordFeedback = document.querySelector("#passwordFeedback");
   generalFeedback = document.querySelector("#generalFeedback");
-}
-
-if (typeof window !== "undefined" && window.location) {
-  navigationTarget = window.location;
 }
 
 // Inicializa la pantalla limpiando cualquier mensaje previo.
@@ -149,15 +149,17 @@ export async function handleLoginSubmit(event) {
   }
 }
 
-// Permite configurar el destino de navegación (útil para pruebas unitarias).
-export function setNavigationTarget(target) {
-  navigationTarget = target;
+// Permite inyectar un manejador personalizado para la navegación (útil en pruebas).
+export function setNavigationHandler(handler) {
+  if (typeof handler === "function") {
+    navigationHandler = handler;
+  }
 }
 
-// Redirige al Dashboard utilizando el destino configurado.
-export function redirectToDashboard(target = navigationTarget) {
-  if (target && typeof target.replace === "function") {
-    target.replace("/modules/dashboard/index.html");
+// Redirige al Dashboard utilizando el manejador activo.
+export function redirectToDashboard(handler = navigationHandler) {
+  if (typeof handler === "function") {
+    handler("../dashboard/index.html");
   }
 }
 
@@ -175,6 +177,6 @@ export default {
   validatePassword,
   fetchUserByUsername,
   handleLoginSubmit,
-  setNavigationTarget,
+  setNavigationHandler,
   redirectToDashboard
 };

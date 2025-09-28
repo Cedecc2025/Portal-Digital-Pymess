@@ -1,7 +1,8 @@
 // dashboard.js
 // Administra la vista principal tras un inicio de sesión válido.
 
-import { requireAuth, getCurrentUsername, logout } from "/lib/authGuard.js";
+import { requireAuth, getCurrentUsername, logout } from "../../../lib/authGuard.js";
+import { gotoFromModule } from "../../../lib/pathUtil.js";
 
 const usernameDisplay = document.querySelector("#usernameDisplay");
 const logoutButton = document.querySelector("#logoutButton");
@@ -20,30 +21,25 @@ function loadUsername() {
 
 // Redirige a la ruta correspondiente según el módulo seleccionado.
 function handleModuleNavigation(event) {
+  event.preventDefault();
   const moduleCard = event.currentTarget;
   const moduleKey = moduleCard.dataset.module;
 
   if (moduleKey === "costos") {
-    window.location.href = "/modules/costos/index.html";
+    gotoFromModule(import.meta.url, "../costos/index.html");
   }
 }
 
 // Configura los listeners necesarios para la pantalla.
 function registerEventListeners() {
-  logoutButton.addEventListener("click", () => {
-    logout();
-  });
+  if (logoutButton) {
+    logoutButton.addEventListener("click", () => {
+      logout();
+    });
+  }
 
   moduleCards.forEach((card) => {
     card.addEventListener("click", handleModuleNavigation);
-    const button = card.querySelector(".module-button");
-
-    if (button) {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        handleModuleNavigation({ currentTarget: card });
-      });
-    }
   });
 }
 

@@ -22,6 +22,7 @@ const registerModulePath = "../sistema-modular/modules/auth/js/register.js";
 
 let registerModule;
 let insertMock;
+let navigationMock;
 
 function mockInsertResponse(response) {
   insertMock = vi.fn().mockResolvedValue(response);
@@ -34,6 +35,7 @@ beforeEach(async () => {
   vi.resetModules();
   fromMock.mockReset();
   hashMock.mockClear();
+  vi.useFakeTimers();
 
   const dom = new JSDOM(
     `<!DOCTYPE html><html><body>
@@ -52,11 +54,14 @@ beforeEach(async () => {
   global.document = dom.window.document;
 
   registerModule = await import(registerModulePath);
+  navigationMock = vi.fn();
+  registerModule.setNavigationHandler(navigationMock);
 });
 
 afterEach(() => {
   delete global.window;
   delete global.document;
+  vi.useRealTimers();
 });
 
 describe("register module", () => {
@@ -79,6 +84,7 @@ describe("register module", () => {
     passwordInput.value = "ClaveSegura1";
 
     await registerModule.handleRegisterSubmit(new window.Event("submit"));
+    await vi.runAllTimersAsync();
 
     expect(hashMock).toHaveBeenCalledWith("ClaveSegura1", 10);
     expect(insertMock).toHaveBeenCalledTimes(1);
@@ -86,6 +92,7 @@ describe("register module", () => {
     expect(payload.username).toBe("usuario_demo");
     expect(payload.password).toBe("hashed::ClaveSegura1");
     expect(generalFeedback.textContent).toBe("Registro exitoso. Ahora puedes iniciar sesión.");
+    expect(navigationMock).toHaveBeenCalledWith("./login.html");
   });
 
   it("informa cuando el usuario ya existe", async () => {
@@ -99,6 +106,7 @@ describe("register module", () => {
     passwordInput.value = "ClaveSegura1";
 
     await registerModule.handleRegisterSubmit(new window.Event("submit"));
+    expect(navigationMock).not.toHaveBeenCalled();
 
     expect(generalFeedback.textContent).toBe("El usuario ya se encuentra registrado. Elige otro nombre.");
   });

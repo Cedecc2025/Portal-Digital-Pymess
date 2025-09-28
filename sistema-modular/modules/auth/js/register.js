@@ -3,6 +3,7 @@
 
 import bcrypt from "https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm";
 import { supabaseClient } from "../../../lib/supabaseClient.js";
+import { gotoFromModule } from "../../../lib/pathUtil.js";
 
 let registerForm = null;
 let usernameInput = null;
@@ -10,6 +11,10 @@ let passwordInput = null;
 let usernameFeedback = null;
 let passwordFeedback = null;
 let generalFeedback = null;
+let navigationHandler = (relativeTarget) => {
+  // Utiliza la ruta del módulo actual para calcular el destino final.
+  gotoFromModule(import.meta.url, relativeTarget);
+};
 
 if (typeof document !== "undefined") {
   registerForm = document.querySelector("#registerForm");
@@ -108,6 +113,20 @@ export function showSuccessMessage(form = registerForm, feedbackElement = genera
   }
 }
 
+// Permite inyectar un manejador personalizado de navegación (útil en pruebas unitarias).
+export function setNavigationHandler(handler) {
+  if (typeof handler === "function") {
+    navigationHandler = handler;
+  }
+}
+
+// Redirige a la pantalla de login utilizando la ruta relativa adecuada.
+export function redirectToLogin(handler = navigationHandler) {
+  if (typeof handler === "function") {
+    handler("./login.html");
+  }
+}
+
 // Maneja el envío del formulario de registro.
 export async function handleRegisterSubmit(event) {
   event.preventDefault();
@@ -132,6 +151,9 @@ export async function handleRegisterSubmit(event) {
   try {
     await registerUser(username, password);
     showSuccessMessage();
+    window.setTimeout(() => {
+      redirectToLogin();
+    }, 1200);
   } catch (error) {
     if (generalFeedback) {
       generalFeedback.textContent = error.message;
@@ -153,5 +175,7 @@ export default {
   validatePassword,
   registerUser,
   showSuccessMessage,
+  setNavigationHandler,
+  redirectToLogin,
   handleRegisterSubmit
 };

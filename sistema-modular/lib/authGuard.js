@@ -1,7 +1,9 @@
 // authGuard.js
 // Este módulo centraliza la lógica de autenticación y protección de rutas del sistema.
 
-const LOGIN_PATH = "/modules/auth/login.html";
+import { gotoFromModule } from "./pathUtil.js";
+
+const LOGIN_RELATIVE_PATH = "../modules/auth/login.html";
 const SESSION_STORAGE_KEY = "sistemaModularSesion";
 
 // Recupera la sesión almacenada en localStorage o sessionStorage.
@@ -34,14 +36,14 @@ export function requireAuth() {
     return;
   }
 
-  window.location.replace(LOGIN_PATH);
+  gotoFromModule(import.meta.url, LOGIN_RELATIVE_PATH);
 }
 
 // Elimina cualquier sesión almacenada y redirige al login.
 export function logout() {
   window.localStorage.removeItem(SESSION_STORAGE_KEY);
   window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
-  window.location.replace(LOGIN_PATH);
+  gotoFromModule(import.meta.url, LOGIN_RELATIVE_PATH);
 }
 
 // Expone utilidades adicionales necesarias para guardar la sesión desde otros módulos.

@@ -27,7 +27,7 @@ vi.mock("../sistema-modular/lib/supabaseClient.js", () => ({
 
 const loginModulePath = "../sistema-modular/modules/auth/js/login.js";
 
-let replaceMock;
+let navigationMock;
 let loginModule;
 
 function buildSupabaseUserResponse(user) {
@@ -65,10 +65,9 @@ beforeEach(async () => {
   global.document = dom.window.document;
   global.localStorage = dom.window.localStorage;
   global.sessionStorage = dom.window.sessionStorage;
-  replaceMock = vi.fn();
-
   loginModule = await import(loginModulePath);
-  loginModule.setNavigationTarget({ replace: replaceMock });
+  navigationMock = vi.fn();
+  loginModule.setNavigationHandler(navigationMock);
 });
 
 afterEach(() => {
@@ -103,7 +102,7 @@ describe("login module", () => {
 
     expect(fromMock).toHaveBeenCalledWith("usuarios");
     expect(saveSessionMock).toHaveBeenCalledWith("usuario_empresarial", true);
-    expect(replaceMock).toHaveBeenCalledWith("/modules/dashboard/index.html");
+    expect(navigationMock).toHaveBeenCalledWith("../dashboard/index.html");
   });
 
   it("muestra un mensaje de error cuando el usuario no existe", async () => {
@@ -117,6 +116,6 @@ describe("login module", () => {
     const generalFeedback = document.querySelector("#generalFeedback");
     expect(generalFeedback.textContent).toBe("Usuario o contraseña incorrectos.");
     expect(saveSessionMock).not.toHaveBeenCalled();
-    expect(replaceMock).not.toHaveBeenCalled();
+    expect(navigationMock).not.toHaveBeenCalled();
   });
 });
