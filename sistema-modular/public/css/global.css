@@ -1,0 +1,22 @@
+/* global.css
+ * Estilos compartidos opcionales para todo el sistema. */
+
+:root {
+  --color-primary: #38bdf8;
+  --color-primary-dark: #0ea5e9;
+  --color-background: #0f172a;
+  --color-surface: #111c36;
+  --color-text: #e2e8f0;
+  --border-radius-lg: 16px;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema Modular</title>
+    <link rel="stylesheet" href="/public/css/global.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+  </head>
+  <body>
+    <main class="dashboard-container">
+      <header class="dashboard-header">
+        <div>
+          <p class="welcome-label">Bienvenido de nuevo</p>
+          <h1 id="usernameDisplay">Usuario</h1>
+        </div>
+        <button id="logoutButton" class="logout-button">Cerrar sesión</button>
+      </header>
+      <section class="modules-grid">
+        <article class="module-card" data-module="costos">
+          <h2>Costos</h2>
+          <p>Administra y monitorea la estructura de costos de tu operación.</p>
+          <button class="module-button">Ingresar</button>
+        </article>
+      </section>
+    </main>
+    <script type="module" src="/lib/supabaseClient.js"></script>
+    <script type="module" src="/lib/authGuard.js"></script>
+    <script type="module" src="./js/dashboard.js"></script>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+// authGuard.js
+// Este módulo centraliza la lógica de autenticación y protección de rutas del sistema.
+
+const LOGIN_PATH = "/modules/auth/login.html";
+const SESSION_STORAGE_KEY = "sistemaModularSesion";
+
+// Recupera la sesión almacenada en localStorage o sessionStorage.
+function getStoredSession() {
+  // Se intenta primero en localStorage ("Recordarme") y luego en sessionStorage.
+  const localSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  const sessionSession = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+
+  if (localSession) {
+    return JSON.parse(localSession);
+  }
+
+  if (sessionSession) {
+    return JSON.parse(sessionSession);
+  }
+
+  return null;
+}
+
+// Determina si existe una sesión autenticada.
+export function isAuthenticated() {
+  // Se considera autenticado si hay un username almacenado.
+  const session = getStoredSession();
+  return Boolean(session && session.username);
+}
+
+// Valida si hay sesión activa y redirige al login en caso contrario.
+export function requireAuth() {
+  if (isAuthenticated()) {
+    return;
+  }
+
+  window.location.replace(LOGIN_PATH);
+}
+
+// Elimina cualquier sesión almacenada y redirige al login.
+export function logout() {
+  window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  window.location.replace(LOGIN_PATH);
+}
+
+// Expone utilidades adicionales necesarias para guardar la sesión desde otros módulos.
+export function saveSession(username, rememberMe) {
+  const sessionData = {
+    username: username,
+    loginAt: new Date().toISOString()
+  };
+
+  if (rememberMe === true) {
+    window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
+  } else {
+    window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
+  }
+}
+
+// Recupera el usuario actual para mostrar información contextual.
+export function getCurrentUsername() {
+  const session = getStoredSession();
+
+  if (session && session.username) {
+    return session.username;
+  }
+
+  return null;
+}
