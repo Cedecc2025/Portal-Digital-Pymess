@@ -54,10 +54,13 @@ const elements = {
   transaccionesList: null,
   totalCostosLabel: null,
   prodFormTitle: null,
+  prodSubmitButton: null,
   prodCancelButton: null,
   costoFormTitle: null,
+  costoSubmitButton: null,
   costoCancelButton: null,
   transFormTitle: null,
+  transSubmitButton: null,
   transCancelButton: null,
   recomendaciones: null,
   peUnidades: null,
@@ -809,6 +812,9 @@ function cancelarEdicionProducto() {
   if (elements.prodFormTitle) {
     elements.prodFormTitle.textContent = "Agregar Producto/Servicio";
   }
+  if (elements.prodSubmitButton) {
+    elements.prodSubmitButton.textContent = "➕ Agregar Producto";
+  }
   if (elements.productosFields.nombre) {
     elements.productosFields.nombre.value = "";
   }
@@ -843,6 +849,9 @@ function editarProducto(productId) {
   state.editingProductId = product.id;
   if (elements.prodFormTitle) {
     elements.prodFormTitle.textContent = "Editar Producto/Servicio";
+  }
+  if (elements.prodSubmitButton) {
+    elements.prodSubmitButton.textContent = "💾 Guardar Cambios";
   }
   if (elements.productosFields.nombre) {
     elements.productosFields.nombre.value = product.nombre;
@@ -1113,6 +1122,9 @@ function cancelarEdicionCostoFijo() {
   if (elements.costoFormTitle) {
     elements.costoFormTitle.textContent = "Agregar Costo Fijo";
   }
+  if (elements.costoSubmitButton) {
+    elements.costoSubmitButton.textContent = "➕ Agregar Costo Fijo";
+  }
   if (elements.costosFields.concepto) {
     elements.costosFields.concepto.value = "";
   }
@@ -1132,7 +1144,7 @@ function cancelarEdicionCostoFijo() {
 
 // Prepara la edición de un costo fijo existente.
 function editarCostoFijo(costId) {
-  const cost = state.fixedCosts.find((item) => item.id === costId);
+  const cost = state.fixedCosts.find((item) => `${item.id}` === `${costId}`);
 
   if (!cost) {
     return;
@@ -1141,6 +1153,9 @@ function editarCostoFijo(costId) {
   state.editingCostId = cost.id;
   if (elements.costoFormTitle) {
     elements.costoFormTitle.textContent = "Editar Costo Fijo";
+  }
+  if (elements.costoSubmitButton) {
+    elements.costoSubmitButton.textContent = "💾 Guardar Cambios";
   }
   if (elements.costosFields.concepto) {
     elements.costosFields.concepto.value = cost.concepto;
@@ -1162,6 +1177,14 @@ function editarCostoFijo(costId) {
 // Elimina un costo fijo por su identificador.
 async function eliminarCostoFijo(costId) {
   if (!costId) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "¿Deseas eliminar este costo fijo? Esta acción no se puede deshacer."
+  );
+
+  if (!confirmed) {
     return;
   }
 
@@ -1412,6 +1435,9 @@ function cancelarEdicionTransaccion() {
   if (elements.transFormTitle) {
     elements.transFormTitle.textContent = "Agregar Transacción";
   }
+  if (elements.transSubmitButton) {
+    elements.transSubmitButton.textContent = "➕ Agregar Transacción";
+  }
   if (elements.transaccionesFields.fecha) {
     elements.transaccionesFields.fecha.value = "";
   }
@@ -1437,7 +1463,7 @@ function cancelarEdicionTransaccion() {
 
 // Prepara la edición de una transacción existente.
 function editarTransaccion(transactionId) {
-  const transaction = state.transactions.find((item) => item.id === transactionId);
+  const transaction = state.transactions.find((item) => `${item.id}` === `${transactionId}`);
 
   if (!transaction) {
     return;
@@ -1446,6 +1472,9 @@ function editarTransaccion(transactionId) {
   state.editingTransactionId = transaction.id;
   if (elements.transFormTitle) {
     elements.transFormTitle.textContent = "Editar Transacción";
+  }
+  if (elements.transSubmitButton) {
+    elements.transSubmitButton.textContent = "💾 Guardar Cambios";
   }
   if (elements.transaccionesFields.fecha) {
     elements.transaccionesFields.fecha.value = transaction.fecha;
@@ -1473,6 +1502,14 @@ function editarTransaccion(transactionId) {
 // Elimina una transacción del registro.
 async function eliminarTransaccion(transactionId) {
   if (!transactionId) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "¿Deseas eliminar esta transacción? Esta acción no se puede deshacer."
+  );
+
+  if (!confirmed) {
     return;
   }
 
@@ -2052,10 +2089,13 @@ function cacheElements() {
   elements.transaccionesList = document.querySelector("#lista-transacciones");
   elements.totalCostosLabel = document.querySelector("#total-costos-fijos");
   elements.prodFormTitle = document.querySelector("#prod-form-title");
+  elements.prodSubmitButton = document.querySelector('[data-action="guardar-producto"]');
   elements.prodCancelButton = document.querySelector('[data-action="cancelar-producto"]');
   elements.costoFormTitle = document.querySelector("#costo-form-title");
+  elements.costoSubmitButton = document.querySelector('[data-action="guardar-costo"]');
   elements.costoCancelButton = document.querySelector('[data-action="cancelar-costo"]');
   elements.transFormTitle = document.querySelector("#trans-form-title");
+  elements.transSubmitButton = document.querySelector('[data-action="guardar-transaccion"]');
   elements.transCancelButton = document.querySelector('[data-action="cancelar-transaccion"]');
   elements.recomendaciones = document.querySelector("#recomendaciones");
   elements.peUnidades = document.querySelector("#pe-unidades");
