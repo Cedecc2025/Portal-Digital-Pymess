@@ -1,7 +1,7 @@
 // costos.js
 // Controla toda la lógica interactiva del módulo de costos.
 
-import { requireAuth, logout, getCurrentUsername } from "../../../lib/authGuard.js";
+import { supabaseClient } from "../../../lib/supabaseClient.js";
 
 const STORAGE_KEYS = {
   products: "costosModuleProducts",
@@ -19,6 +19,7 @@ const state = {
   fixedCosts: [],
   transactions: [],
   selectedMonth: "",
+  remoteUser: null,
   editingProductId: null,
   editingCostId: null,
   editingTransactionId: null,
@@ -93,6 +94,13 @@ const elements = {
 };
 
 let toastTimeoutId = null;
+
+const SUPABASE_TABLES = {
+  products: "productos",
+  fixedCosts: "costos_fijos",
+  transactions: "flujo_caja",
+  users: "usuarios"
+};
 
 // Obtiene un identificador único simple para los registros.
 function generateId() {
@@ -189,6 +197,242 @@ function hideToast() {
   elements.loadingBanner.classList.add("hidden");
 }
 
+// Determina si se debe intentar sincronizar con Supabase.
+function shouldSyncWithSupabase() {
+  return Boolean(state.remoteUser && state.remoteUser.id);
+}
+
+// Verifica si el identificador proviene de la base de datos (numérico).
+function isRemoteIdentifier(identifier) {
+  if (identifier === null || identifier === undefined) {
+    return false;
+  }
+
+  const parsed = Number.parseInt(identifier, 10);
+  return Number.isInteger(parsed) && `${parsed}` === `${identifier}`;
+}
+
+// Convierte un registro de productos de Supabase a la estructura local.
+function mapSupabaseProduct(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    nombre: row.nombre ?? "",
+    tipo: row.tipo ?? "producto",
+    moneda: row.moneda ?? "CRC",
+    costo: Number.parseFloat(row.costo_unitario ?? 0) || 0,
+    precio: Number.parseFloat(row.precio_venta ?? 0) || 0,
+    unidades: Number.parseInt(row.unidades_vendidas ?? 0, 10) || 0
+  };
+}
+
+// Convierte un registro de costos fijos de Supabase a la estructura local.
+function mapSupabaseFixedCost(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    concepto: row.concepto ?? "",
+    moneda: row.moneda ?? "CRC",
+    monto: Number.parseFloat(row.monto ?? 0) || 0,
+    frecuencia: row.frecuencia ?? "mensual"
+  };
+}
+
+// Convierte una transacción remota a la representación interna.
+function mapSupabaseTransaction(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    fecha: row.fecha ?? "",
+    tipo: row.tipo ?? "ingreso",
+    categoria: row.categoria ?? "otro",
+    concepto: row.concepto ?? "",
+    moneda: row.moneda ?? "CRC",
+    monto: Number.parseFloat(row.monto ?? 0) || 0
+  };
+}
+
+// Genera el payload que espera Supabase para un producto.
+function buildSupabaseProductPayload(product) {
+  if (!product) {
+    return null;
+  }
+
+  return {
+    usuario_id: state.remoteUser?.id ?? null,
+    nombre: product.nombre,
+    tipo: product.tipo,
+    moneda: product.moneda,
+    costo_unitario: product.costo,
+    precio_venta: product.precio,
+    unidades_vendidas: product.unidades
+  };
+}
+
+// Genera el payload para la tabla de costos fijos.
+function buildSupabaseFixedCostPayload(cost) {
+  if (!cost) {
+    return null;
+  }
+
+  return {
+    usuario_id: state.remoteUser?.id ?? null,
+    concepto: cost.concepto,
+    moneda: cost.moneda,
+    monto: cost.monto,
+    frecuencia: cost.frecuencia
+  };
+}
+
+// Genera el payload para la tabla de flujo de caja.
+function buildSupabaseTransactionPayload(transaction) {
+  if (!transaction) {
+    return null;
+  }
+
+  return {
+    usuario_id: state.remoteUser?.id ?? null,
+    fecha: transaction.fecha,
+    tipo: transaction.tipo,
+    categoria: transaction.categoria,
+    concepto: transaction.concepto,
+    moneda: transaction.moneda,
+    monto: transaction.monto
+  };
+}
+
+// Combina la información remota con la local preservando registros no sincronizados.
+function mergeRemoteRecords(localRecords, remoteRecords) {
+  const normalizedRemote = remoteRecords.filter(Boolean);
+  const remoteIds = new Set(normalizedRemote.map((item) => `${item.id}`));
+
+  const pendingLocal = localRecords.filter((item) => !remoteIds.has(`${item.id}`));
+
+  return [...normalizedRemote, ...pendingLocal];
+}
+
+// Recupera un usuario de referencia desde Supabase para operar el módulo.
+async function bootstrapRemoteUser() {
+  try {
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_TABLES.users)
+      .select("id, username")
+      .order("id", { ascending: true })
+      .limit(1);
+
+    if (error) {
+      throw error;
+    }
+
+    if (Array.isArray(data) && data.length > 0) {
+      state.remoteUser = data[0];
+    } else {
+      state.remoteUser = null;
+    }
+  } catch (error) {
+    console.warn("No fue posible obtener un usuario remoto para sincronizar.", error);
+    state.remoteUser = null;
+  }
+}
+
+// Obtiene los productos almacenados en Supabase y los integra con el estado local.
+async function syncProductsFromSupabase() {
+  if (!shouldSyncWithSupabase()) {
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_TABLES.products)
+      .select("id, nombre, tipo, moneda, costo_unitario, precio_venta, unidades_vendidas")
+      .eq("usuario_id", state.remoteUser.id)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    const remoteProducts = Array.isArray(data) ? data.map(mapSupabaseProduct).filter(Boolean) : [];
+    state.products = mergeRemoteRecords(state.products, remoteProducts);
+    persistData();
+  } catch (error) {
+    console.error("Error al sincronizar productos con Supabase:", error);
+    showToast("No se pudieron sincronizar los productos con Supabase.");
+  }
+}
+
+// Obtiene los costos fijos remotos e incorpora los cambios al estado local.
+async function syncFixedCostsFromSupabase() {
+  if (!shouldSyncWithSupabase()) {
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_TABLES.fixedCosts)
+      .select("id, concepto, moneda, monto, frecuencia, created_at")
+      .eq("usuario_id", state.remoteUser.id)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    const remoteCosts = Array.isArray(data) ? data.map(mapSupabaseFixedCost).filter(Boolean) : [];
+    state.fixedCosts = mergeRemoteRecords(state.fixedCosts, remoteCosts);
+    persistData();
+  } catch (error) {
+    console.error("Error al sincronizar costos fijos con Supabase:", error);
+    showToast("No se pudieron sincronizar los costos fijos con Supabase.");
+  }
+}
+
+// Recupera las transacciones de Supabase y actualiza la información local.
+async function syncTransactionsFromSupabase() {
+  if (!shouldSyncWithSupabase()) {
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_TABLES.transactions)
+      .select("id, fecha, tipo, categoria, concepto, moneda, monto, created_at")
+      .eq("usuario_id", state.remoteUser.id)
+      .order("fecha", { ascending: false })
+      .order("id", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    const remoteTransactions = Array.isArray(data)
+      ? data.map(mapSupabaseTransaction).filter(Boolean)
+      : [];
+
+    state.transactions = mergeRemoteRecords(state.transactions, remoteTransactions);
+    persistData();
+  } catch (error) {
+    console.error("Error al sincronizar el flujo de caja con Supabase:", error);
+    showToast("No se pudo sincronizar el flujo de caja con Supabase.");
+  }
+}
+
+// Ejecuta una sincronización completa con la base de datos.
+async function syncAllDataFromSupabase() {
+  await syncProductsFromSupabase();
+  await syncFixedCostsFromSupabase();
+  await syncTransactionsFromSupabase();
+}
+
 // Cambia el estado de un dropdown abierto.
 function toggleDropdown(dropdownId) {
   if (!dropdownId) {
@@ -283,22 +527,25 @@ function handleTabChange(event) {
 }
 
 // Ejecuta acciones basadas en los atributos data-action de los botones.
-function handleAction(event) {
+async function handleAction(event) {
   const actionButton = event.target.closest("[data-action]");
 
   if (!actionButton) {
     return;
   }
 
+  event.preventDefault();
+
   const action = actionButton.dataset.action;
   const entityId = actionButton.dataset.id ?? null;
 
   switch (action) {
     case "refrescar-productos":
+      await syncProductsFromSupabase();
       refrescarProductos();
       break;
     case "guardar-producto":
-      guardarProducto();
+      await guardarProducto();
       break;
     case "cancelar-producto":
       cancelarEdicionProducto();
@@ -307,13 +554,14 @@ function handleAction(event) {
       editarProducto(entityId);
       break;
     case "eliminar-producto":
-      eliminarProducto(entityId);
+      await eliminarProducto(entityId);
       break;
     case "refrescar-costos":
+      await syncFixedCostsFromSupabase();
       refrescarCostosFijos();
       break;
     case "guardar-costo":
-      guardarCostoFijo();
+      await guardarCostoFijo();
       break;
     case "cancelar-costo":
       cancelarEdicionCostoFijo();
@@ -322,13 +570,14 @@ function handleAction(event) {
       editarCostoFijo(entityId);
       break;
     case "eliminar-costo":
-      eliminarCostoFijo(entityId);
+      await eliminarCostoFijo(entityId);
       break;
     case "refrescar-flujo":
+      await syncTransactionsFromSupabase();
       refrescarFlujoCaja();
       break;
     case "guardar-transaccion":
-      guardarTransaccion();
+      await guardarTransaccion();
       break;
     case "cancelar-transaccion":
       cancelarEdicionTransaccion();
@@ -337,9 +586,10 @@ function handleAction(event) {
       editarTransaccion(entityId);
       break;
     case "eliminar-transaccion":
-      eliminarTransaccion(entityId);
+      await eliminarTransaccion(entityId);
       break;
     case "refrescar-analisis":
+      await syncAllDataFromSupabase();
       refrescarAnalisis();
       break;
     case "exportar":
@@ -383,13 +633,8 @@ function handleMonthChange(event) {
   refrescarAnalisis();
 }
 
-// Asocia el botón de cerrar sesión con el guard de autenticación.
-function handleLogoutClick() {
-  logout();
-}
-
 // Agrega o actualiza un producto en la colección.
-function guardarProducto() {
+async function guardarProducto() {
   const nombre = elements.productosFields.nombre.value.trim();
   const tipo = elements.productosFields.tipo.value;
   const moneda = elements.productosFields.moneda.value;
@@ -412,8 +657,10 @@ function guardarProducto() {
     return;
   }
 
+  const isEditing = Boolean(state.editingProductId);
+  const provisionalId = state.editingProductId ?? generateId();
   const productData = {
-    id: state.editingProductId ?? generateId(),
+    id: provisionalId,
     nombre: nombre,
     tipo: tipo,
     moneda: moneda,
@@ -422,20 +669,99 @@ function guardarProducto() {
     unidades: unidades
   };
 
-  if (state.editingProductId) {
-    state.products = state.products.map((product) =>
-      product.id === state.editingProductId ? productData : product
-    );
+  if (isEditing) {
+    const index = state.products.findIndex((product) => `${product.id}` === `${state.editingProductId}`);
+
+    if (index === -1) {
+      showToast("No se encontró el producto a actualizar.");
+      return;
+    }
+
+    const previousProduct = { ...state.products[index] };
+    state.products[index] = { ...productData };
+
+    if (shouldSyncWithSupabase()) {
+      try {
+        const payload = buildSupabaseProductPayload(productData);
+
+        let response;
+
+        if (isRemoteIdentifier(productData.id)) {
+          response = await supabaseClient
+            .from(SUPABASE_TABLES.products)
+            .update(payload)
+            .eq("id", productData.id)
+            .eq("usuario_id", state.remoteUser.id)
+            .select("id, nombre, tipo, moneda, costo_unitario, precio_venta, unidades_vendidas")
+            .single();
+        } else {
+          response = await supabaseClient
+            .from(SUPABASE_TABLES.products)
+            .insert([payload])
+            .select("id, nombre, tipo, moneda, costo_unitario, precio_venta, unidades_vendidas")
+            .single();
+        }
+
+        if (response.error) {
+          throw response.error;
+        }
+
+        const mappedProduct = mapSupabaseProduct(response.data);
+        if (mappedProduct) {
+          state.products[index] = mappedProduct;
+        }
+      } catch (error) {
+        console.error("Error al sincronizar el producto con Supabase:", error);
+        state.products[index] = previousProduct;
+        persistData();
+        showToast("No se pudo actualizar el producto en Supabase.");
+        return;
+      }
+    }
+
+    persistData();
+    cancelarEdicionProducto();
+    refrescarProductos();
+    refrescarAnalisis();
     showToast("Producto actualizado correctamente.");
-  } else {
-    state.products.push(productData);
-    showToast("Producto agregado correctamente.");
+    return;
+  }
+
+  state.products.push({ ...productData });
+
+  if (shouldSyncWithSupabase()) {
+    try {
+      const payload = buildSupabaseProductPayload(productData);
+      const { data, error } = await supabaseClient
+        .from(SUPABASE_TABLES.products)
+        .insert([payload])
+        .select("id, nombre, tipo, moneda, costo_unitario, precio_venta, unidades_vendidas")
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const mappedProduct = mapSupabaseProduct(data);
+      if (mappedProduct) {
+        state.products[state.products.length - 1] = mappedProduct;
+      }
+    } catch (error) {
+      console.error("Error al guardar el producto en Supabase:", error);
+      showToast("Producto guardado localmente. Intenta sincronizar más tarde.");
+      persistData();
+      refrescarProductos();
+      refrescarAnalisis();
+      cancelarEdicionProducto();
+      return;
+    }
   }
 
   persistData();
   cancelarEdicionProducto();
   refrescarProductos();
   refrescarAnalisis();
+  showToast("Producto agregado correctamente.");
 }
 
 // Cancela la edición del producto y limpia el formulario.
@@ -503,12 +829,42 @@ function editarProducto(productId) {
 }
 
 // Elimina un producto de la colección.
-function eliminarProducto(productId) {
+async function eliminarProducto(productId) {
   if (!productId) {
     return;
   }
 
-  state.products = state.products.filter((product) => product.id !== productId);
+  const index = state.products.findIndex((product) => `${product.id}` === `${productId}`);
+
+  if (index === -1) {
+    showToast("No se encontró el producto a eliminar.");
+    return;
+  }
+
+  const [removedProduct] = state.products.splice(index, 1);
+
+  if (shouldSyncWithSupabase() && isRemoteIdentifier(productId)) {
+    try {
+      const { error } = await supabaseClient
+        .from(SUPABASE_TABLES.products)
+        .delete()
+        .eq("id", productId)
+        .eq("usuario_id", state.remoteUser.id);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error al eliminar el producto en Supabase:", error);
+      state.products.splice(index, 0, removedProduct);
+      persistData();
+      refrescarProductos();
+      refrescarAnalisis();
+      showToast("No se pudo eliminar el producto en Supabase.");
+      return;
+    }
+  }
+
   persistData();
   showToast("Producto eliminado.");
   refrescarProductos();
@@ -579,7 +935,7 @@ function refrescarProductos() {
 }
 
 // Guarda o actualiza un costo fijo.
-function guardarCostoFijo() {
+async function guardarCostoFijo() {
   const concepto = elements.costosFields.concepto.value.trim();
   const moneda = elements.costosFields.moneda.value;
   const monto = Number.parseFloat(elements.costosFields.monto.value);
@@ -595,28 +951,109 @@ function guardarCostoFijo() {
     return;
   }
 
+  const isEditing = Boolean(state.editingCostId);
+  const provisionalId = state.editingCostId ?? generateId();
   const costData = {
-    id: state.editingCostId ?? generateId(),
+    id: provisionalId,
     concepto: concepto,
     moneda: moneda,
     monto: monto,
     frecuencia: frecuencia
   };
 
-  if (state.editingCostId) {
-    state.fixedCosts = state.fixedCosts.map((cost) =>
-      cost.id === state.editingCostId ? costData : cost
-    );
+  if (isEditing) {
+    const index = state.fixedCosts.findIndex((cost) => `${cost.id}` === `${state.editingCostId}`);
+
+    if (index === -1) {
+      showToast("No se encontró el costo fijo a actualizar.");
+      return;
+    }
+
+    const previousCost = { ...state.fixedCosts[index] };
+    state.fixedCosts[index] = { ...costData };
+
+    if (shouldSyncWithSupabase()) {
+      try {
+        const payload = buildSupabaseFixedCostPayload(costData);
+
+        let response;
+
+        if (isRemoteIdentifier(costData.id)) {
+          response = await supabaseClient
+            .from(SUPABASE_TABLES.fixedCosts)
+            .update(payload)
+            .eq("id", costData.id)
+            .eq("usuario_id", state.remoteUser.id)
+            .select("id, concepto, moneda, monto, frecuencia")
+            .single();
+        } else {
+          response = await supabaseClient
+            .from(SUPABASE_TABLES.fixedCosts)
+            .insert([payload])
+            .select("id, concepto, moneda, monto, frecuencia")
+            .single();
+        }
+
+        if (response.error) {
+          throw response.error;
+        }
+
+        const mappedCost = mapSupabaseFixedCost(response.data);
+        if (mappedCost) {
+          state.fixedCosts[index] = mappedCost;
+        }
+      } catch (error) {
+        console.error("Error al sincronizar el costo fijo con Supabase:", error);
+        state.fixedCosts[index] = previousCost;
+        persistData();
+        showToast("No se pudo actualizar el costo fijo en Supabase.");
+        return;
+      }
+    }
+
+    persistData();
+    cancelarEdicionCostoFijo();
+    refrescarCostosFijos();
+    refrescarAnalisis();
     showToast("Costo fijo actualizado.");
-  } else {
-    state.fixedCosts.push(costData);
-    showToast("Costo fijo agregado.");
+    return;
+  }
+
+  state.fixedCosts.push({ ...costData });
+
+  if (shouldSyncWithSupabase()) {
+    try {
+      const payload = buildSupabaseFixedCostPayload(costData);
+      const { data, error } = await supabaseClient
+        .from(SUPABASE_TABLES.fixedCosts)
+        .insert([payload])
+        .select("id, concepto, moneda, monto, frecuencia")
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const mappedCost = mapSupabaseFixedCost(data);
+      if (mappedCost) {
+        state.fixedCosts[state.fixedCosts.length - 1] = mappedCost;
+      }
+    } catch (error) {
+      console.error("Error al guardar el costo fijo en Supabase:", error);
+      showToast("Costo fijo guardado localmente. Intenta sincronizar más tarde.");
+      persistData();
+      refrescarCostosFijos();
+      refrescarAnalisis();
+      cancelarEdicionCostoFijo();
+      return;
+    }
   }
 
   persistData();
   cancelarEdicionCostoFijo();
   refrescarCostosFijos();
   refrescarAnalisis();
+  showToast("Costo fijo agregado.");
 }
 
 // Cancela la edición del costo fijo.
@@ -672,12 +1109,42 @@ function editarCostoFijo(costId) {
 }
 
 // Elimina un costo fijo por su identificador.
-function eliminarCostoFijo(costId) {
+async function eliminarCostoFijo(costId) {
   if (!costId) {
     return;
   }
 
-  state.fixedCosts = state.fixedCosts.filter((cost) => cost.id !== costId);
+  const index = state.fixedCosts.findIndex((cost) => `${cost.id}` === `${costId}`);
+
+  if (index === -1) {
+    showToast("No se encontró el costo a eliminar.");
+    return;
+  }
+
+  const [removedCost] = state.fixedCosts.splice(index, 1);
+
+  if (shouldSyncWithSupabase() && isRemoteIdentifier(costId)) {
+    try {
+      const { error } = await supabaseClient
+        .from(SUPABASE_TABLES.fixedCosts)
+        .delete()
+        .eq("id", costId)
+        .eq("usuario_id", state.remoteUser.id);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error al eliminar el costo fijo en Supabase:", error);
+      state.fixedCosts.splice(index, 0, removedCost);
+      persistData();
+      refrescarCostosFijos();
+      refrescarAnalisis();
+      showToast("No se pudo eliminar el costo fijo en Supabase.");
+      return;
+    }
+  }
+
   persistData();
   showToast("Costo eliminado.");
   refrescarCostosFijos();
@@ -758,7 +1225,7 @@ function refrescarCostosFijos() {
 }
 
 // Guarda o actualiza una transacción de flujo de caja.
-function guardarTransaccion() {
+async function guardarTransaccion() {
   const fecha = elements.transaccionesFields.fecha.value;
   const tipo = elements.transaccionesFields.tipo.value;
   const concepto = elements.transaccionesFields.concepto.value.trim();
@@ -781,8 +1248,10 @@ function guardarTransaccion() {
     return;
   }
 
+  const isEditing = Boolean(state.editingTransactionId);
+  const provisionalId = state.editingTransactionId ?? generateId();
   const transactionData = {
-    id: state.editingTransactionId ?? generateId(),
+    id: provisionalId,
     fecha: fecha,
     tipo: tipo,
     concepto: concepto,
@@ -791,20 +1260,99 @@ function guardarTransaccion() {
     categoria: categoria
   };
 
-  if (state.editingTransactionId) {
-    state.transactions = state.transactions.map((item) =>
-      item.id === state.editingTransactionId ? transactionData : item
-    );
+  if (isEditing) {
+    const index = state.transactions.findIndex((item) => `${item.id}` === `${state.editingTransactionId}`);
+
+    if (index === -1) {
+      showToast("No se encontró la transacción a actualizar.");
+      return;
+    }
+
+    const previousTransaction = { ...state.transactions[index] };
+    state.transactions[index] = { ...transactionData };
+
+    if (shouldSyncWithSupabase()) {
+      try {
+        const payload = buildSupabaseTransactionPayload(transactionData);
+
+        let response;
+
+        if (isRemoteIdentifier(transactionData.id)) {
+          response = await supabaseClient
+            .from(SUPABASE_TABLES.transactions)
+            .update(payload)
+            .eq("id", transactionData.id)
+            .eq("usuario_id", state.remoteUser.id)
+            .select("id, fecha, tipo, categoria, concepto, moneda, monto")
+            .single();
+        } else {
+          response = await supabaseClient
+            .from(SUPABASE_TABLES.transactions)
+            .insert([payload])
+            .select("id, fecha, tipo, categoria, concepto, moneda, monto")
+            .single();
+        }
+
+        if (response.error) {
+          throw response.error;
+        }
+
+        const mappedTransaction = mapSupabaseTransaction(response.data);
+        if (mappedTransaction) {
+          state.transactions[index] = mappedTransaction;
+        }
+      } catch (error) {
+        console.error("Error al sincronizar la transacción con Supabase:", error);
+        state.transactions[index] = previousTransaction;
+        persistData();
+        showToast("No se pudo actualizar la transacción en Supabase.");
+        return;
+      }
+    }
+
+    persistData();
+    cancelarEdicionTransaccion();
+    refrescarFlujoCaja();
+    refrescarAnalisis();
     showToast("Transacción actualizada.");
-  } else {
-    state.transactions.push(transactionData);
-    showToast("Transacción agregada.");
+    return;
+  }
+
+  state.transactions.push({ ...transactionData });
+
+  if (shouldSyncWithSupabase()) {
+    try {
+      const payload = buildSupabaseTransactionPayload(transactionData);
+      const { data, error } = await supabaseClient
+        .from(SUPABASE_TABLES.transactions)
+        .insert([payload])
+        .select("id, fecha, tipo, categoria, concepto, moneda, monto")
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const mappedTransaction = mapSupabaseTransaction(data);
+      if (mappedTransaction) {
+        state.transactions[state.transactions.length - 1] = mappedTransaction;
+      }
+    } catch (error) {
+      console.error("Error al guardar la transacción en Supabase:", error);
+      showToast("Transacción guardada localmente. Intenta sincronizar más tarde.");
+      persistData();
+      refrescarFlujoCaja();
+      refrescarAnalisis();
+      cancelarEdicionTransaccion();
+      return;
+    }
   }
 
   persistData();
   cancelarEdicionTransaccion();
   refrescarFlujoCaja();
   refrescarAnalisis();
+  showToast("Transacción agregada.");
 }
 
 // Cancela la edición de la transacción.
@@ -872,12 +1420,42 @@ function editarTransaccion(transactionId) {
 }
 
 // Elimina una transacción del registro.
-function eliminarTransaccion(transactionId) {
+async function eliminarTransaccion(transactionId) {
   if (!transactionId) {
     return;
   }
 
-  state.transactions = state.transactions.filter((item) => item.id !== transactionId);
+  const index = state.transactions.findIndex((item) => `${item.id}` === `${transactionId}`);
+
+  if (index === -1) {
+    showToast("No se encontró la transacción a eliminar.");
+    return;
+  }
+
+  const [removedTransaction] = state.transactions.splice(index, 1);
+
+  if (shouldSyncWithSupabase() && isRemoteIdentifier(transactionId)) {
+    try {
+      const { error } = await supabaseClient
+        .from(SUPABASE_TABLES.transactions)
+        .delete()
+        .eq("id", transactionId)
+        .eq("usuario_id", state.remoteUser.id);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error al eliminar la transacción en Supabase:", error);
+      state.transactions.splice(index, 0, removedTransaction);
+      persistData();
+      refrescarFlujoCaja();
+      refrescarAnalisis();
+      showToast("No se pudo eliminar la transacción en Supabase.");
+      return;
+    }
+  }
+
   persistData();
   showToast("Transacción eliminada.");
   refrescarFlujoCaja();
@@ -1366,17 +1944,14 @@ function refrescarTodosLosPaneles() {
   refrescarAnalisis();
 }
 
-// Configura el saludo con el usuario autenticado.
+// Configura el mensaje de contexto en el encabezado.
 function setupGreeting() {
   if (!elements.headerSubtitle) {
     return;
   }
 
-  const username = getCurrentUsername();
-
-  if (username) {
-    elements.headerSubtitle.textContent = `Hola ${username}, gestiona aquí tus finanzas con precisión.`;
-  }
+  elements.headerSubtitle.textContent =
+    "Gestiona tus costos, flujo de caja y análisis financiero desde un único panel.";
 }
 
 // Registra todos los listeners necesarios para la interfaz.
@@ -1399,9 +1974,6 @@ function registerEventListeners() {
   }
   if (elements.fileInput) {
     elements.fileInput.addEventListener("change", importarDatos);
-  }
-  if (elements.logoutButton) {
-    elements.logoutButton.addEventListener("click", handleLogoutClick);
   }
 }
 
@@ -1483,14 +2055,13 @@ function waitForChartLibrary() {
 
 // Inicializa el módulo asegurando que todos los recursos estén listos.
 async function initializeModule() {
-  requireAuth();
-
   if (typeof document === "undefined") {
     return;
   }
 
   cacheElements();
   hideToast();
+  await bootstrapRemoteUser();
   loadPersistedData();
 
   if (!state.selectedMonth) {
@@ -1503,6 +2074,7 @@ async function initializeModule() {
 
   await waitForChartLibrary();
   createCharts();
+  await syncAllDataFromSupabase();
   refrescarTodosLosPaneles();
 
   if (elements.appContainer) {
