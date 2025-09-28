@@ -12,13 +12,13 @@ vi.mock("https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm", () => ({
 
 const fromMock = vi.fn();
 
-vi.mock("../sistema-modular/lib/supabaseClient.js", () => ({
+vi.mock("../lib/supabaseClient.js", () => ({
   supabaseClient: {
     from: (...args) => fromMock(...args)
   }
 }));
 
-const registerModulePath = "../sistema-modular/modules/auth/js/register.js";
+const registerModulePath = "../modules/auth/js/register.js";
 
 let registerModule;
 let insertMock;

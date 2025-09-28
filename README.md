@@ -10,11 +10,13 @@ Proyecto de ejemplo en HTML/CSS/JS vanilla que implementa un flujo de autenticac
 ## Cómo ejecutar el proyecto
 
 1. Clona o descarga este repositorio.
-2. Abre la carpeta `sistema-modular` en tu editor.
-3. Inicia un servidor estático, por ejemplo con la extensión **Live Server** de VS Code o con `npx serve`.
-4. Navega a `http://localhost:PORT/sistema-modular/index.html` (sustituye `PORT` por el puerto real del servidor).
+2. Abre la carpeta raíz del proyecto (`Portal-Digital-Pymess`) en tu editor.
+3. Inicia un servidor estático desde la raíz, por ejemplo con la extensión **Live Server** de VS Code o con `npx serve`.
+4. Navega a `http://localhost:PORT/index.html` (sustituye `PORT` por el puerto real del servidor).
 
-> **Tip:** Si usas Live Server, haz clic derecho sobre `index.html` y selecciona **Open with Live Server**.
+> **Despliegue en GitHub Pages:** al estar `index.html` en la raíz, activa GitHub Pages desde la rama principal y selecciona el modo "Deploy from a branch" apuntando a `/(root)`.
+
+> **Tip:** Si usas Live Server, haz clic derecho sobre `index.html` en la raíz y selecciona **Open with Live Server**.
 
 ## Configuración de Supabase
 
@@ -39,7 +41,7 @@ CREATE TABLE public.usuarios (
 ## Estructura del proyecto
 
 ```
-/sistema-modular/
+/ (raíz del repositorio)
   README.md
   index.html                # Portada del sistema
   /public/
@@ -47,6 +49,7 @@ CREATE TABLE public.usuarios (
       global.css           # Estilos compartidos
   /lib/
     authGuard.js           # Gestión de sesión y protección de rutas
+    pathUtil.js            # Helper para resolver rutas relativas
     supabaseClient.js      # Cliente único de Supabase
   /modules/
     /auth/

@@ -13,19 +13,19 @@ vi.mock("https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm", () => ({
 
 const saveSessionMock = vi.fn();
 
-vi.mock("../sistema-modular/lib/authGuard.js", () => ({
+vi.mock("../lib/authGuard.js", () => ({
   saveSession: saveSessionMock
 }));
 
 const fromMock = vi.fn();
 
-vi.mock("../sistema-modular/lib/supabaseClient.js", () => ({
+vi.mock("../lib/supabaseClient.js", () => ({
   supabaseClient: {
     from: (...args) => fromMock(...args)
   }
 }));
 
-const loginModulePath = "../sistema-modular/modules/auth/js/login.js";
+const loginModulePath = "../modules/auth/js/login.js";
 
 let navigationMock;
 let loginModule;
