@@ -2,53 +2,88 @@
 // Controla la lógica de autenticación del formulario de inicio de sesión.
 
 import bcrypt from "https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm";
-import { supabaseClient } from "/lib/supabaseClient.js";
-import { saveSession } from "/lib/authGuard.js";
+import { supabaseClient } from "../../../lib/supabaseClient.js";
+import { saveSession } from "../../../lib/authGuard.js";
 
-const loginForm = document.querySelector("#loginForm");
-const usernameInput = document.querySelector("#username");
-const passwordInput = document.querySelector("#password");
-const rememberMeInput = document.querySelector("#rememberMe");
-const usernameFeedback = document.querySelector("#usernameFeedback");
-const passwordFeedback = document.querySelector("#passwordFeedback");
-const generalFeedback = document.querySelector("#generalFeedback");
+let loginForm = null;
+let usernameInput = null;
+let passwordInput = null;
+let rememberMeInput = null;
+let usernameFeedback = null;
+let passwordFeedback = null;
+let generalFeedback = null;
+let navigationTarget = null;
+
+if (typeof document !== "undefined") {
+  loginForm = document.querySelector("#loginForm");
+  usernameInput = document.querySelector("#username");
+  passwordInput = document.querySelector("#password");
+  rememberMeInput = document.querySelector("#rememberMe");
+  usernameFeedback = document.querySelector("#usernameFeedback");
+  passwordFeedback = document.querySelector("#passwordFeedback");
+  generalFeedback = document.querySelector("#generalFeedback");
+}
+
+if (typeof window !== "undefined" && window.location) {
+  navigationTarget = window.location;
+}
 
 // Inicializa la pantalla limpiando cualquier mensaje previo.
-function initializeForm() {
-  // Se aseguran todos los contenedores de feedback estén vacíos.
-  usernameFeedback.textContent = "";
-  passwordFeedback.textContent = "";
-  generalFeedback.textContent = "";
+export function initializeForm(feedbackElements = {}) {
+  // Se asegura que todos los contenedores de feedback estén vacíos.
+  const usernameElement = feedbackElements.usernameFeedback ?? usernameFeedback;
+  const passwordElement = feedbackElements.passwordFeedback ?? passwordFeedback;
+  const generalElement = feedbackElements.generalFeedback ?? generalFeedback;
+
+  if (usernameElement) {
+    usernameElement.textContent = "";
+  }
+
+  if (passwordElement) {
+    passwordElement.textContent = "";
+  }
+
+  if (generalElement) {
+    generalElement.textContent = "";
+  }
 }
 
 // Valida si el username cumple los criterios.
-function validateUsername(username) {
+export function validateUsername(username, feedbackElement = usernameFeedback) {
   const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/;
 
   if (usernamePattern.test(username) === false) {
-    usernameFeedback.textContent = "El usuario debe tener entre 3 y 20 caracteres alfanuméricos, guion o guion bajo.";
+    if (feedbackElement) {
+      feedbackElement.textContent = "El usuario debe tener entre 3 y 20 caracteres alfanuméricos, guion o guion bajo.";
+    }
     return false;
   }
 
-  usernameFeedback.textContent = "";
+  if (feedbackElement) {
+    feedbackElement.textContent = "";
+  }
   return true;
 }
 
 // Valida si el password es suficientemente largo.
-function validatePassword(password) {
+export function validatePassword(password, feedbackElement = passwordFeedback) {
   if (password.length < 8) {
-    passwordFeedback.textContent = "La contraseña debe tener al menos 8 caracteres.";
+    if (feedbackElement) {
+      feedbackElement.textContent = "La contraseña debe tener al menos 8 caracteres.";
+    }
     return false;
   }
 
-  passwordFeedback.textContent = "";
+  if (feedbackElement) {
+    feedbackElement.textContent = "";
+  }
   return true;
 }
 
 // Busca al usuario en Supabase y retorna sus datos.
-async function fetchUserByUsername(username) {
+export async function fetchUserByUsername(username, client = supabaseClient) {
   try {
-    const { data, error } = await supabaseClient
+    const { data, error } = await client
       .from("usuarios")
       .select("id, username, password")
       .eq("username", username)
@@ -66,18 +101,22 @@ async function fetchUserByUsername(username) {
 }
 
 // Procesa el envío del formulario de login.
-async function handleLoginSubmit(event) {
+export async function handleLoginSubmit(event) {
   event.preventDefault();
-  generalFeedback.textContent = "";
+  if (generalFeedback) {
+    generalFeedback.textContent = "";
+  }
 
-  const username = usernameInput.value.trim();
-  const password = passwordInput.value;
+  const username = usernameInput ? usernameInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value : "";
 
   const isUsernameValid = validateUsername(username);
   const isPasswordValid = validatePassword(password);
 
   if (isUsernameValid === false || isPasswordValid === false) {
-    generalFeedback.textContent = "Verifica la información ingresada.";
+    if (generalFeedback) {
+      generalFeedback.textContent = "Verifica la información ingresada.";
+    }
     return;
   }
 
@@ -85,23 +124,57 @@ async function handleLoginSubmit(event) {
     const user = await fetchUserByUsername(username);
 
     if (!user) {
-      generalFeedback.textContent = "Usuario o contraseña incorrectos.";
+      if (generalFeedback) {
+        generalFeedback.textContent = "Usuario o contraseña incorrectos.";
+      }
       return;
     }
 
     const passwordMatches = await bcrypt.compare(password, user.password);
 
     if (passwordMatches === false) {
-      generalFeedback.textContent = "Usuario o contraseña incorrectos.";
+      if (generalFeedback) {
+        generalFeedback.textContent = "Usuario o contraseña incorrectos.";
+      }
       return;
     }
 
-    saveSession(user.username, rememberMeInput.checked);
-    window.location.replace("/modules/dashboard/index.html");
+    const rememberValue = rememberMeInput ? rememberMeInput.checked : false;
+    saveSession(user.username, rememberValue);
+    redirectToDashboard();
   } catch (error) {
-    generalFeedback.textContent = error.message;
+    if (generalFeedback) {
+      generalFeedback.textContent = error.message;
+    }
   }
 }
 
-initializeForm();
-loginForm.addEventListener("submit", handleLoginSubmit);
+// Permite configurar el destino de navegación (útil para pruebas unitarias).
+export function setNavigationTarget(target) {
+  navigationTarget = target;
+}
+
+// Redirige al Dashboard utilizando el destino configurado.
+export function redirectToDashboard(target = navigationTarget) {
+  if (target && typeof target.replace === "function") {
+    target.replace("/modules/dashboard/index.html");
+  }
+}
+
+if (typeof document !== "undefined") {
+  initializeForm();
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLoginSubmit);
+  }
+}
+
+export default {
+  initializeForm,
+  validateUsername,
+  validatePassword,
+  fetchUserByUsername,
+  handleLoginSubmit,
+  setNavigationTarget,
+  redirectToDashboard
+};

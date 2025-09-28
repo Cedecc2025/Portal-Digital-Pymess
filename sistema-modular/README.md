@@ -112,9 +112,22 @@ Cada módulo cuenta con sus propias carpetas de estilos y scripts, lo que facili
 - [@supabase/supabase-js](https://supabase.com/docs/reference/javascript/installing) cargado vía CDN (ESM).
 - [bcryptjs](https://www.npmjs.com/package/bcryptjs) cargado vía CDN en formato ESM.
 
+## Pruebas unitarias
+
+El proyecto incorpora pruebas unitarias con [Vitest](https://vitest.dev/) para los flujos de **Login** y **Registro**. Para
+ejecutarlas:
+
+```bash
+npm install
+npm test
+```
+
+Estas pruebas simulan el DOM con **jsdom**, validan la lógica de validación de formularios, la interacción con Supabase y la
+generación de mensajes de retroalimentación al usuario.
+
 ## Próximos pasos sugeridos
 
 - Implementar módulos adicionales (por ejemplo, Finanzas, Reportes).
 - Añadir manejo de roles/permiso avanzados en `authGuard`.
 - Integrar formularios y datos reales en el módulo de Costos.
-- Añadir pruebas automáticas y pipeline de despliegue.
+- Extender las pruebas automáticas y preparar un pipeline de despliegue continuo.

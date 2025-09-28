@@ -14,15 +14,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 40px;
 }
 
 .register-card {
   background-color: rgba(15, 23, 42, 0.92);
-  padding: 40px;
-  border-radius: 20px;
+  padding: 44px 40px;
+  border-radius: 24px;
   width: min(460px, 100%);
-  box-shadow: 0 20px 55px rgba(15, 23, 42, 0.6);
+  box-shadow: 0 30px 60px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .register-card header {
@@ -31,6 +32,7 @@ body {
 
 .register-card h1 {
   margin: 0 0 8px;
+  font-size: 28px;
 }
 
 .register-card p {
@@ -94,8 +96,24 @@ footer {
 .link {
   color: #34d399;
   text-decoration: none;
+  font-weight: 600;
 }
 
 .link:hover {
   text-decoration: underline;
+}
+
+.link:focus {
+  outline: 2px solid rgba(52, 211, 153, 0.6);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .register-container {
+    padding: 24px;
+  }
+
+  .register-card {
+    padding: 32px 24px;
+  }
 }

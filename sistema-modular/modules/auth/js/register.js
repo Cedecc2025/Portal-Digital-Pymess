@@ -2,52 +2,82 @@
 // Gestiona la creación de nuevos usuarios en Supabase.
 
 import bcrypt from "https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm";
-import { supabaseClient } from "/lib/supabaseClient.js";
+import { supabaseClient } from "../../../lib/supabaseClient.js";
 
-const registerForm = document.querySelector("#registerForm");
-const usernameInput = document.querySelector("#username");
-const passwordInput = document.querySelector("#password");
-const usernameFeedback = document.querySelector("#usernameFeedback");
-const passwordFeedback = document.querySelector("#passwordFeedback");
-const generalFeedback = document.querySelector("#generalFeedback");
+let registerForm = null;
+let usernameInput = null;
+let passwordInput = null;
+let usernameFeedback = null;
+let passwordFeedback = null;
+let generalFeedback = null;
+
+if (typeof document !== "undefined") {
+  registerForm = document.querySelector("#registerForm");
+  usernameInput = document.querySelector("#username");
+  passwordInput = document.querySelector("#password");
+  usernameFeedback = document.querySelector("#usernameFeedback");
+  passwordFeedback = document.querySelector("#passwordFeedback");
+  generalFeedback = document.querySelector("#generalFeedback");
+}
 
 // Inicializa la pantalla asegurando que no existan mensajes previos.
-function initializeForm() {
-  usernameFeedback.textContent = "";
-  passwordFeedback.textContent = "";
-  generalFeedback.textContent = "";
+export function initializeForm(feedbackElements = {}) {
+  const usernameElement = feedbackElements.usernameFeedback ?? usernameFeedback;
+  const passwordElement = feedbackElements.passwordFeedback ?? passwordFeedback;
+  const generalElement = feedbackElements.generalFeedback ?? generalFeedback;
+
+  if (usernameElement) {
+    usernameElement.textContent = "";
+  }
+
+  if (passwordElement) {
+    passwordElement.textContent = "";
+  }
+
+  if (generalElement) {
+    generalElement.textContent = "";
+    generalElement.style.color = "#fca5a5";
+  }
 }
 
 // Verifica que el username cumpla con la política establecida.
-function validateUsername(username) {
+export function validateUsername(username, feedbackElement = usernameFeedback) {
   const usernamePattern = /^[A-Za-z0-9_-]{3,20}$/;
 
   if (usernamePattern.test(username) === false) {
-    usernameFeedback.textContent = "El usuario debe tener entre 3 y 20 caracteres alfanuméricos, guion o guion bajo.";
+    if (feedbackElement) {
+      feedbackElement.textContent = "El usuario debe tener entre 3 y 20 caracteres alfanuméricos, guion o guion bajo.";
+    }
     return false;
   }
 
-  usernameFeedback.textContent = "";
+  if (feedbackElement) {
+    feedbackElement.textContent = "";
+  }
   return true;
 }
 
 // Valida que la contraseña tenga la longitud mínima requerida.
-function validatePassword(password) {
+export function validatePassword(password, feedbackElement = passwordFeedback) {
   if (password.length < 8) {
-    passwordFeedback.textContent = "La contraseña debe tener al menos 8 caracteres.";
+    if (feedbackElement) {
+      feedbackElement.textContent = "La contraseña debe tener al menos 8 caracteres.";
+    }
     return false;
   }
 
-  passwordFeedback.textContent = "";
+  if (feedbackElement) {
+    feedbackElement.textContent = "";
+  }
   return true;
 }
 
 // Inserta al nuevo usuario en Supabase con contraseña hasheada.
-async function registerUser(username, password) {
+export async function registerUser(username, password, client = supabaseClient) {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const { error } = await supabaseClient.from("usuarios").insert({
+    const { error } = await client.from("usuarios").insert({
       username: username,
       password: passwordHash
     });
@@ -67,26 +97,35 @@ async function registerUser(username, password) {
 }
 
 // Resetea el formulario mostrando un mensaje de éxito.
-function showSuccessMessage() {
-  generalFeedback.style.color = "#bbf7d0";
-  generalFeedback.textContent = "Registro exitoso. Ahora puedes iniciar sesión.";
-  registerForm.reset();
+export function showSuccessMessage(form = registerForm, feedbackElement = generalFeedback) {
+  if (feedbackElement) {
+    feedbackElement.style.color = "#bbf7d0";
+    feedbackElement.textContent = "Registro exitoso. Ahora puedes iniciar sesión.";
+  }
+
+  if (form) {
+    form.reset();
+  }
 }
 
 // Maneja el envío del formulario de registro.
-async function handleRegisterSubmit(event) {
+export async function handleRegisterSubmit(event) {
   event.preventDefault();
-  generalFeedback.style.color = "#fca5a5";
-  generalFeedback.textContent = "";
+  if (generalFeedback) {
+    generalFeedback.style.color = "#fca5a5";
+    generalFeedback.textContent = "";
+  }
 
-  const username = usernameInput.value.trim();
-  const password = passwordInput.value;
+  const username = usernameInput ? usernameInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value : "";
 
   const isUsernameValid = validateUsername(username);
   const isPasswordValid = validatePassword(password);
 
   if (isUsernameValid === false || isPasswordValid === false) {
-    generalFeedback.textContent = "Verifica la información ingresada.";
+    if (generalFeedback) {
+      generalFeedback.textContent = "Verifica la información ingresada.";
+    }
     return;
   }
 
@@ -94,9 +133,25 @@ async function handleRegisterSubmit(event) {
     await registerUser(username, password);
     showSuccessMessage();
   } catch (error) {
-    generalFeedback.textContent = error.message;
+    if (generalFeedback) {
+      generalFeedback.textContent = error.message;
+    }
   }
 }
 
-initializeForm();
-registerForm.addEventListener("submit", handleRegisterSubmit);
+if (typeof document !== "undefined") {
+  initializeForm();
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", handleRegisterSubmit);
+  }
+}
+
+export default {
+  initializeForm,
+  validateUsername,
+  validatePassword,
+  registerUser,
+  showSuccessMessage,
+  handleRegisterSubmit
+};
