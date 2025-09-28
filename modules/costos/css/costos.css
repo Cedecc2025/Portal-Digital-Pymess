@@ -256,6 +256,27 @@ body {
   gap: 8px;
 }
 
+.delete-warning {
+  background: rgba(229, 62, 62, 0.08);
+  border: 1px solid rgba(229, 62, 62, 0.3);
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.delete-warning__text {
+  color: #c53030;
+  font-weight: 600;
+  margin: 0;
+}
+
+.delete-warning__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .metric-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: var(--radius-lg);

@@ -24,6 +24,7 @@ const state = {
   editingProductId: null,
   editingCostId: null,
   editingTransactionId: null,
+  pendingTransactionDeletionId: null,
   charts: {
     flujo: null,
     margen: null,
@@ -527,6 +528,43 @@ function formatCurrency(value, currency = state.currentCurrency) {
   return formatter.format(value || 0);
 }
 
+// Actualiza las opciones disponibles para la categoría de transacción según el tipo.
+function updateTransactionCategoryOptions(transactionType, presetValue = null) {
+  const categorySelect = elements.transaccionesFields.categoria;
+
+  if (!categorySelect) {
+    return;
+  }
+
+  const ingresoOptions = [
+    { value: "venta", label: "Venta" },
+    { value: "servicio", label: "Servicio" },
+    { value: "otro", label: "Otro" }
+  ];
+  const egresoOptions = [
+    { value: "compra", label: "Compra" },
+    { value: "salario", label: "Salario" },
+    { value: "alquiler", label: "Alquiler" },
+    { value: "servicios", label: "Servicios" },
+    { value: "otro", label: "Otro" }
+  ];
+
+  const options = transactionType === "egreso" ? egresoOptions : ingresoOptions;
+  categorySelect.innerHTML = "";
+
+  options.forEach((option) => {
+    const optionElement = document.createElement("option");
+    optionElement.value = option.value;
+    optionElement.textContent = option.label;
+    categorySelect.appendChild(optionElement);
+  });
+
+  const desiredValue = presetValue ?? options[0].value;
+  categorySelect.value = options.some((option) => option.value === desiredValue)
+    ? desiredValue
+    : options[0].value;
+}
+
 // Obtiene el símbolo correspondiente a la moneda actual.
 function getCurrencySymbol() {
   if (state.currentCurrency === "USD") {
@@ -627,7 +665,13 @@ async function handleAction(event) {
     case "editar-transaccion":
       editarTransaccion(entityId);
       break;
-    case "eliminar-transaccion":
+    case "solicitar-eliminar-transaccion":
+      solicitarConfirmacionTransaccion(entityId);
+      break;
+    case "cancelar-eliminar-transaccion":
+      cancelarConfirmacionTransaccion();
+      break;
+    case "confirmar-eliminar-transaccion":
       await eliminarTransaccion(entityId);
       break;
     case "refrescar-analisis":
@@ -673,6 +717,13 @@ function handleMonthChange(event) {
   persistData();
   refrescarFlujoCaja();
   refrescarAnalisis();
+}
+
+// Ajusta las categorías cuando se cambia el tipo de transacción.
+function handleTransactionTypeChange(event) {
+  const newType = event.target.value;
+  const currentValue = elements.transaccionesFields.categoria?.value ?? null;
+  updateTransactionCategoryOptions(newType, currentValue);
 }
 
 // Agrega o actualiza un producto en la colección.
@@ -1384,13 +1435,13 @@ async function guardarTransaccion() {
       }
     }
 
-    persistData();
-    cancelarEdicionTransaccion();
-    refrescarFlujoCaja();
-    refrescarAnalisis();
-    showToast("Transacción actualizada.");
-    return;
-  }
+      persistData();
+      cancelarEdicionTransaccion();
+      refrescarFlujoCaja();
+      refrescarAnalisis();
+      showToast("Datos editados correctamente.");
+      return;
+    }
 
   state.transactions.push({ ...transactionData });
 
@@ -1432,6 +1483,7 @@ async function guardarTransaccion() {
 // Cancela la edición de la transacción.
 function cancelarEdicionTransaccion() {
   state.editingTransactionId = null;
+  state.pendingTransactionDeletionId = null;
   if (elements.transFormTitle) {
     elements.transFormTitle.textContent = "Agregar Transacción";
   }
@@ -1453,9 +1505,7 @@ function cancelarEdicionTransaccion() {
   if (elements.transaccionesFields.monto) {
     elements.transaccionesFields.monto.value = "";
   }
-  if (elements.transaccionesFields.categoria) {
-    elements.transaccionesFields.categoria.value = "venta";
-  }
+  updateTransactionCategoryOptions("ingreso", "venta");
   if (elements.transCancelButton) {
     elements.transCancelButton.classList.add("hidden");
   }
@@ -1469,6 +1519,7 @@ function editarTransaccion(transactionId) {
     return;
   }
 
+  state.pendingTransactionDeletionId = null;
   state.editingTransactionId = transaction.id;
   if (elements.transFormTitle) {
     elements.transFormTitle.textContent = "Editar Transacción";
@@ -1482,6 +1533,7 @@ function editarTransaccion(transactionId) {
   if (elements.transaccionesFields.tipo) {
     elements.transaccionesFields.tipo.value = transaction.tipo;
   }
+  updateTransactionCategoryOptions(transaction.tipo, transaction.categoria);
   if (elements.transaccionesFields.concepto) {
     elements.transaccionesFields.concepto.value = transaction.concepto;
   }
@@ -1499,17 +1551,34 @@ function editarTransaccion(transactionId) {
   }
 }
 
-// Elimina una transacción del registro.
-async function eliminarTransaccion(transactionId) {
+// Muestra un aviso de confirmación antes de eliminar una transacción.
+function solicitarConfirmacionTransaccion(transactionId) {
   if (!transactionId) {
     return;
   }
 
-  const confirmed = window.confirm(
-    "¿Deseas eliminar esta transacción? Esta acción no se puede deshacer."
-  );
+  const normalizedId = `${transactionId}`;
+  if (`${state.pendingTransactionDeletionId}` === normalizedId) {
+    state.pendingTransactionDeletionId = null;
+  } else {
+    state.pendingTransactionDeletionId = transactionId;
+  }
+  refrescarFlujoCaja();
+}
 
-  if (!confirmed) {
+// Cancela la advertencia de eliminación activa.
+function cancelarConfirmacionTransaccion() {
+  if (!state.pendingTransactionDeletionId) {
+    return;
+  }
+
+  state.pendingTransactionDeletionId = null;
+  refrescarFlujoCaja();
+}
+
+// Elimina una transacción del registro.
+async function eliminarTransaccion(transactionId) {
+  if (!transactionId) {
     return;
   }
 
@@ -1521,6 +1590,7 @@ async function eliminarTransaccion(transactionId) {
   }
 
   const [removedTransaction] = state.transactions.splice(index, 1);
+  state.pendingTransactionDeletionId = null;
 
   if (shouldSyncWithSupabase() && isRemoteIdentifier(transactionId)) {
     try {
@@ -1554,6 +1624,15 @@ async function eliminarTransaccion(transactionId) {
 function refrescarFlujoCaja() {
   if (!elements.transaccionesList) {
     return;
+  }
+
+  if (
+    state.pendingTransactionDeletionId &&
+    !state.transactions.some(
+      (transaction) => `${transaction.id}` === `${state.pendingTransactionDeletionId}`
+    )
+  ) {
+    state.pendingTransactionDeletionId = null;
   }
 
   elements.transaccionesList.innerHTML = "";
@@ -1593,7 +1672,7 @@ function refrescarFlujoCaja() {
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "btn btn-danger";
-    deleteButton.dataset.action = "eliminar-transaccion";
+    deleteButton.dataset.action = "solicitar-eliminar-transaccion";
     deleteButton.dataset.id = transaction.id;
     deleteButton.type = "button";
     deleteButton.textContent = "Eliminar";
@@ -1619,6 +1698,41 @@ function refrescarFlujoCaja() {
 
     card.appendChild(header);
     card.appendChild(meta);
+
+    const isPendingDeletion = `${state.pendingTransactionDeletionId}` === `${transaction.id}`;
+
+    if (isPendingDeletion) {
+      const warning = document.createElement("div");
+      warning.className = "delete-warning";
+
+      const warningText = document.createElement("p");
+      warningText.className = "delete-warning__text";
+      warningText.textContent =
+        "¿Deseas eliminar esta transacción? Esta acción no se puede deshacer.";
+
+      const warningActions = document.createElement("div");
+      warningActions.className = "delete-warning__actions";
+
+      const cancelButton = document.createElement("button");
+      cancelButton.type = "button";
+      cancelButton.className = "btn btn-secondary";
+      cancelButton.dataset.action = "cancelar-eliminar-transaccion";
+      cancelButton.textContent = "Cancelar";
+
+      const confirmButton = document.createElement("button");
+      confirmButton.type = "button";
+      confirmButton.className = "btn btn-danger";
+      confirmButton.dataset.action = "confirmar-eliminar-transaccion";
+      confirmButton.dataset.id = transaction.id;
+      confirmButton.textContent = "Eliminar";
+
+      warningActions.appendChild(cancelButton);
+      warningActions.appendChild(confirmButton);
+      warning.appendChild(warningText);
+      warning.appendChild(warningActions);
+      card.appendChild(warning);
+    }
+
     elements.transaccionesList.appendChild(card);
   });
 
@@ -2060,6 +2174,9 @@ function registerEventListeners() {
   if (elements.monthInput) {
     elements.monthInput.addEventListener("change", handleMonthChange);
   }
+  if (elements.transaccionesFields.tipo) {
+    elements.transaccionesFields.tipo.addEventListener("change", handleTransactionTypeChange);
+  }
   if (elements.fileInput) {
     elements.fileInput.addEventListener("change", importarDatos);
   }
@@ -2154,6 +2271,8 @@ async function initializeModule() {
   hideToast();
   await bootstrapRemoteUser();
   loadPersistedData();
+  const initialType = elements.transaccionesFields.tipo?.value ?? "ingreso";
+  updateTransactionCategoryOptions(initialType);
 
   if (!state.selectedMonth) {
     state.selectedMonth = getCurrentMonthValue();
