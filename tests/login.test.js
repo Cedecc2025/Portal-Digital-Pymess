@@ -101,7 +101,7 @@ describe("login module", () => {
     await loginModule.handleLoginSubmit(new window.Event("submit"));
 
     expect(fromMock).toHaveBeenCalledWith("usuarios");
-    expect(saveSessionMock).toHaveBeenCalledWith("usuario_empresarial", true);
+    expect(saveSessionMock).toHaveBeenCalledWith({ username: "usuario_empresarial", id: 10 }, true);
     expect(navigationMock).toHaveBeenCalledWith("../../dashboard/index.html");
   });
 

@@ -2,6 +2,7 @@
 // Controla toda la lógica interactiva del módulo de costos.
 
 import { supabaseClient } from "../../../lib/supabaseClient.js";
+import { getCurrentUser } from "../../../lib/authGuard.js";
 
 const STORAGE_KEYS = {
   products: "costosModuleProducts",
@@ -107,12 +108,30 @@ function generateId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function getStorageScopeSuffix() {
+  const currentUser = getCurrentUser();
+
+  if (currentUser?.userId) {
+    return `user-${currentUser.userId}`;
+  }
+
+  if (currentUser?.username) {
+    return `user-${currentUser.username}`;
+  }
+
+  return "guest";
+}
+
+function getScopedStorageKey(baseKey) {
+  return `${baseKey}:${getStorageScopeSuffix()}`;
+}
+
 // Carga los datos persistidos en localStorage.
 function loadPersistedData() {
-  const products = window.localStorage.getItem(STORAGE_KEYS.products);
-  const costs = window.localStorage.getItem(STORAGE_KEYS.costs);
-  const transactions = window.localStorage.getItem(STORAGE_KEYS.transactions);
-  const preferences = window.localStorage.getItem(STORAGE_KEYS.preferences);
+  const products = window.localStorage.getItem(getScopedStorageKey(STORAGE_KEYS.products));
+  const costs = window.localStorage.getItem(getScopedStorageKey(STORAGE_KEYS.costs));
+  const transactions = window.localStorage.getItem(getScopedStorageKey(STORAGE_KEYS.transactions));
+  const preferences = window.localStorage.getItem(getScopedStorageKey(STORAGE_KEYS.preferences));
 
   if (products) {
     state.products = JSON.parse(products);
@@ -136,14 +155,20 @@ function loadPersistedData() {
 
 // Persiste los datos actuales en localStorage.
 function persistData() {
-  window.localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(state.products));
-  window.localStorage.setItem(STORAGE_KEYS.costs, JSON.stringify(state.fixedCosts));
   window.localStorage.setItem(
-    STORAGE_KEYS.transactions,
+    getScopedStorageKey(STORAGE_KEYS.products),
+    JSON.stringify(state.products)
+  );
+  window.localStorage.setItem(
+    getScopedStorageKey(STORAGE_KEYS.costs),
+    JSON.stringify(state.fixedCosts)
+  );
+  window.localStorage.setItem(
+    getScopedStorageKey(STORAGE_KEYS.transactions),
     JSON.stringify(state.transactions)
   );
   window.localStorage.setItem(
-    STORAGE_KEYS.preferences,
+    getScopedStorageKey(STORAGE_KEYS.preferences),
     JSON.stringify({
       currency: state.currentCurrency,
       exchangeRate: state.exchangeRate,
@@ -322,19 +347,33 @@ function mergeRemoteRecords(localRecords, remoteRecords) {
 
 // Recupera un usuario de referencia desde Supabase para operar el módulo.
 async function bootstrapRemoteUser() {
+  const currentUser = getCurrentUser();
+
+  if (!currentUser || !currentUser.username) {
+    state.remoteUser = null;
+    return;
+  }
+
+  if (currentUser.userId) {
+    const numericId = Number(currentUser.userId);
+    const resolvedId = Number.isNaN(numericId) ? currentUser.userId : numericId;
+    state.remoteUser = { id: resolvedId, username: currentUser.username };
+    return;
+  }
+
   try {
     const { data, error } = await supabaseClient
       .from(SUPABASE_TABLES.users)
       .select("id, username")
-      .order("id", { ascending: true })
-      .limit(1);
+      .eq("username", currentUser.username)
+      .maybeSingle();
 
     if (error) {
       throw error;
     }
 
-    if (Array.isArray(data) && data.length > 0) {
-      state.remoteUser = data[0];
+    if (data) {
+      state.remoteUser = data;
     } else {
       state.remoteUser = null;
     }
@@ -795,7 +834,7 @@ function cancelarEdicionProducto() {
 
 // Prepara el formulario para editar un producto existente.
 function editarProducto(productId) {
-  const product = state.products.find((item) => item.id === productId);
+  const product = state.products.find((item) => `${item.id}` === `${productId}`);
 
   if (!product) {
     return;
@@ -815,13 +854,13 @@ function editarProducto(productId) {
     elements.productosFields.moneda.value = product.moneda;
   }
   if (elements.productosFields.costo) {
-    elements.productosFields.costo.value = product.costo.toString();
+    elements.productosFields.costo.value = `${product.costo ?? ""}`;
   }
   if (elements.productosFields.precio) {
-    elements.productosFields.precio.value = product.precio.toString();
+    elements.productosFields.precio.value = `${product.precio ?? ""}`;
   }
   if (elements.productosFields.unidades) {
-    elements.productosFields.unidades.value = product.unidades.toString();
+    elements.productosFields.unidades.value = `${product.unidades ?? ""}`;
   }
   if (elements.prodCancelButton) {
     elements.prodCancelButton.classList.remove("hidden");
@@ -834,6 +873,14 @@ async function eliminarProducto(productId) {
     return;
   }
 
+  const confirmed = window.confirm(
+    "¿Deseas eliminar este producto? Esta acción no se puede deshacer."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
   const index = state.products.findIndex((product) => `${product.id}` === `${productId}`);
 
   if (index === -1) {
@@ -842,6 +889,10 @@ async function eliminarProducto(productId) {
   }
 
   const [removedProduct] = state.products.splice(index, 1);
+
+  if (state.editingProductId && `${state.editingProductId}` === `${productId}`) {
+    cancelarEdicionProducto();
+  }
 
   if (shouldSyncWithSupabase() && isRemoteIdentifier(productId)) {
     try {

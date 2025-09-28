@@ -140,7 +140,7 @@ export async function handleLoginSubmit(event) {
     }
 
     const rememberValue = rememberMeInput ? rememberMeInput.checked : false;
-    saveSession(user.username, rememberValue);
+    saveSession({ username: user.username, id: user.id }, rememberValue);
     redirectToDashboard();
   } catch (error) {
     if (generalFeedback) {
