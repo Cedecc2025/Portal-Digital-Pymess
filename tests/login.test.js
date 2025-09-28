@@ -102,7 +102,7 @@ describe("login module", () => {
 
     expect(fromMock).toHaveBeenCalledWith("usuarios");
     expect(saveSessionMock).toHaveBeenCalledWith("usuario_empresarial", true);
-    expect(navigationMock).toHaveBeenCalledWith("../dashboard/index.html");
+    expect(navigationMock).toHaveBeenCalledWith("../../dashboard/index.html");
   });
 
   it("muestra un mensaje de error cuando el usuario no existe", async () => {

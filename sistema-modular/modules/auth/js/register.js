@@ -123,7 +123,7 @@ export function setNavigationHandler(handler) {
 // Redirige a la pantalla de login utilizando la ruta relativa adecuada.
 export function redirectToLogin(handler = navigationHandler) {
   if (typeof handler === "function") {
-    handler("./login.html");
+    handler("../login.html");
   }
 }
 

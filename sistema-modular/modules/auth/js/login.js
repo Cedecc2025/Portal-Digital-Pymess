@@ -159,7 +159,7 @@ export function setNavigationHandler(handler) {
 // Redirige al Dashboard utilizando el manejador activo.
 export function redirectToDashboard(handler = navigationHandler) {
   if (typeof handler === "function") {
-    handler("../dashboard/index.html");
+    handler("../../dashboard/index.html");
   }
 }
 

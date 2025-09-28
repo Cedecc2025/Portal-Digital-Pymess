@@ -92,7 +92,7 @@ describe("register module", () => {
     expect(payload.username).toBe("usuario_demo");
     expect(payload.password).toBe("hashed::ClaveSegura1");
     expect(generalFeedback.textContent).toBe("Registro exitoso. Ahora puedes iniciar sesión.");
-    expect(navigationMock).toHaveBeenCalledWith("./login.html");
+    expect(navigationMock).toHaveBeenCalledWith("../login.html");
   });
 
   it("informa cuando el usuario ya existe", async () => {
