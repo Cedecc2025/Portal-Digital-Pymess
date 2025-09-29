@@ -227,20 +227,7 @@ export function updatePasswordStrengthDisplay(score) {
 // Cambia el estado de carga del formulario para evitar envíos duplicados.
 export function setRegisterLoading(isLoading) {
   if (registerSubmitButton) {
-    const spinner = registerSubmitButton.querySelector(".spinner");
-    if (isLoading) {
-      registerSubmitButton.classList.add("is-loading");
-      registerSubmitButton.setAttribute("disabled", "true");
-      if (spinner) {
-        spinner.hidden = false;
-      }
-    } else {
-      registerSubmitButton.classList.remove("is-loading");
-      registerSubmitButton.removeAttribute("disabled");
-      if (spinner) {
-        spinner.hidden = true;
-      }
-    }
+    registerSubmitButton.toggleAttribute("disabled", isLoading);
   }
 
   if (usernameInput) {

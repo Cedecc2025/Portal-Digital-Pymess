@@ -55,7 +55,7 @@ beforeEach(async () => {
         <input id="rememberMe" type="checkbox" />
         <span id="usernameFeedback"></span>
         <span id="passwordFeedback"></span>
-        <button id="loginSubmit"><span class="spinner" hidden></span></button>
+        <button id="loginSubmit">Ingresar</button>
         <p id="loginFeedback"></p>
       </form>
     </body></html>`,

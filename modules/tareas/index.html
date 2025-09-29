@@ -82,12 +82,10 @@
         </aside>
       </section>
 
-      <section class="tasks-placeholder">
+      <section class="tasks-listing" aria-live="polite">
         <h2>Tareas recientes</h2>
-        <p>
-          A medida que registres tareas se listarán aquí con su estado y prioridad. Desde este módulo podrás integrarlas con
-          reportes o tableros adicionales.
-        </p>
+        <p id="taskListEmpty">Aún no has registrado tareas. Cada nueva tarea aparecerá aquí con su prioridad y fecha límite.</p>
+        <ul id="taskList" class="task-list"></ul>
       </section>
     </main>
 

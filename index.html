@@ -8,24 +8,35 @@
     <link rel="stylesheet" href="./public/css/home.css" />
   </head>
   <body>
-    <main class="home-shell">
-      <section class="intro-panel surface-card">
-        <header class="insights-header">
+    <main class="main-hero">
+      <section class="welcome-card">
+        <span class="kpi-chip" aria-label="Usuarios activos en las últimas 24 horas">Usuarios activos (24h): 1,248</span>
+        <header class="welcome-header">
           <span class="badge-pill">🚀 Plataforma integral</span>
-          <h1>Portal de Herramientas Empresariales</h1>
+          <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
+          <p class="welcome-description">
+            Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar y hacer crecer tu negocio de manera ágil y profesional.
+          </p>
         </header>
+        <section class="portal-overview" aria-label="Resumen de módulos disponibles">
+          <p class="portal-copy">
+            Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave de tu organización:
+          </p>
+          <ul class="module-overview">
+            <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
+            <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios de forma clara y accesible.</li>
+            <li><strong>Chatbot Web:</strong> brinda atención automática y disponible 24/7 para tus clientes.</li>
+            <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas para impulsar tus resultados.</li>
+            <li><strong>Herramientas Extra:</strong> utilidades complementarias que facilitan la gestión diaria.</li>
+          </ul>
+          <p class="portal-copy">
+            Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo suficientemente robusto para ayudarte a tomar decisiones basadas en datos y optimizar tus procesos.
+          </p>
+        </section>
         <div class="cta-actions">
           <a class="primary-button" href="./modules/auth/login.html">Iniciar sesión</a>
           <a class="secondary-button" href="./modules/auth/register.html">Registrarse</a>
         </div>
-      </section>
-
-      <section class="insights-panel surface-card">
-        <header class="insights-header">
-          <h2>Explora los módulos clave</h2>
-          <p>Desplázate por las tarjetas para conocer los beneficios de cada aplicación del portal.</p>
-        </header>
-
         <section class="kpi-carousel" aria-label="Módulos disponibles" id="kpiCarousel">
           <div class="kpi-track" id="kpiTrack">
             <article class="kpi-card module-slide" id="kpi-slide-0" data-index="0">
@@ -80,7 +91,6 @@
             </button>
           </div>
         </section>
-        <p class="coming-soon-note">Los demás módulos del portal se encuentran en proceso de construcción.</p>
       </section>
     </main>
     <script type="module" src="./lib/supabaseClient.js"></script>

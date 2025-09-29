@@ -11,6 +11,10 @@ let taskFeedback = null;
 let taskSubmitButton = null;
 let taskResetButton = null;
 let logoutButton = null;
+let taskListContainer = null;
+let taskListEmptyMessage = null;
+let dashboardSliderTrack = null;
+let defaultEmptyMessageText = "";
 
 // Obtiene y guarda las referencias a los elementos del DOM utilizados en el módulo.
 function cacheElements() {
@@ -19,6 +23,13 @@ function cacheElements() {
   taskSubmitButton = document.querySelector("#taskSubmit");
   taskResetButton = document.querySelector("#taskReset");
   logoutButton = document.querySelector("#logoutButton");
+  taskListContainer = document.querySelector("#taskList");
+  taskListEmptyMessage = document.querySelector("#taskListEmpty");
+  dashboardSliderTrack = document.querySelector("#task-slider-track");
+
+  if (taskListEmptyMessage && !defaultEmptyMessageText) {
+    defaultEmptyMessageText = taskListEmptyMessage.textContent ?? "";
+  }
 }
 
 // Muestra un mensaje al usuario indicando el resultado de la operación.
@@ -79,6 +90,109 @@ async function persistTask(payload) {
   }
 }
 
+// Consulta todas las tareas del usuario autenticado.
+async function fetchTasksForUser(userId) {
+  const { data, error } = await supabaseClient
+    .from(TASKS_TABLE)
+    .select("id, title, priority, status, due_date")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+// Rellena el listado local y, si está disponible, el slider del dashboard.
+function renderTaskCollections(tasks) {
+  if (taskListContainer) {
+    if (!tasks.length) {
+      taskListContainer.innerHTML = "";
+      if (taskListEmptyMessage) {
+        taskListEmptyMessage.textContent = defaultEmptyMessageText;
+        taskListEmptyMessage.hidden = false;
+      }
+    } else {
+      const markup = tasks
+        .map((task) => {
+          const priority = (task.priority ?? "media").toLowerCase();
+          const readablePriority = priority.charAt(0).toUpperCase() + priority.slice(1);
+          const status = task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : "Pendiente";
+          const dueDateLabel = task.due_date ? new Date(task.due_date).toLocaleDateString() : "Sin fecha";
+
+          return `
+            <li data-id="${task.id}">
+              <strong>${task.title}</strong>
+              <span>${readablePriority} • ${status} • ${dueDateLabel}</span>
+            </li>
+          `;
+        })
+        .join("");
+
+      taskListContainer.innerHTML = markup;
+      if (taskListEmptyMessage) {
+        taskListEmptyMessage.hidden = true;
+      }
+    }
+  }
+
+  if (dashboardSliderTrack) {
+    if (!tasks.length) {
+      dashboardSliderTrack.innerHTML = "";
+      return;
+    }
+
+    const sliderCards = tasks
+      .slice(0, 20)
+      .map((task) => {
+        const priority = (task.priority ?? "media").toLowerCase();
+        const priorityClass = priority.replace(/[^a-z]/gi, "");
+        const priorityLabel = priority.charAt(0).toUpperCase() + priority.slice(1);
+        const status = task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : "Pendiente";
+        const dueLabel = task.due_date ? new Date(task.due_date).toLocaleDateString() : "Sin fecha";
+
+        return `
+          <article class="task-card" role="listitem" data-id="${task.id}">
+            <header>
+              <span class="badge badge--${priorityClass || "media"}">${priorityLabel || "Media"}</span>
+              <h4>${task.title}</h4>
+            </header>
+            <p class="meta">${status} • ${dueLabel}</p>
+          </article>
+        `;
+      })
+      .join("");
+
+    dashboardSliderTrack.innerHTML = sliderCards;
+  }
+}
+
+// Vuelve a consultar las tareas del usuario y actualiza la interfaz.
+async function refreshTaskCollections() {
+  const currentUser = getCurrentUser();
+
+  if (!currentUser || !currentUser.userId) {
+    if (taskListEmptyMessage) {
+      taskListEmptyMessage.hidden = false;
+      taskListEmptyMessage.textContent = "No pudimos validar tu sesión. Inicia sesión nuevamente.";
+    }
+    return;
+  }
+
+  try {
+    const tasks = await fetchTasksForUser(currentUser.userId);
+    renderTaskCollections(tasks);
+  } catch (error) {
+    console.error("Error al consultar las tareas", error);
+    if (taskListEmptyMessage) {
+      taskListEmptyMessage.hidden = false;
+      taskListEmptyMessage.textContent = "No fue posible cargar tus tareas. Intenta nuevamente en unos minutos.";
+    }
+  }
+}
+
 // Gestiona el envío del formulario, validando y guardando en Supabase.
 async function handleTaskSubmit(event) {
   event.preventDefault();
@@ -114,6 +228,7 @@ async function handleTaskSubmit(event) {
     await persistTask(taskPayload);
     resetForm();
     showFeedback("✅ Tarea guardada correctamente.");
+    await refreshTaskCollections();
   } catch (error) {
     console.error("Error al guardar la tarea", error);
     const message =
@@ -150,6 +265,7 @@ function init() {
   requireAuth();
   cacheElements();
   registerEventListeners();
+  refreshTaskCollections();
 }
 
 if (document.readyState === "loading") {

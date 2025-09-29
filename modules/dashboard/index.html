@@ -14,44 +14,28 @@
           <p class="welcome-label">Bienvenido de nuevo</p>
           <h1 id="usernameDisplay">Usuario</h1>
         </div>
-        <div class="header-actions">
-          <nav class="quick-links" aria-label="Acciones rápidas">
-            <a class="quick-link" href="#perfil" id="linkProfile">Ver perfil</a>
-            <a class="quick-link" href="#notificaciones" id="linkNotifications">Notificaciones</a>
-            <a class="quick-link" href="#ayuda" id="linkHelp">Centro de ayuda</a>
-          </nav>
-          <button id="logoutButton" class="logout-button">Cerrar sesión</button>
-          <button class="more-actions" id="moreActions" aria-haspopup="true" aria-expanded="false" aria-label="Más acciones">
-            ⋯
-          </button>
-          <div class="more-menu" id="moreMenu" role="menu">
-            <a role="menuitem" href="#perfil">Ver perfil</a>
-            <a role="menuitem" href="#notificaciones">Notificaciones</a>
-            <a role="menuitem" href="#ayuda">Centro de ayuda</a>
-          </div>
-        </div>
+        <nav class="dash-actions" aria-label="Acciones del dashboard">
+          <a class="btn btn-secondary" href="../tareas/index.html">Tareas</a>
+          <button id="logoutButton" class="btn btn-outline" type="button">Cerrar sesión</button>
+        </nav>
       </header>
-      <section class="dashboard-widgets" aria-label="Indicadores rápidos">
-        <a class="widget-card" href="#estado-cuenta">
-          <span class="widget-label">Estado de cuenta</span>
-          <strong class="widget-value">$12,450</strong>
-          <small class="widget-meta">Actualizado hace 4h</small>
-        </a>
-        <a class="widget-card" href="#tareas">
-          <span class="widget-label">Tareas pendientes</span>
-          <strong class="widget-value">7</strong>
-          <small class="widget-meta">3 vencen hoy</small>
-        </a>
-        <a class="widget-card" href="#actualizaciones">
-          <span class="widget-label">Próximas actualizaciones</span>
-          <strong class="widget-value">4</strong>
-          <small class="widget-meta">Módulos en despliegue</small>
-        </a>
-        <a class="widget-card" href="#ultimo-acceso">
-          <span class="widget-label">Último acceso</span>
-          <strong class="widget-value">Ayer 22:14</strong>
-          <small class="widget-meta">IP segura detectada</small>
-        </a>
+      <section class="task-slider" aria-label="Tareas recientes">
+        <header class="task-slider__header">
+          <div>
+            <h2>Tus tareas recientes</h2>
+            <p id="taskSliderStatus">Consulta el avance de las últimas tareas registradas por tu equipo.</p>
+          </div>
+        </header>
+        <div class="task-slider__shell">
+          <button class="task-slider__nav" id="taskSliderPrev" type="button" aria-label="Ver tareas anteriores">‹</button>
+          <div class="task-slider__viewport" id="taskSliderViewport">
+            <div class="task-slider__track" id="task-slider-track" role="list"></div>
+          </div>
+          <button class="task-slider__nav" id="taskSliderNext" type="button" aria-label="Ver más tareas">›</button>
+        </div>
+        <p class="task-slider__empty" id="taskSliderEmpty">
+          Aún no has registrado tareas. Captura la primera desde el módulo de Tareas para verla aquí.
+        </p>
       </section>
       <section class="modules-grid">
         <a class="module-card module-card--primary" href="../costos/index.html" data-module="costos">

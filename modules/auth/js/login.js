@@ -126,20 +126,7 @@ export function validatePassword(password, feedbackElement = passwordFeedback) {
 // Cambia el estado de carga del formulario para evitar envíos duplicados.
 export function setLoadingState(isLoading) {
   if (loginSubmitButton) {
-    const spinner = loginSubmitButton.querySelector(".spinner");
-    if (isLoading) {
-      loginSubmitButton.classList.add("is-loading");
-      loginSubmitButton.setAttribute("disabled", "true");
-      if (spinner) {
-        spinner.hidden = false;
-      }
-    } else {
-      loginSubmitButton.classList.remove("is-loading");
-      loginSubmitButton.removeAttribute("disabled");
-      if (spinner) {
-        spinner.hidden = true;
-      }
-    }
+    loginSubmitButton.toggleAttribute("disabled", isLoading);
   }
 
   if (usernameInput) {

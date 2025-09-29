@@ -52,7 +52,7 @@ beforeEach(async () => {
         <p id="registerFeedback"></p>
         <p id="usernameAvailability"></p>
         <div class="strength-meter"><span class="strength-bar" data-level="0"></span><span id="strengthCopy"></span></div>
-        <button id="registerSubmit"><span class="spinner" hidden></span></button>
+        <button id="registerSubmit">Registrar</button>
       </form>
     </body></html>`,
     { url: "http://localhost/modules/auth/register.html" }
