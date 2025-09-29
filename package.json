@@ -1,0 +1,13 @@
+{
+  "name": "portal-digital-pymess",
+  "version": "1.0.0",
+  "description": "Portal web modular con autenticación Supabase",
+  "type": "module",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0",
+    "vitest": "^1.5.0"
+  }
+}
