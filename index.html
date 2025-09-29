@@ -9,60 +9,15 @@
   </head>
   <body>
     <main class="home-shell">
-      <section class="intro-panel surface-card">
-        <span class="badge-pill">🚀 Plataforma integral</span>
-        <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
-        <p>
-          Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar y hacer crecer tu
-          negocio de manera ágil y profesional.
-        </p>
-        <p>
-          Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave de tu organización.
-        </p>
-        <div class="modules-list" aria-label="Módulos disponibles">
-          <article class="module-row" tabindex="0">
-            <span class="module-icon" aria-hidden="true">🤝</span>
-            <div class="module-copy">
-              <h3>CRM</h3>
-              <p>Administra clientes, contactos y oportunidades de venta con visibilidad completa.</p>
-            </div>
-          </article>
-          <article class="module-row" tabindex="0">
-            <span class="module-icon" aria-hidden="true">🛍️</span>
-            <div class="module-copy">
-              <h3>Catálogo</h3>
-              <p>Organiza tu oferta de productos y servicios con información clara y accesible.</p>
-            </div>
-          </article>
-          <article class="module-row" tabindex="0">
-            <span class="module-icon" aria-hidden="true">🤖</span>
-            <div class="module-copy">
-              <h3>Chatbot Web</h3>
-              <p>Ofrece atención automática y disponible 24/7 para tus clientes digitales.</p>
-            </div>
-          </article>
-          <article class="module-row" tabindex="0">
-            <span class="module-icon" aria-hidden="true">📈</span>
-            <div class="module-copy">
-              <h3>Estrategias de Marketing</h3>
-              <p>Planifica campañas efectivas y mide el impacto con datos accionables.</p>
-            </div>
-          </article>
-          <article class="module-row" tabindex="0">
-            <span class="module-icon" aria-hidden="true">🧰</span>
-            <div class="module-copy">
-              <h3>Herramientas Extra</h3>
-              <p>Accede a utilidades complementarias que potencian tu operación diaria.</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
       <section class="insights-panel surface-card">
         <header class="insights-header">
-          <h2>Comienza tu sesión segura</h2>
+          <span class="badge-pill">🚀 Plataforma integral</span>
+          <h1>Comienza tu sesión segura</h1>
           <p>
             Inicia sesión para acceder a tu panel centralizado, monitorear métricas y coordinar a tu equipo desde cualquier lugar.
+          </p>
+          <p>
+            Explora los módulos disponibles y activa las herramientas diseñadas para impulsar la gestión de tu negocio.
           </p>
         </header>
 
@@ -85,49 +40,74 @@
           </button>
         </div>
 
-        <section class="kpi-carousel" aria-label="Métricas clave" id="kpiCarousel">
+        <section class="kpi-carousel" aria-label="Módulos clave" id="kpiCarousel">
           <div class="kpi-track" id="kpiTrack">
-            <article class="kpi-card" data-index="0">
-              <h4>Usuarios activos (24h)</h4>
-              <p class="kpi-value">1,248</p>
-              <small class="kpi-trend up">+8% vs ayer</small>
+            <article class="kpi-card module-slide" data-index="0">
+              <header class="module-slide-header">
+                <span class="module-icon" aria-hidden="true">🤝</span>
+                <div>
+                  <h4>CRM</h4>
+                  <p class="module-intro">Administra clientes, contactos y oportunidades de venta con visibilidad completa.</p>
+                </div>
+              </header>
+              <a class="module-link" href="./modules/dashboard/index.html">Acceder al CRM</a>
             </article>
-            <article class="kpi-card" data-index="1">
-              <h4>Usuarios activos (30d)</h4>
-              <p class="kpi-value">4,972</p>
-              <small class="kpi-trend up">+4% mensual</small>
+            <article class="kpi-card module-slide" data-index="1">
+              <header class="module-slide-header">
+                <span class="module-icon" aria-hidden="true">🛍️</span>
+                <div>
+                  <h4>Catálogo</h4>
+                  <p class="module-intro">Organiza y presenta tu oferta de productos y servicios de forma clara y accesible.</p>
+                </div>
+              </header>
+              <a class="module-link" href="./modules/dashboard/index.html">Ver Catálogo</a>
             </article>
-            <article class="kpi-card" data-index="2">
-              <h4>Éxitos de login</h4>
-              <p class="kpi-value">96%</p>
-              <small class="kpi-trend up">+2 pts vs semana pasada</small>
+            <article class="kpi-card module-slide" data-index="2">
+              <header class="module-slide-header">
+                <span class="module-icon" aria-hidden="true">🤖</span>
+                <div>
+                  <h4>Chatbot Web</h4>
+                  <p class="module-intro">Automatiza la atención al cliente y mantente disponible 24/7 sin complicaciones.</p>
+                </div>
+              </header>
+              <a class="module-link" href="./modules/dashboard/index.html">Configurar Chatbot</a>
             </article>
-            <article class="kpi-card" data-index="3">
-              <h4>Planes creados</h4>
-              <p class="kpi-value">312</p>
-              <small class="kpi-trend up">+18 en los últimos 7 días</small>
+            <article class="kpi-card module-slide" data-index="3">
+              <header class="module-slide-header">
+                <span class="module-icon" aria-hidden="true">📈</span>
+                <div>
+                  <h4>Estrategias</h4>
+                  <p class="module-intro">Planifica campañas de marketing, asigna presupuestos y mide resultados en un solo lugar.</p>
+                </div>
+              </header>
+              <a class="module-link" href="./modules/dashboard/index.html">Diseñar Estrategia</a>
             </article>
-            <article class="kpi-card" data-index="4">
-              <h4>Tiempo promedio en app</h4>
-              <p class="kpi-value">18m</p>
-              <small class="kpi-trend steady">= vs trimestre anterior</small>
+            <article class="kpi-card module-slide" data-index="4">
+              <header class="module-slide-header">
+                <span class="module-icon" aria-hidden="true">🧰</span>
+                <div>
+                  <h4>Herramientas Extra</h4>
+                  <p class="module-intro">Utilidades complementarias que potencian tus operaciones y análisis diarios.</p>
+                </div>
+              </header>
+              <a class="module-link" href="./modules/dashboard/index.html">Explorar Herramientas</a>
             </article>
           </div>
-          <div class="kpi-controls" id="kpiControls" role="tablist" aria-label="Controles de métricas">
+          <div class="kpi-controls" id="kpiControls" role="tablist" aria-label="Controles de módulos">
             <button type="button" class="dot is-active" data-target="0" role="tab" aria-selected="true" aria-controls="kpi-slide-0">
-              <span class="sr-only">Usuarios activos 24h</span>
+              <span class="sr-only">CRM</span>
             </button>
             <button type="button" class="dot" data-target="1" role="tab" aria-selected="false" aria-controls="kpi-slide-1">
-              <span class="sr-only">Usuarios activos 30d</span>
+              <span class="sr-only">Catálogo</span>
             </button>
             <button type="button" class="dot" data-target="2" role="tab" aria-selected="false" aria-controls="kpi-slide-2">
-              <span class="sr-only">Éxitos de login</span>
+              <span class="sr-only">Chatbot Web</span>
             </button>
             <button type="button" class="dot" data-target="3" role="tab" aria-selected="false" aria-controls="kpi-slide-3">
-              <span class="sr-only">Planes creados</span>
+              <span class="sr-only">Estrategias</span>
             </button>
             <button type="button" class="dot" data-target="4" role="tab" aria-selected="false" aria-controls="kpi-slide-4">
-              <span class="sr-only">Tiempo promedio en app</span>
+              <span class="sr-only">Herramientas Extra</span>
             </button>
           </div>
         </section>
