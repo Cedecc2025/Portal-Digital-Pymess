@@ -1,965 +1,955 @@
 // estrategias.js
-// Controla el asistente paso a paso para crear una estrategia de marketing.
+// Orquesta el flujo del asistente de estrategia de marketing, gestionando UI, validaciones y persistencia.
 
-import { requireAuth } from "../../../lib/authGuard.js";
+import { requireAuth, getCurrentUser } from "../../../lib/authGuard.js";
+import { STEPS, OBJECTIVES, MARKETING_CHANNELS, KPI_OPTIONS, CONTENT_TYPES, DAYS_OF_WEEK } from "./constants.js";
+import { getState, setState, mergeState, loadStateFromStorage, saveState } from "./stateManager.js";
+import { validateRequired, validatePositiveNumber, setFieldError, clearFeedback } from "./validation.js";
+import { saveStrategyToSupabase, loadStrategyFromSupabase } from "./persistence.js";
+import { renderTrackingChart } from "./charts.js";
 
-const progressStepsElement = document.querySelector("#progressSteps");
-const stepCountElement = document.querySelector("#stepCount");
-const stepNameElement = document.querySelector("#stepName");
-const contentAreaElement = document.querySelector("#contentArea");
-const previousButton = document.querySelector("#prevBtn");
-const nextButton = document.querySelector("#nextBtn");
+let currentStepIndex = 0;
+let contentArea = null;
+let progressSteps = null;
+let stepCount = null;
+let stepName = null;
+let nextButton = null;
+let prevButton = null;
+let statusBanner = null;
 
-let currentStep = 0;
+// Inicializa la UI seleccionando elementos y registrando eventos principales.
+function initializeElements() {
+  contentArea = document.querySelector("#contentArea");
+  progressSteps = document.querySelector("#progressSteps");
+  stepCount = document.querySelector("#stepCount");
+  stepName = document.querySelector("#stepName");
+  nextButton = document.querySelector("#nextBtn");
+  prevButton = document.querySelector("#prevBtn");
+  statusBanner = document.querySelector("#statusBanner");
 
-const strategyData = {
-  companyInfo: {
-    name: "",
-    industry: "",
-    size: "",
-    currentSituation: ""
-  },
-  targetAudience: {
-    demographics: "",
-    interests: "",
-    painPoints: ""
-  },
-  objectives: [],
-  channels: [],
-  budget: {
-    total: "",
-    distribution: {}
-  },
-  timeline: {
-    duration: "3",
-    activities: []
-  },
-  publicationCalendar: {
-    contentTypes: []
-  },
-  kpis: [],
-  monthlyTracking: {
-    months: []
-  }
-};
-
-const steps = [
-  { name: "Inicio", icon: "💡" },
-  { name: "Información de Empresa", icon: "🏢" },
-  { name: "Audiencia Objetivo", icon: "👥" },
-  { name: "Objetivos", icon: "🎯" },
-  { name: "Canales de Marketing", icon: "📢" },
-  { name: "Presupuesto", icon: "💰" },
-  { name: "Cronograma", icon: "📅" },
-  { name: "Calendario de Publicaciones", icon: "✏️" },
-  { name: "KPIs", icon: "📊" },
-  { name: "Tracking Mensual", icon: "📈" },
-  { name: "Resumen", icon: "📄" }
-];
-
-const objectives = [
-  "Aumentar reconocimiento de marca",
-  "Generar más leads",
-  "Incrementar ventas",
-  "Mejorar retención de clientes",
-  "Expandir a nuevos mercados",
-  "Lanzar nuevo producto/servicio"
-];
-
-const marketingChannels = [
-  { id: "social", name: "Redes Sociales", icon: "💬", className: "icon-social" },
-  { id: "email", name: "Email Marketing", icon: "✉️", className: "icon-email" },
-  { id: "content", name: "Marketing de Contenidos", icon: "📝", className: "icon-content" },
-  { id: "seo", name: "SEO", icon: "🌐", className: "icon-seo" },
-  { id: "video", name: "Video Marketing", icon: "🎥", className: "icon-video" },
-  { id: "paid", name: "Publicidad Pagada", icon: "💸", className: "icon-paid" }
-];
-
-const kpiOptions = [
-  "Tráfico web",
-  "Tasa de conversión",
-  "ROI de marketing",
-  "Costo por adquisición (CAC)",
-  "Valor de vida del cliente (CLV)",
-  "Engagement en redes sociales",
-  "Tasa de apertura de emails",
-  "Posicionamiento SEO"
-];
-
-const contentTypes = [
-  "Educativo",
-  "Promocional",
-  "Testimonios",
-  "Behind the scenes",
-  "Tips y consejos",
-  "Noticias",
-  "Entretenimiento",
-  "Casos de éxito"
-];
-
-// Inicializa el módulo asegurando la autenticación previa.
-function initializeModule() {
-  requireAuth();
-  registerNavigationEvents();
-  renderProgressIndicators();
-  renderStepContent();
+  prevButton.addEventListener("click", handlePreviousStep);
+  nextButton.addEventListener("click", handleNextStep);
 }
 
-// Registra los eventos de los botones de navegación principal.
-function registerNavigationEvents() {
-  if (previousButton) {
-    previousButton.addEventListener("click", () => {
-      goToPreviousStep();
-    });
-  }
-
-  if (nextButton) {
-    nextButton.addEventListener("click", () => {
-      goToNextStep();
-    });
-  }
-}
-
-// Avanza al paso siguiente del asistente.
-function goToNextStep() {
-  if (currentStep < steps.length - 1) {
-    currentStep += 1;
-    renderProgressIndicators();
-    renderStepContent();
-  }
-}
-
-// Retrocede al paso anterior del asistente.
-function goToPreviousStep() {
-  if (currentStep > 0) {
-    currentStep -= 1;
-    renderProgressIndicators();
-    renderStepContent();
-  }
-}
-
-// Construye la cabecera del progreso con iconos y metadatos.
-function renderProgressIndicators() {
-  if (!progressStepsElement) {
-    return;
-  }
-
-  progressStepsElement.innerHTML = "";
-
-  steps.forEach((step, index) => {
-    const stepContainer = document.createElement("div");
-    stepContainer.className = [
+// Renderiza los indicadores de progreso con base en el paso actual.
+function renderProgress() {
+  progressSteps.innerHTML = "";
+  STEPS.forEach((step, index) => {
+    const node = document.createElement("div");
+    node.className = [
       "step",
-      index < currentStep ? "completed" : "",
-      index === currentStep ? "active" : ""
+      index < currentStepIndex ? "completed" : "",
+      index === currentStepIndex ? "active" : ""
     ]
       .filter(Boolean)
       .join(" ");
 
-    const circle = document.createElement("div");
-    circle.className = "step-circle";
-    circle.textContent = step.icon;
-
-    stepContainer.appendChild(circle);
-
-    if (index < steps.length - 1) {
-      const line = document.createElement("div");
-      line.className = "step-line";
-
-      if (index < currentStep) {
-        line.classList.add("completed");
-      }
-
-      stepContainer.appendChild(line);
-    }
-
-    progressStepsElement.appendChild(stepContainer);
+    node.innerHTML = `
+      <div class="step-circle">${step.icon}</div>
+      ${index < STEPS.length - 1 ? '<div class="step-line"></div>' : ""}
+    `;
+    progressSteps.appendChild(node);
   });
 
-  if (stepCountElement) {
-    stepCountElement.textContent = `Paso ${currentStep + 1} de ${steps.length}`;
-  }
+  stepCount.textContent = `Paso ${currentStepIndex + 1} de ${STEPS.length}`;
+  stepName.textContent = STEPS[currentStepIndex].name;
 
-  if (stepNameElement) {
-    stepNameElement.textContent = steps[currentStep].name;
-  }
+  prevButton.disabled = currentStepIndex === 0;
+  nextButton.textContent = currentStepIndex === STEPS.length - 1 ? "Completado" : "Siguiente →";
 }
 
-// Renderiza el contenido del paso actual en pantalla.
-function renderStepContent() {
-  if (!contentAreaElement) {
+// Maneja el evento del botón "Siguiente" validando y avanzando el flujo.
+async function handleNextStep() {
+  const isValid = runStepValidation(STEPS[currentStepIndex].id);
+  if (!isValid) {
     return;
   }
 
-  contentAreaElement.innerHTML = buildStepMarkup(currentStep);
-  attachStepHandlers(currentStep);
-  updateNavigationButtons();
+  if (currentStepIndex === STEPS.length - 1) {
+    await finalizeStrategy();
+    return;
+  }
+
+  currentStepIndex += 1;
+  renderProgress();
+  renderStepContent();
 }
 
-// Crea el marcado HTML correspondiente a cada paso del asistente.
-function buildStepMarkup(stepIndex) {
-  switch (stepIndex) {
-    case 0:
-      return `
-        <div class="welcome-hero">
-          <div class="welcome-icon">📈</div>
-          <h2 class="welcome-title">Bienvenido a tu Plataforma de Estrategia de Marketing</h2>
-          <p style="color: #6b7280; max-width: 600px; margin: 0 auto;">
-            Diseña una estrategia de marketing profesional para tu PYME en solo 11 pasos.
-            Esta herramienta te guiará a través del proceso completo, desde el análisis inicial
-            hasta la definición de métricas de éxito.
-          </p>
-          <div class="feature-cards">
-            <div class="feature-card blue">
-              <div class="feature-icon">🎯</div>
-              <h3 style="color: #1e40af;">Define Objetivos</h3>
-              <p style="font-size: 14px; color: #3730a3;">Establece metas claras y medibles</p>
-            </div>
-            <div class="feature-card purple">
-              <div class="feature-icon">🎨</div>
-              <h3 style="color: #7c3aed;">Selecciona Canales</h3>
-              <p style="font-size: 14px; color: #6d28d9;">Elige los mejores canales para tu audiencia</p>
-            </div>
-            <div class="feature-card green">
-              <div class="feature-icon">📊</div>
-              <h3 style="color: #166534;">Mide Resultados</h3>
-              <p style="font-size: 14px; color: #15803d;">Define KPIs para evaluar el éxito</p>
-            </div>
-          </div>
-        </div>
-      `;
-    case 1:
-      return `
-        <h2>Información de tu Empresa</h2>
-        <div class="form-group">
-          <label for="companyName">Nombre de la empresa</label>
-          <input id="companyName" type="text" class="form-control" value="${strategyData.companyInfo.name}" placeholder="Tu empresa S.A.">
-        </div>
-        <div class="form-group">
-          <label for="industry">Industria</label>
-          <select id="industry" class="form-control">
-            <option value="">Selecciona una industria</option>
-            ${buildSelectOption("retail", "Retail / Comercio", strategyData.companyInfo.industry)}
-            ${buildSelectOption("services", "Servicios", strategyData.companyInfo.industry)}
-            ${buildSelectOption("technology", "Tecnología", strategyData.companyInfo.industry)}
-            ${buildSelectOption("manufacturing", "Manufactura", strategyData.companyInfo.industry)}
-            ${buildSelectOption("food", "Alimentos y Bebidas", strategyData.companyInfo.industry)}
-            ${buildSelectOption("health", "Salud y Bienestar", strategyData.companyInfo.industry)}
-            ${buildSelectOption("education", "Educación", strategyData.companyInfo.industry)}
-            ${buildSelectOption("other", "Otro", strategyData.companyInfo.industry)}
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="size">Tamaño de la empresa</label>
-          <select id="size" class="form-control">
-            <option value="">Selecciona el tamaño</option>
-            ${buildSelectOption("1-10", "1-10 empleados", strategyData.companyInfo.size)}
-            ${buildSelectOption("11-50", "11-50 empleados", strategyData.companyInfo.size)}
-            ${buildSelectOption("51-200", "51-200 empleados", strategyData.companyInfo.size)}
-            ${buildSelectOption("200+", "200+ empleados", strategyData.companyInfo.size)}
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="currentSituation">Situación actual del marketing</label>
-          <textarea id="currentSituation" class="form-control" placeholder="Describe brevemente tu situación actual de marketing...">${strategyData.companyInfo.currentSituation}</textarea>
-        </div>
-      `;
-    case 2:
-      return `
-        <h2>Define tu Audiencia Objetivo</h2>
-        <div class="form-group">
-          <label for="demographics">Demografía</label>
-          <input id="demographics" type="text" class="form-control" value="${strategyData.targetAudience.demographics}" placeholder="Ej: 25-45 años, profesionales, ingresos medios-altos">
-        </div>
-        <div class="form-group">
-          <label for="interests">Intereses y comportamientos</label>
-          <textarea id="interests" class="form-control" placeholder="¿Qué les interesa? ¿Cómo se comportan?">${strategyData.targetAudience.interests}</textarea>
-        </div>
-        <div class="form-group">
-          <label for="painPoints">Problemas o necesidades (Pain Points)</label>
-          <textarea id="painPoints" class="form-control" placeholder="¿Qué problemas resuelve tu producto/servicio?">${strategyData.targetAudience.painPoints}</textarea>
-        </div>
-        <div class="alert alert-info">
-          <span>ℹ️</span>
-          <div>
-            <strong>Tip: Sé específico</strong><br>
-            Mientras más específica sea tu audiencia, más efectiva será tu estrategia de marketing.
-          </div>
-        </div>
-      `;
-    case 3:
-      return `
-        <h2>Establece tus Objetivos de Marketing</h2>
-        <p>Selecciona hasta 3 objetivos principales para tu estrategia</p>
-        <div class="grid grid-2">
-          ${objectives
-            .map((objective) => `
-              <div class="selectable-card ${strategyData.objectives.includes(objective) ? "selected" : ""}" data-objective="${objective}">
-                <span>${objective}</span>
-                ${strategyData.objectives.includes(objective) ? "✓" : ""}
-              </div>
-            `)
-            .join("")}
-        </div>
-        ${
-          strategyData.objectives.length === 3
-            ? `
-          <div class="alert alert-warning">
-            Has seleccionado el máximo de 3 objetivos. Deselecciona uno para elegir otro diferente.
-          </div>`
-            : ""
+// Regresa al paso anterior del asistente.
+function handlePreviousStep() {
+  if (currentStepIndex === 0) {
+    return;
+  }
+  currentStepIndex -= 1;
+  renderProgress();
+  renderStepContent();
+}
+
+// Calcula estadísticas rápidas para el seguimiento mensual.
+function computeTrackingInsights() {
+  const state = getState();
+  const insights = [];
+  state.monthlyTracking.months.forEach((month, index) => {
+    month.metrics.forEach((metric) => {
+      const variation = Number(metric.actual ?? 0) - Number(metric.target ?? 0);
+      const previousMonth = state.monthlyTracking.months[index - 1];
+      let trend = 0;
+      if (previousMonth) {
+        const previousMetric = previousMonth.metrics.find((item) => item.kpi === metric.kpi);
+        if (previousMetric) {
+          const previousValue = Number(previousMetric.actual ?? 0);
+          trend = previousValue === 0 ? 0 : ((Number(metric.actual ?? 0) - previousValue) / previousValue) * 100;
         }
-      `;
-    case 4:
-      return `
-        <h2>Selecciona tus Canales de Marketing</h2>
-        <p>Elige los canales más apropiados para alcanzar a tu audiencia</p>
-        <div class="grid grid-3">
-          ${marketingChannels
-            .map((channel) => `
-              <div class="selectable-card ${strategyData.channels.includes(channel.id) ? "selected" : ""}" data-channel="${channel.id}">
-                <div class="channel-card">
-                  <div class="channel-icon ${channel.className}">${channel.icon}</div>
-                  <span>${channel.name}</span>
-                </div>
-                ${strategyData.channels.includes(channel.id) ? "✓" : ""}
-              </div>
-            `)
-            .join("")}
-        </div>
-        <div class="alert alert-success">
-          <strong>Recomendación:</strong> Comienza con 2-3 canales y domínalos antes de expandirte a más.
-        </div>
-      `;
-    case 5:
-      return buildBudgetStep();
-    case 6:
-      return buildTimelineStep();
-    case 7:
-      return buildPublicationCalendarStep();
-    case 8:
-      return buildKpiStep();
-    case 9:
-      return buildTrackingStep();
-    case 10:
-      return buildSummaryStep();
+      }
+      metric.variation = Number.isFinite(variation) ? variation : 0;
+      metric.trend = Number.isFinite(trend) ? trend : 0;
+    });
+  });
+  state.monthlyTracking.insights = insights;
+}
+
+// Ejecuta la validación específica del paso actual.
+function runStepValidation(stepId) {
+  const container = contentArea.querySelector(".step-container");
+  clearFeedback(container ?? contentArea);
+  const state = getState();
+
+  switch (stepId) {
+    case "company": {
+      const nameInput = container.querySelector("#companyName");
+      const industrySelect = container.querySelector("#industry");
+      const sizeSelect = container.querySelector("#size");
+      const situationArea = container.querySelector("#currentSituation");
+
+      let isValid = true;
+      if (!validateRequired(nameInput.value)) {
+        setFieldError(nameInput, "El nombre de la empresa es obligatorio.");
+        isValid = false;
+      }
+      if (!validateRequired(industrySelect.value)) {
+        setFieldError(industrySelect, "Selecciona una industria.");
+        isValid = false;
+      }
+      if (!validateRequired(sizeSelect.value)) {
+        setFieldError(sizeSelect, "Selecciona el tamaño.");
+        isValid = false;
+      }
+      if (!validateRequired(situationArea.value)) {
+        setFieldError(situationArea, "Describe la situación actual.");
+        isValid = false;
+      }
+      if (isValid) {
+        state.companyInfo = {
+          name: nameInput.value.trim(),
+          industry: industrySelect.value,
+          size: sizeSelect.value,
+          currentSituation: situationArea.value.trim()
+        };
+        saveState();
+      }
+      return isValid;
+    }
+    case "audience": {
+      const demographicsInput = container.querySelector("#audienceDemographics");
+      const interestsInput = container.querySelector("#audienceInterests");
+      const painsInput = container.querySelector("#audiencePains");
+
+      let isValid = true;
+      if (!validateRequired(demographicsInput.value)) {
+        setFieldError(demographicsInput, "Define la demografía.");
+        isValid = false;
+      }
+      if (!validateRequired(interestsInput.value)) {
+        setFieldError(interestsInput, "Describe los intereses.");
+        isValid = false;
+      }
+      if (!validateRequired(painsInput.value)) {
+        setFieldError(painsInput, "Indica los pain points.");
+        isValid = false;
+      }
+      if (isValid) {
+        state.targetAudience = {
+          demographics: demographicsInput.value.trim(),
+          interests: interestsInput.value.trim(),
+          painPoints: painsInput.value.trim()
+        };
+        saveState();
+      }
+      return isValid;
+    }
+    case "buyerPersona": {
+      const motivations = container.querySelector("#personaMotivations");
+      const objections = container.querySelector("#personaObjections");
+      const email = container.querySelector("#personaEmail");
+      let isValid = true;
+      if (!validateRequired(motivations.value)) {
+        setFieldError(motivations, "Describe motivaciones.");
+        isValid = false;
+      }
+      if (!validateRequired(objections.value)) {
+        setFieldError(objections, "Describe objeciones.");
+        isValid = false;
+      }
+      if (!validateRequired(email.value)) {
+        setFieldError(email, "Ingresa un correo de referencia.");
+        isValid = false;
+      } else if (!validateEmail(email.value)) {
+        setFieldError(email, "Correo inválido.");
+        isValid = false;
+      }
+      if (isValid) {
+        const archetypeRows = Array.from(container.querySelectorAll(".persona-row"));
+        state.buyerPersona = {
+          motivations: motivations.value.trim(),
+          objections: objections.value.trim(),
+          contactEmail: email.value.trim(),
+          preferredChannels: Array.from(container.querySelectorAll("input[name='personaChannel']:checked")).map((input) => input.value),
+          archetypes: archetypeRows.map((row) => ({
+            name: row.querySelector(".persona-name").value.trim(),
+            motivations: row.querySelector(".persona-motivations").value.trim(),
+            objections: row.querySelector(".persona-objections").value.trim(),
+            channels: row.querySelector(".persona-channels").value.split(",").map((value) => value.trim()).filter(Boolean)
+          }))
+        };
+        saveState();
+      }
+      return isValid;
+    }
+    case "competitive": {
+      const competitorRows = Array.from(container.querySelectorAll(".competitor-row"));
+      if (competitorRows.length === 0) {
+        return false;
+      }
+      state.competitiveAnalysis.competitors = competitorRows.map((row) => ({
+        name: row.querySelector(".competitor-name").value.trim(),
+        value: row.querySelector(".competitor-value").value.trim(),
+        notes: row.querySelector(".competitor-notes").value.trim()
+      }));
+      saveState();
+      return true;
+    }
+    case "swot": {
+      state.swot = {
+        strengths: Array.from(container.querySelectorAll("textarea[data-category='strength']")).map((area) => area.value.trim()).filter(Boolean),
+        weaknesses: Array.from(container.querySelectorAll("textarea[data-category='weakness']")).map((area) => area.value.trim()).filter(Boolean),
+        opportunities: Array.from(container.querySelectorAll("textarea[data-category='opportunity']")).map((area) => area.value.trim()).filter(Boolean),
+        threats: Array.from(container.querySelectorAll("textarea[data-category='threat']")).map((area) => area.value.trim()).filter(Boolean)
+      };
+      saveState();
+      return true;
+    }
+    case "objectives": {
+      if (state.objectives.length === 0) {
+        const grid = container.querySelector(".grid");
+        setFieldError(grid, "Selecciona al menos un objetivo.");
+        return false;
+      }
+      return true;
+    }
+    case "channels": {
+      if (state.channels.length === 0) {
+        const grid = container.querySelector(".grid");
+        setFieldError(grid, "Selecciona al menos un canal.");
+        return false;
+      }
+      return true;
+    }
+    case "budget": {
+      const totalInput = container.querySelector("#budgetTotal");
+      if (!validatePositiveNumber(totalInput.value)) {
+        setFieldError(totalInput, "Ingresa un presupuesto válido.");
+        return false;
+      }
+      state.budget.total = Number(totalInput.value);
+      saveState();
+      return true;
+    }
+    case "tacticalPlan": {
+      const rows = Array.from(container.querySelectorAll(".tactical-row"));
+      state.tacticalPlan.items = rows.map((row) => ({
+        activity: row.querySelector(".tactical-activity").value.trim(),
+        responsible: row.querySelector(".tactical-responsible").value.trim(),
+        dependencies: row.querySelector(".tactical-dependencies").value.trim(),
+        cost: Number(row.querySelector(".tactical-cost").value) || 0
+      }));
+      saveState();
+      return true;
+    }
+    case "calendar": {
+      const entryRows = Array.from(container.querySelectorAll(".calendar-row"));
+      state.publicationCalendar.entries = entryRows.map((row) => ({
+        day: row.querySelector(".calendar-day").value,
+        channel: row.querySelector(".calendar-channel").value,
+        contentType: row.querySelector(".calendar-type").value,
+        time: row.querySelector(".calendar-time").value
+      }));
+      saveState();
+      return true;
+    }
+    case "campaigns": {
+      const campaignRows = Array.from(container.querySelectorAll(".campaign-row"));
+      const automationRows = Array.from(container.querySelectorAll(".automation-row"));
+      state.campaigns.active = campaignRows.map((row) => ({
+        name: row.querySelector(".campaign-name").value.trim(),
+        channel: row.querySelector(".campaign-channel").value.trim(),
+        budget: Number(row.querySelector(".campaign-budget").value) || 0,
+        startDate: row.querySelector(".campaign-start").value,
+        endDate: row.querySelector(".campaign-end").value,
+        goal: row.querySelector(".campaign-goal").value.trim(),
+        status: row.querySelector(".campaign-status").value
+      }));
+      state.campaigns.automations = automationRows.map((row) => ({
+        name: row.querySelector(".automation-name").value.trim(),
+        trigger: row.querySelector(".automation-trigger").value.trim(),
+        cadence: row.querySelector(".automation-cadence").value.trim(),
+        tool: row.querySelector(".automation-tool").value.trim()
+      }));
+      saveState();
+      return true;
+    }
+    case "kpis": {
+      const selectedRows = Array.from(container.querySelectorAll(".kpi-row"));
+      state.kpis = selectedRows.map((row) => ({
+        name: row.querySelector(".kpi-name").textContent,
+        measurement: row.querySelector(".kpi-measurement").value,
+        target: Number(row.querySelector(".kpi-target").value) || 0
+      }));
+      saveState();
+      return true;
+    }
+    case "tracking": {
+      const monthRows = Array.from(container.querySelectorAll(".tracking-row"));
+      state.monthlyTracking.months = monthRows.map((row) => ({
+        label: row.querySelector(".tracking-label").value,
+        metrics: Array.from(row.querySelectorAll(".tracking-metric"), (metricRow) => ({
+          kpi: metricRow.dataset.kpi,
+          target: Number(metricRow.querySelector(".metric-target").value) || 0,
+          actual: Number(metricRow.querySelector(".metric-actual").value) || 0,
+          variation: 0,
+          trend: 0
+        }))
+      }));
+      computeTrackingInsights();
+      saveState();
+      return true;
+    }
     default:
-      return "";
+      return true;
   }
 }
 
-// Construye el contenido del paso de presupuesto.
-function buildBudgetStep() {
-  const budgetDistributionMarkup = strategyData.channels
-    .map((channelId) => {
-      const channel = marketingChannels.find((item) => item.id === channelId);
-      const value = strategyData.budget.distribution[channelId] || 0;
-
-      return `
-        <div class="budget-slider">
-          <div class="channel-label">
-            <span class="channel-icon ${channel?.className ?? ""}" style="width: 30px; height: 30px; font-size: 16px;">${channel?.icon ?? ""}</span>
-            <span>${channel?.name ?? ""}</span>
-          </div>
-          <input type="range" min="0" max="100" value="${value}" data-distribution="${channelId}">
-          <span class="percentage">${value}%</span>
-        </div>
-      `;
-    })
-    .join("");
-
-  const totalAssigned = Object.values(strategyData.budget.distribution).reduce((sum, value) => {
-    const parsed = Number.parseInt(value, 10);
-    if (Number.isNaN(parsed)) {
-      return sum;
-    }
-    return sum + parsed;
-  }, 0);
-
-  return `
-    <h2>Define tu Presupuesto de Marketing</h2>
-    <div class="form-group">
-      <label for="totalBudget">Presupuesto mensual total (en tu moneda local)</label>
-      <input id="totalBudget" type="number" class="form-control" value="${strategyData.budget.total}" placeholder="Ej: 5000">
-    </div>
-    ${
-      strategyData.channels.length > 0
-        ? `
-      <h3>Distribución por canal</h3>
-      ${budgetDistributionMarkup}
-      <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 20px;">
-        <strong>Total asignado: ${totalAssigned}%</strong>
-      </div>`
-        : `
-      <div class="alert alert-info">
-        <span>ℹ️</span>
-        <div>
-          Selecciona al menos un canal de marketing para distribuir tu presupuesto.
-        </div>
-      </div>`
-    }
-  `;
+// Permite agregar filas dinámicas en secciones repetibles.
+function addDynamicRow(containerSelector, template) {
+  const container = contentArea.querySelector(containerSelector);
+  if (!container) {
+    return;
+  }
+  container.insertAdjacentHTML("beforeend", template);
 }
 
-// Construye el contenido del paso de cronograma.
-function buildTimelineStep() {
-  const months = Math.min(Number.parseInt(strategyData.timeline.duration, 10) || 3, 6);
-  const activitiesMarkup = Array.from({ length: months }, (_, index) => {
-    const value = strategyData.timeline.activities[index] || "";
-    return `
-      <div class="kpi-card">
-        <label for="activity-${index}">Mes ${index + 1}</label>
-        <input id="activity-${index}" type="text" class="form-control" value="${value}" placeholder="Ej: Lanzamiento de campaña en redes sociales">
-      </div>
-    `;
-  }).join("");
+// Renderiza el contenido del paso actual.
+function renderStepContent() {
+  const stepId = STEPS[currentStepIndex].id;
+  const state = getState();
 
-  return `
-    <h2>Planifica tu Cronograma</h2>
-    <div class="form-group">
-      <label for="durationSelect">Duración de la campaña (meses)</label>
-      <select id="durationSelect" class="form-control">
-        ${buildSelectOption("1", "1 mes", strategyData.timeline.duration)}
-        ${buildSelectOption("3", "3 meses", strategyData.timeline.duration)}
-        ${buildSelectOption("6", "6 meses", strategyData.timeline.duration)}
-        ${buildSelectOption("12", "12 meses", strategyData.timeline.duration)}
-      </select>
-    </div>
-    <h3>Actividades clave por mes</h3>
-    ${activitiesMarkup}
-  `;
+  const templates = {
+    welcome: renderWelcomeStep,
+    company: renderCompanyStep,
+    audience: renderAudienceStep,
+    buyerPersona: renderBuyerPersonaStep,
+    competitive: renderCompetitiveStep,
+    swot: renderSwotStep,
+    objectives: renderObjectivesStep,
+    channels: renderChannelsStep,
+    budget: renderBudgetStep,
+    tacticalPlan: renderTacticalPlanStep,
+    calendar: renderCalendarStep,
+    campaigns: renderCampaignsStep,
+    kpis: renderKpiStep,
+    tracking: renderTrackingStep,
+    report: renderReportStep
+  };
+
+  templates[stepId](state);
+  saveState();
 }
 
-// Construye el contenido del paso de calendario de publicaciones.
-function buildPublicationCalendarStep() {
-  const contentTypeMarkup = contentTypes
-    .map((type) => `
-      <label class="checkbox-group">
-        <input type="checkbox" value="${type}" ${strategyData.publicationCalendar.contentTypes.includes(type) ? "checked" : ""}>
-        <span>${type}</span>
-      </label>
-    `)
-    .join("");
-
-  const rowsMarkup = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-    .map((day) => {
-      const channelOptions = strategyData.channels
-        .map((channelId) => {
-          const channel = marketingChannels.find((item) => item.id === channelId);
-          return `<option value="${channelId}">${channel?.name ?? ""}</option>`;
-        })
-        .join("");
-
-      const contentOptions = strategyData.publicationCalendar.contentTypes
-        .map((type) => `<option value="${type}">${type}</option>`)
-        .join("");
-
-      return `
-        <tr>
-          <td><strong>${day}</strong></td>
-          <td>
-            <select class="form-control" data-calendar="channel">
-              <option value="">Seleccionar</option>
-              ${channelOptions}
-            </select>
-          </td>
-          <td>
-            <select class="form-control" data-calendar="content">
-              <option value="">Tipo</option>
-              ${contentOptions}
-            </select>
-          </td>
-          <td><input type="time" class="form-control"></td>
-        </tr>
-      `;
-    })
-    .join("");
-
-  return `
-    <h2>Calendario de Publicaciones</h2>
-    <p>Planifica tu contenido semanal para mantener consistencia</p>
-    <h3>Tipos de contenido a publicar</h3>
-    <div class="grid grid-4">
-      ${contentTypeMarkup}
-    </div>
-    <h3 style="margin-top: 30px;">Frecuencia de publicación semanal</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Día</th>
-          <th>Canal</th>
-          <th>Tipo de contenido</th>
-          <th>Hora</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rowsMarkup}
-      </tbody>
-    </table>
-    <div class="alert alert-info">
-      <span>🕐</span>
-      <div>
-        <strong>Mejores horarios para publicar:</strong><br>
-        • LinkedIn: Martes a Jueves, 9-10am<br>
-        • Instagram: 11am-1pm y 7-9pm<br>
-        • Facebook: 1-4pm<br>
-        • Twitter/X: 9-10am y 7-9pm
+// Genera el paso de bienvenida.
+function renderWelcomeStep() {
+  contentArea.innerHTML = `
+    <div class="step-container welcome-hero">
+      <div class="welcome-icon">📈</div>
+      <h2 class="welcome-title">Bienvenido a tu Plataforma de Estrategia de Marketing</h2>
+      <p>Guardaremos tus avances automáticamente en Supabase y en este dispositivo.</p>
+      <div class="feature-cards">
+        <div class="feature-card blue">
+          <div class="feature-icon">🎯</div>
+          <h3>Define Objetivos</h3>
+          <p>Metas medibles por cada etapa del funnel.</p>
+        </div>
+        <div class="feature-card purple">
+          <div class="feature-icon">🤝</div>
+          <h3>Asignación de Responsables</h3>
+          <p>Plan táctico detallado con dependencias.</p>
+        </div>
+        <div class="feature-card green">
+          <div class="feature-icon">📊</div>
+          <h3>Seguimiento Inteligente</h3>
+          <p>KPIs con tendencias, alertas y reportes ejecutivos.</p>
+        </div>
       </div>
     </div>
   `;
 }
 
-// Construye el contenido del paso de KPIs.
-function buildKpiStep() {
-  return `
-    <h2>Define tus KPIs (Indicadores Clave)</h2>
-    <p>Selecciona las métricas que usarás para medir el éxito</p>
-    <div class="grid grid-2">
-      ${kpiOptions
-        .map((kpi) => `
-          <div class="selectable-card ${strategyData.kpis.includes(kpi) ? "selected" : ""}" data-kpi="${kpi}">
-            <span>${kpi}</span>
-            ${strategyData.kpis.includes(kpi) ? "✓" : ""}
-          </div>
-        `)
-        .join("")}
-    </div>
-    <div class="alert alert-info">
-      <strong>Tip:</strong> Elige KPIs que estén directamente relacionados con tus objetivos de negocio.
-    </div>
-  `;
-}
-
-// Construye el contenido del paso de seguimiento mensual.
-function buildTrackingStep() {
-  const duration = Number.parseInt(strategyData.timeline.duration, 10) || 3;
-  const headers = Array.from({ length: duration }, (_, index) => `<th>Mes ${index + 1}</th>`).join("");
-  const rows = strategyData.kpis
-    .map((kpi) => {
-      const inputs = Array.from({ length: duration }, () => `<td><input type="number" placeholder="0" style="width: 80px; text-align: center;"></td>`).join("");
-      return `<tr><td><strong>${kpi}</strong></td>${inputs}<td style="text-align: center; color: #3b82f6; font-weight: 600;">-</td></tr>`;
-    })
-    .join("");
-
-  const statusCards = [
-    { color: "green", label: "Mejor rendimiento", icon: "📈" },
-    { color: "yellow", label: "Necesita atención", icon: "⚠️" },
-    { color: "blue", label: "En objetivo", icon: "✅" }
-  ]
-    .map((card) => `
-      <div class="status-card ${card.color}">
-        <div class="status-header">
-          <span>${card.label}</span>
-          <span>${card.icon}</span>
-        </div>
-        <select class="form-control">
-          <option>Seleccionar KPI</option>
-          ${strategyData.kpis.map((kpi) => `<option>${kpi}</option>`).join("")}
+// Renderiza el formulario de información empresarial.
+function renderCompanyStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Información de tu Empresa</h2>
+      <div class="form-group">
+        <label for="companyName">Nombre de la empresa</label>
+        <input id="companyName" type="text" class="form-control" value="${state.companyInfo.name}" />
+      </div>
+      <div class="form-group">
+        <label for="industry">Industria</label>
+        <select id="industry" class="form-control">
+          <option value="">Selecciona una industria</option>
+          <option value="retail">Retail / Comercio</option>
+          <option value="services">Servicios</option>
+          <option value="technology">Tecnología</option>
+          <option value="manufacturing">Manufactura</option>
+          <option value="food">Alimentos y Bebidas</option>
+          <option value="health">Salud y Bienestar</option>
+          <option value="education">Educación</option>
+          <option value="other">Otro</option>
         </select>
       </div>
-    `)
-    .join("");
-
-  return `
-    <h2>Sistema de Tracking Mensual</h2>
-    <p>Configura cómo medirás y registrarás tus resultados cada mes</p>
-    <h3>Métricas a trackear mensualmente</h3>
-    <div class="tracking-grid">
-      ${strategyData.kpis
-        .map((kpi) => `
-          <div class="metric-card">
-            <div class="metric-header">
-              <span>${kpi}</span>
-              <span>📊</span>
-            </div>
-            <input type="text" class="form-control" placeholder="Meta mensual" style="margin-bottom: 8px;">
-            <select class="form-control">
-              <option>Medición numérica</option>
-              <option>Porcentaje</option>
-              <option>Escala 1-10</option>
-            </select>
-          </div>
-        `)
-        .join("")}
-    </div>
-    ${
-      strategyData.kpis.length > 0
-        ? `
-      <h3>Dashboard de Resultados Mensuales</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Métrica</th>
-            ${headers}
-            <th>Promedio</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>`
-        : ""
-    }
-    <div class="status-cards">
-      ${statusCards}
+      <div class="form-group">
+        <label for="size">Tamaño de la empresa</label>
+        <select id="size" class="form-control">
+          <option value="">Selecciona el tamaño</option>
+          <option value="1-10">1-10 empleados</option>
+          <option value="11-50">11-50 empleados</option>
+          <option value="51-200">51-200 empleados</option>
+          <option value="200+">200+ empleados</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="currentSituation">Situación actual del marketing</label>
+        <textarea id="currentSituation" class="form-control" rows="4">${state.companyInfo.currentSituation}</textarea>
+      </div>
     </div>
   `;
+  contentArea.querySelector("#industry").value = state.companyInfo.industry;
+  contentArea.querySelector("#size").value = state.companyInfo.size;
 }
 
-// Construye el contenido del paso final con el resumen de la estrategia.
-function buildSummaryStep() {
-  const companyInfo = strategyData.companyInfo.name
-    ? `
-      <div class="summary-card">
-        <h3>📊 Información de la Empresa</h3>
-        <p><strong>Empresa:</strong> ${strategyData.companyInfo.name}</p>
-        <p><strong>Industria:</strong> ${strategyData.companyInfo.industry}</p>
-        <p><strong>Tamaño:</strong> ${strategyData.companyInfo.size} empleados</p>
-      </div>`
-    : "";
-
-  const objectivesInfo = strategyData.objectives.length > 0
-    ? `
-      <div class="summary-card">
-        <h3>🎯 Objetivos Principales</h3>
-        ${strategyData.objectives.map((item) => `<p>✓ ${item}</p>`).join("")}
-      </div>`
-    : "";
-
-  const channelsInfo = strategyData.channels.length > 0
-    ? `
-      <div class="summary-card">
-        <h3>📢 Canales de Marketing</h3>
-        ${strategyData.channels
-          .map((channelId) => {
-            const channel = marketingChannels.find((item) => item.id === channelId);
-            return `<span class="tag tag-blue">${channel?.name ?? ""}</span>`;
-          })
-          .join("")}
-      </div>`
-    : "";
-
-  const budgetInfo = strategyData.budget.total
-    ? `
-      <div class="summary-card">
-        <h3>💰 Presupuesto</h3>
-        <p style="font-size: 24px; color: #3b82f6; font-weight: bold;">$${strategyData.budget.total}/mes</p>
-        <p>Durante ${strategyData.timeline.duration} meses</p>
-      </div>`
-    : "";
-
-  return `
-    <div style="text-align: center;">
-      <div class="success-icon">✓</div>
-      <h2 style="font-size: 28px; margin-bottom: 8px;">¡Tu Estrategia de Marketing está Lista!</h2>
-      <p style="color: #6b7280;">Aquí está el resumen de tu plan estratégico</p>
-    </div>
-    <div class="summary-section">
-      ${companyInfo}
-      ${objectivesInfo}
-      ${channelsInfo}
-      ${budgetInfo}
-    </div>
-    <div class="alert alert-success" style="margin-top: 20px;">
-      <div>
-        <strong>✨ Tu estrategia está completa y lista para implementar</strong><br><br>
-        Próximos pasos:<br>
-        • Implementa tu calendario de publicaciones<br>
-        • Registra tus métricas mensualmente en el dashboard<br>
-        • Ajusta la estrategia basándote en los resultados<br>
-        • Revisa y actualiza trimestralmente
+// Renderiza el paso de audiencia objetivo.
+function renderAudienceStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Define tu Audiencia Objetivo</h2>
+      <div class="form-group">
+        <label for="audienceDemographics">Demografía</label>
+        <textarea id="audienceDemographics" class="form-control" rows="3">${state.targetAudience.demographics}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="audienceInterests">Intereses y comportamientos</label>
+        <textarea id="audienceInterests" class="form-control" rows="3">${state.targetAudience.interests}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="audiencePains">Problemas o necesidades (Pain Points)</label>
+        <textarea id="audiencePains" class="form-control" rows="3">${state.targetAudience.painPoints}</textarea>
       </div>
     </div>
   `;
 }
 
-// Adjunta los manejadores de eventos para cada paso renderizado.
-function attachStepHandlers(stepIndex) {
-  switch (stepIndex) {
-    case 1:
-      wireCompanyInfoStep();
-      break;
-    case 2:
-      wireAudienceStep();
-      break;
-    case 3:
-      wireObjectivesStep();
-      break;
-    case 4:
-      wireChannelsStep();
-      break;
-    case 5:
-      wireBudgetStep();
-      break;
-    case 6:
-      wireTimelineStep();
-      break;
-    case 7:
-      wirePublicationStep();
-      break;
-    case 8:
-      wireKpiStep();
-      break;
-    default:
-      break;
-  }
+// Renderiza el paso de buyer persona avanzado.
+function renderBuyerPersonaStep(state) {
+  const archetypes = state.buyerPersona.archetypes ?? [];
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Buyer Persona Avanzado</h2>
+      <div class="form-group">
+        <label for="personaMotivations">Motivaciones clave</label>
+        <textarea id="personaMotivations" class="form-control" rows="3">${state.buyerPersona.motivations ?? ""}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="personaObjections">Objeciones habituales</label>
+        <textarea id="personaObjections" class="form-control" rows="3">${state.buyerPersona.objections ?? ""}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="personaEmail">Correo de referencia</label>
+        <input id="personaEmail" type="email" class="form-control" value="${state.buyerPersona.contactEmail ?? ""}" />
+      </div>
+      <div class="form-group">
+        <label>Canales preferidos</label>
+        <div class="checkbox-grid">
+          ${MARKETING_CHANNELS.map((channel) => `
+            <label class="checkbox-group">
+              <input type="checkbox" name="personaChannel" value="${channel.id}" ${state.buyerPersona.preferredChannels?.includes(channel.id) ? "checked" : ""} />
+              <span>${channel.name}</span>
+            </label>
+          `).join("")}
+        </div>
+      </div>
+      <div class="persona-archetypes">
+        <h3>Arquetipos</h3>
+        <div class="persona-list"></div>
+        <button type="button" class="btn btn-secondary" id="addPersona">➕ Agregar arquetipo</button>
+      </div>
+    </div>
+  `;
+
+  const listContainer = contentArea.querySelector(".persona-list");
+  const renderRow = (persona = { name: "", motivations: "", objections: "", channels: [] }) => `
+    <div class="persona-row">
+      <input class="form-control persona-name" placeholder="Nombre" value="${persona.name}" />
+      <textarea class="form-control persona-motivations" rows="2" placeholder="Motivaciones">${persona.motivations}</textarea>
+      <textarea class="form-control persona-objections" rows="2" placeholder="Objeciones">${persona.objections}</textarea>
+      <input class="form-control persona-channels" placeholder="Canales separados por coma" value="${persona.channels.join(", ")}" />
+    </div>
+  `;
+  listContainer.innerHTML = archetypes.length ? archetypes.map((persona) => renderRow(persona)).join("") : renderRow();
+  contentArea.querySelector("#addPersona").addEventListener("click", () => {
+    addDynamicRow(".persona-list", renderRow());
+  });
 }
 
-// Agrega listeners para actualizar la información de la empresa.
-function wireCompanyInfoStep() {
-  const nameInput = document.querySelector("#companyName");
-  const industrySelect = document.querySelector("#industry");
-  const sizeSelect = document.querySelector("#size");
-  const situationTextarea = document.querySelector("#currentSituation");
-
-  if (nameInput) {
-    nameInput.addEventListener("input", (event) => {
-      updateData("companyInfo", "name", event.target.value);
-    });
-  }
-
-  if (industrySelect) {
-    industrySelect.addEventListener("change", (event) => {
-      updateData("companyInfo", "industry", event.target.value);
-    });
-  }
-
-  if (sizeSelect) {
-    sizeSelect.addEventListener("change", (event) => {
-      updateData("companyInfo", "size", event.target.value);
-    });
-  }
-
-  if (situationTextarea) {
-    situationTextarea.addEventListener("input", (event) => {
-      updateData("companyInfo", "currentSituation", event.target.value);
-    });
-  }
+// Renderiza el paso de análisis competitivo.
+function renderCompetitiveStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Análisis Competitivo</h2>
+      <div class="competitor-list"></div>
+      <button type="button" class="btn btn-secondary" id="addCompetitor">➕ Agregar competidor</button>
+    </div>
+  `;
+  const list = contentArea.querySelector(".competitor-list");
+  const renderRow = (competitor = { name: "", value: "", notes: "" }) => `
+    <div class="competitor-row">
+      <input class="form-control competitor-name" placeholder="Nombre" value="${competitor.name}" />
+      <input class="form-control competitor-value" placeholder="Propuesta de valor" value="${competitor.value}" />
+      <textarea class="form-control competitor-notes" rows="2" placeholder="Notas">${competitor.notes}</textarea>
+    </div>
+  `;
+  list.innerHTML = state.competitiveAnalysis.competitors.length
+    ? state.competitiveAnalysis.competitors.map((competitor) => renderRow(competitor)).join("")
+    : renderRow();
+  contentArea.querySelector("#addCompetitor").addEventListener("click", () => {
+    addDynamicRow(".competitor-list", renderRow());
+  });
 }
 
-// Agrega listeners para los campos de audiencia objetivo.
-function wireAudienceStep() {
-  const demographicsInput = document.querySelector("#demographics");
-  const interestsTextarea = document.querySelector("#interests");
-  const painPointsTextarea = document.querySelector("#painPoints");
-
-  if (demographicsInput) {
-    demographicsInput.addEventListener("input", (event) => {
-      updateData("targetAudience", "demographics", event.target.value);
-    });
-  }
-
-  if (interestsTextarea) {
-    interestsTextarea.addEventListener("input", (event) => {
-      updateData("targetAudience", "interests", event.target.value);
-    });
-  }
-
-  if (painPointsTextarea) {
-    painPointsTextarea.addEventListener("input", (event) => {
-      updateData("targetAudience", "painPoints", event.target.value);
-    });
-  }
+// Renderiza el paso de matriz SWOT.
+function renderSwotStep(state) {
+  const categories = [
+    { key: "strength", label: "Fortalezas", items: state.swot.strengths },
+    { key: "weakness", label: "Debilidades", items: state.swot.weaknesses },
+    { key: "opportunity", label: "Oportunidades", items: state.swot.opportunities },
+    { key: "threat", label: "Amenazas", items: state.swot.threats }
+  ];
+  contentArea.innerHTML = `
+    <div class="step-container swot-grid">
+      ${categories
+        .map(
+          (category) => `
+            <div class="swot-card">
+              <h3>${category.label}</h3>
+              <textarea data-category="${category.key}" class="form-control" rows="6">${category.items.join("\n")}</textarea>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
 }
 
-// Configura los listeners para seleccionar y deseleccionar objetivos.
-function wireObjectivesStep() {
-  const cards = document.querySelectorAll("[data-objective]");
-
-  cards.forEach((card) => {
+// Renderiza la selección de objetivos.
+function renderObjectivesStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Objetivos de Marketing</h2>
+      <p>Selecciona hasta 3 objetivos prioritarios.</p>
+      <div class="grid grid-2 objective-grid">
+        ${OBJECTIVES.map((objective) => `
+          <button type="button" class="selectable-card ${state.objectives.includes(objective) ? "selected" : ""}" data-objective="${objective}">
+            <span>${objective}</span>
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+  contentArea.querySelectorAll(".selectable-card").forEach((card) => {
     card.addEventListener("click", () => {
-      const objective = card.getAttribute("data-objective");
-      if (!objective) {
-        return;
+      const value = card.dataset.objective;
+      const currentObjectives = new Set(getState().objectives);
+      if (currentObjectives.has(value)) {
+        currentObjectives.delete(value);
+      } else if (currentObjectives.size < 3) {
+        currentObjectives.add(value);
       }
-      toggleObjective(objective);
-    });
-  });
-}
-
-// Configura los listeners para seleccionar canales de marketing.
-function wireChannelsStep() {
-  const cards = document.querySelectorAll("[data-channel]");
-
-  cards.forEach((card) => {
-    card.addEventListener("click", () => {
-      const channel = card.getAttribute("data-channel");
-      if (!channel) {
-        return;
-      }
-      toggleChannel(channel);
-    });
-  });
-}
-
-// Configura los listeners del paso de presupuesto.
-function wireBudgetStep() {
-  const totalInput = document.querySelector("#totalBudget");
-  const sliders = document.querySelectorAll("[data-distribution]");
-
-  if (totalInput) {
-    totalInput.addEventListener("input", (event) => {
-      updateData("budget", "total", event.target.value);
-    });
-  }
-
-  sliders.forEach((slider) => {
-    slider.addEventListener("input", (event) => {
-      const channelId = slider.getAttribute("data-distribution");
-      if (!channelId) {
-        return;
-      }
-      updateBudgetDistribution(channelId, event.target.value);
-    });
-  });
-}
-
-// Configura los listeners del cronograma.
-function wireTimelineStep() {
-  const durationSelect = document.querySelector("#durationSelect");
-  const activityInputs = document.querySelectorAll("[id^='activity-']");
-
-  if (durationSelect) {
-    durationSelect.addEventListener("change", (event) => {
-      updateData("timeline", "duration", event.target.value);
+      mergeState({ objectives: Array.from(currentObjectives) });
       renderStepContent();
     });
-  }
-
-  activityInputs.forEach((input) => {
-    input.addEventListener("input", (event) => {
-      const index = Number.parseInt(input.id.replace("activity-", ""), 10);
-      if (Number.isNaN(index)) {
-        return;
-      }
-      updateActivity(index, event.target.value);
-    });
   });
 }
 
-// Configura los listeners del calendario de publicaciones.
-function wirePublicationStep() {
-  const checkboxes = document.querySelectorAll("[type='checkbox']");
-
-  checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", (event) => {
-      const { value, checked } = event.target;
-      if (checked) {
-        addContentType(value);
-      } else {
-        removeContentType(value);
-      }
-    });
-  });
-}
-
-// Configura los listeners para la selección de KPIs.
-function wireKpiStep() {
-  const cards = document.querySelectorAll("[data-kpi]");
-
-  cards.forEach((card) => {
+// Renderiza la selección de canales y presupuesto.
+function renderChannelsStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Canales de Marketing</h2>
+      <div class="grid grid-3 channel-grid">
+        ${MARKETING_CHANNELS.map((channel) => `
+          <button type="button" class="selectable-card ${state.channels.includes(channel.id) ? "selected" : ""}" data-channel="${channel.id}">
+            <div class="channel-card">
+              <div class="channel-icon ${channel.className}">${channel.icon}</div>
+              <span>${channel.name}</span>
+            </div>
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+  contentArea.querySelectorAll(".selectable-card").forEach((card) => {
     card.addEventListener("click", () => {
-      const kpi = card.getAttribute("data-kpi");
-      if (!kpi) {
-        return;
+      const value = card.dataset.channel;
+      const channels = new Set(getState().channels);
+      if (channels.has(value)) {
+        channels.delete(value);
+      } else {
+        channels.add(value);
       }
-      toggleKpi(kpi);
+      mergeState({ channels: Array.from(channels) });
+      renderStepContent();
     });
   });
 }
 
-// Actualiza el estado de cualquier campo simple.
-function updateData(section, field, value) {
-  if (!strategyData[section]) {
-    return;
-  }
-
-  strategyData[section][field] = value;
+// Renderiza el paso de presupuesto con sliders.
+function renderBudgetStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Presupuesto</h2>
+      <div class="form-group">
+        <label for="budgetTotal">Presupuesto mensual total</label>
+        <input id="budgetTotal" type="number" class="form-control" value="${state.budget.total}" />
+      </div>
+      <div class="budget-grid">
+        ${state.channels
+          .map((channelId) => {
+            const channel = MARKETING_CHANNELS.find((item) => item.id === channelId);
+            const value = state.budget.distribution[channelId] ?? 0;
+            return `
+              <div class="budget-slider">
+                <div class="channel-label">
+                  <span class="channel-icon ${channel.className}">${channel.icon}</span>
+                  <span>${channel.name}</span>
+                </div>
+                <input type="range" min="0" max="100" value="${value}" data-channel="${channelId}" />
+                <span class="percentage">${value}%</span>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `;
+  contentArea.querySelectorAll(".budget-slider input[type='range']").forEach((slider) => {
+    slider.addEventListener("input", (event) => {
+      const channelId = event.target.dataset.channel;
+      const value = Number(event.target.value);
+      event.target.nextElementSibling.textContent = `${value}%`;
+      const state = getState();
+      state.budget.distribution[channelId] = value;
+      saveState();
+    });
+  });
 }
 
-// Alterna la selección de un objetivo.
-function toggleObjective(objective) {
-  const index = strategyData.objectives.indexOf(objective);
+// Renderiza el plan táctico con responsables y costos.
+function renderTacticalPlanStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Plan Táctico y Responsables</h2>
+      <div class="tactical-list"></div>
+      <button type="button" class="btn btn-secondary" id="addTactical">➕ Agregar actividad</button>
+    </div>
+  `;
+  const list = contentArea.querySelector(".tactical-list");
+  const renderRow = (item = { activity: "", responsible: "", dependencies: "", cost: 0 }) => `
+    <div class="tactical-row">
+      <input class="form-control tactical-activity" placeholder="Actividad" value="${item.activity}" />
+      <input class="form-control tactical-responsible" placeholder="Responsable" value="${item.responsible}" />
+      <input class="form-control tactical-dependencies" placeholder="Dependencias" value="${item.dependencies}" />
+      <input class="form-control tactical-cost" type="number" placeholder="Costo" value="${item.cost}" />
+    </div>
+  `;
+  list.innerHTML = state.tacticalPlan.items.length
+    ? state.tacticalPlan.items.map((item) => renderRow(item)).join("")
+    : renderRow();
+  contentArea.querySelector("#addTactical").addEventListener("click", () => {
+    addDynamicRow(".tactical-list", renderRow());
+  });
+}
 
-  if (index > -1) {
-    strategyData.objectives.splice(index, 1);
-  } else if (strategyData.objectives.length < 3) {
-    strategyData.objectives.push(objective);
+// Renderiza el calendario editorial con canal y hora.
+function renderCalendarStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Calendario Editorial</h2>
+      <div class="calendar-list"></div>
+      <button type="button" class="btn btn-secondary" id="addCalendar">➕ Agregar publicación</button>
+    </div>
+  `;
+  const list = contentArea.querySelector(".calendar-list");
+  const renderRow = (entry = { day: DAYS_OF_WEEK[0], channel: state.channels[0] ?? "", contentType: CONTENT_TYPES[0], time: "09:00" }) => `
+    <div class="calendar-row">
+      <select class="form-control calendar-day">
+        ${DAYS_OF_WEEK.map((day) => `<option value="${day}" ${day === entry.day ? "selected" : ""}>${day}</option>`).join("")}
+      </select>
+      <select class="form-control calendar-channel">
+        ${state.channels.map((channelId) => {
+          const channel = MARKETING_CHANNELS.find((item) => item.id === channelId);
+          return `<option value="${channelId}" ${channelId === entry.channel ? "selected" : ""}>${channel?.name ?? channelId}</option>`;
+        }).join("")}
+      </select>
+      <select class="form-control calendar-type">
+        ${CONTENT_TYPES.map((type) => `<option value="${type}" ${type === entry.contentType ? "selected" : ""}>${type}</option>`).join("")}
+      </select>
+      <input class="form-control calendar-time" type="time" value="${entry.time}" />
+    </div>
+  `;
+  list.innerHTML = state.publicationCalendar.entries.length
+    ? state.publicationCalendar.entries.map((entry) => renderRow(entry)).join("")
+    : renderRow();
+  contentArea.querySelector("#addCalendar").addEventListener("click", () => {
+    addDynamicRow(".calendar-list", renderRow());
+  });
+}
+
+// Renderiza el paso de campañas y automatizaciones.
+function renderCampaignsStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Campañas y Automatizaciones</h2>
+      <h3>Campañas activas</h3>
+      <div class="campaign-list"></div>
+      <button type="button" class="btn btn-secondary" id="addCampaign">➕ Agregar campaña</button>
+      <h3>Automatizaciones</h3>
+      <div class="automation-list"></div>
+      <button type="button" class="btn btn-secondary" id="addAutomation">➕ Agregar automatización</button>
+    </div>
+  `;
+  const campaignList = contentArea.querySelector(".campaign-list");
+  const automationList = contentArea.querySelector(".automation-list");
+  const renderCampaignRow = (campaign = { name: "", channel: "", budget: 0, startDate: "", endDate: "", goal: "", status: "Planificada" }) => `
+    <div class="campaign-row">
+      <input class="form-control campaign-name" placeholder="Nombre" value="${campaign.name}" />
+      <input class="form-control campaign-channel" placeholder="Canal" value="${campaign.channel}" />
+      <input class="form-control campaign-budget" type="number" placeholder="Presupuesto" value="${campaign.budget}" />
+      <input class="form-control campaign-start" type="date" value="${campaign.startDate ?? ""}" />
+      <input class="form-control campaign-end" type="date" value="${campaign.endDate ?? ""}" />
+      <input class="form-control campaign-goal" placeholder="Objetivo" value="${campaign.goal}" />
+      <select class="form-control campaign-status">
+        ${["Planificada", "En ejecución", "Pausada", "Finalizada"].map((status) => `<option value="${status}" ${status === campaign.status ? "selected" : ""}>${status}</option>`).join("")}
+      </select>
+    </div>
+  `;
+  const renderAutomationRow = (automation = { name: "", trigger: "", cadence: "", tool: "" }) => `
+    <div class="automation-row">
+      <input class="form-control automation-name" placeholder="Nombre" value="${automation.name}" />
+      <input class="form-control automation-trigger" placeholder="Trigger" value="${automation.trigger}" />
+      <input class="form-control automation-cadence" placeholder="Frecuencia" value="${automation.cadence}" />
+      <input class="form-control automation-tool" placeholder="Herramienta" value="${automation.tool}" />
+    </div>
+  `;
+  campaignList.innerHTML = state.campaigns.active.length
+    ? state.campaigns.active.map((campaign) => renderCampaignRow(campaign)).join("")
+    : renderCampaignRow();
+  automationList.innerHTML = state.campaigns.automations.length
+    ? state.campaigns.automations.map((automation) => renderAutomationRow(automation)).join("")
+    : renderAutomationRow();
+  contentArea.querySelector("#addCampaign").addEventListener("click", () => {
+    addDynamicRow(".campaign-list", renderCampaignRow());
+  });
+  contentArea.querySelector("#addAutomation").addEventListener("click", () => {
+    addDynamicRow(".automation-list", renderAutomationRow());
+  });
+}
+
+// Renderiza el paso de KPIs.
+function renderKpiStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>KPIs</h2>
+      <p>Configura las métricas a seguir.</p>
+      <div class="kpi-list">
+        ${KPI_OPTIONS.map((kpi) => {
+          const existing = state.kpis.find((item) => item.name === kpi) ?? { measurement: "Cantidad", target: 0 };
+          return `
+            <div class="kpi-row">
+              <span class="kpi-name">${kpi}</span>
+              <select class="form-control kpi-measurement">
+                ${["Cantidad", "Porcentaje", "Índice"].map((option) => `<option value="${option}" ${option === existing.measurement ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+              <input class="form-control kpi-target" type="number" value="${existing.target}" />
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+// Renderiza el paso de tracking mensual con gráfico.
+function renderTrackingStep(state) {
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <h2>Tracking Mensual</h2>
+      <div class="tracking-list"></div>
+      <button type="button" class="btn btn-secondary" id="addMonth">➕ Agregar mes</button>
+      <div class="chart-container" style="height: 280px; margin-top: 24px;">
+        <canvas id="trackingChart"></canvas>
+      </div>
+    </div>
+  `;
+  const list = contentArea.querySelector(".tracking-list");
+  const renderMonthRow = (month = { label: "2024-01", metrics: state.kpis.map((kpi) => ({ kpi: kpi.name, target: kpi.target, actual: 0 })) }) => `
+    <div class="tracking-row">
+      <input class="form-control tracking-label" type="month" value="${month.label}" />
+      ${month.metrics
+        .map(
+          (metric) => `
+            <div class="tracking-metric" data-kpi="${metric.kpi}">
+              <strong>${metric.kpi}</strong>
+              <input class="form-control metric-target" type="number" value="${metric.target}" placeholder="Meta" />
+              <input class="form-control metric-actual" type="number" value="${metric.actual}" placeholder="Resultado" />
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+  list.innerHTML = state.monthlyTracking.months.length
+    ? state.monthlyTracking.months.map((month) => renderMonthRow(month)).join("")
+    : renderMonthRow();
+  contentArea.querySelector("#addMonth").addEventListener("click", () => {
+    addDynamicRow(".tracking-list", renderMonthRow());
+  });
+  renderTrackingChart(contentArea.querySelector("#trackingChart"), state.monthlyTracking.months.length ? state.monthlyTracking.months : [
+    { label: "2024-01", metrics: state.kpis.map((kpi) => ({ kpi: kpi.name, target: kpi.target, actual: 0 })) }
+  ]);
+}
+
+// Renderiza el paso final con resumen y acciones.
+function renderReportStep(state) {
+  const user = getCurrentUser();
+  const mailtoLink = `mailto:?subject=Estrategia%20de%20Marketing&body=Consulta%20la%20estrategia%20guardada%20por%20${encodeURIComponent(user?.username ?? "")}`;
+  contentArea.innerHTML = `
+    <div class="step-container">
+      <div class="success-icon">✓</div>
+      <h2>Resumen Ejecutivo</h2>
+      <p>Revisa y comparte tu plan estratégico.</p>
+      <div class="summary-section">
+        <div class="summary-card">
+          <h3>Empresa</h3>
+          <p><strong>${state.companyInfo.name}</strong> • ${state.companyInfo.industry} • ${state.companyInfo.size}</p>
+          <p>${state.companyInfo.currentSituation}</p>
+        </div>
+        <div class="summary-card">
+          <h3>Objetivos</h3>
+          <ul>${state.objectives.map((objective) => `<li>${objective}</li>`).join("")}</ul>
+        </div>
+        <div class="summary-card">
+          <h3>Canales y Presupuesto</h3>
+          <p>Presupuesto mensual: <strong>$${state.budget.total}</strong></p>
+          <ul>
+            ${Object.entries(state.budget.distribution)
+              .map(([channel, percentage]) => {
+                const channelData = MARKETING_CHANNELS.find((item) => item.id === channel);
+                return `<li>${channelData?.name ?? channel}: ${percentage}%</li>`;
+              })
+              .join("")}
+          </ul>
+        </div>
+        <div class="summary-card">
+          <h3>Plan táctico</h3>
+          <ul>${state.tacticalPlan.items.map((item) => `<li>${item.activity} - ${item.responsible}</li>`).join("")}</ul>
+        </div>
+      </div>
+      <div class="cta-group">
+        <button type="button" class="btn btn-primary" id="saveStrategy">💾 Guardar en Supabase</button>
+        <button type="button" class="btn btn-secondary" id="downloadPdf">⬇️ Descargar PDF</button>
+        <a class="btn btn-secondary" href="${mailtoLink}">📧 Compartir por correo</a>
+        <button type="button" class="btn" id="goDashboard">🏠 Ir al Dashboard</button>
+      </div>
+      <p class="confirmation" id="confirmationMessage"></p>
+    </div>
+  `;
+  contentArea.querySelector("#saveStrategy").addEventListener("click", async () => {
+    try {
+      await saveStrategyToSupabase();
+      const message = contentArea.querySelector("#confirmationMessage");
+      message.textContent = "✅ Estrategia guardada correctamente.";
+    } catch (error) {
+      const message = contentArea.querySelector("#confirmationMessage");
+      message.textContent = "❌ No se pudo guardar la estrategia.";
+      console.error(error);
+    }
+  });
+  contentArea.querySelector("#downloadPdf").addEventListener("click", () => {
+    window.print();
+  });
+  contentArea.querySelector("#goDashboard").addEventListener("click", () => {
+    window.location.href = "../dashboard/index.html";
+  });
+}
+
+// Finaliza el asistente guardando todo y mostrando confirmación.
+async function finalizeStrategy() {
+  try {
+    await saveStrategyToSupabase();
+    const message = contentArea.querySelector("#confirmationMessage");
+    if (message) {
+      message.textContent = "✅ Estrategia guardada correctamente.";
+    }
+    statusBanner.textContent = "Estrategia sincronizada con éxito.";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    statusBanner.textContent = "No se pudo guardar la estrategia. Intenta nuevamente.";
+    console.error(error);
   }
+}
 
+// Recupera la estrategia previa desde Supabase o localStorage.
+async function bootstrapState() {
+  const localState = loadStateFromStorage();
+  if (localState) {
+    setState(localState);
+  }
+  try {
+    const remoteState = await loadStrategyFromSupabase();
+    if (remoteState) {
+      setState(remoteState);
+    }
+  } catch (error) {
+    console.error("No se pudo sincronizar con Supabase", error);
+  }
+}
+
+// Punto de entrada principal del módulo.
+async function initializeWizard() {
+  requireAuth();
+  initializeElements();
+  await bootstrapState();
+  renderProgress();
   renderStepContent();
 }
 
-// Alterna la selección de un canal.
-function toggleChannel(channelId) {
-  const index = strategyData.channels.indexOf(channelId);
-
-  if (index > -1) {
-    strategyData.channels.splice(index, 1);
-  } else {
-    strategyData.channels.push(channelId);
-  }
-
-  renderStepContent();
+if (typeof document !== "undefined") {
+  initializeWizard();
 }
-
-// Alterna la selección de un KPI.
-function toggleKpi(kpi) {
-  const index = strategyData.kpis.indexOf(kpi);
-
-  if (index > -1) {
-    strategyData.kpis.splice(index, 1);
-  } else {
-    strategyData.kpis.push(kpi);
-  }
-
-  renderStepContent();
-}
-
-// Agrega un tipo de contenido al calendario.
-function addContentType(type) {
-  if (!strategyData.publicationCalendar.contentTypes.includes(type)) {
-    strategyData.publicationCalendar.contentTypes.push(type);
-  }
-}
-
-// Elimina un tipo de contenido del calendario.
-function removeContentType(type) {
-  strategyData.publicationCalendar.contentTypes = strategyData.publicationCalendar.contentTypes.filter(
-    (item) => item !== type
-  );
-}
-
-// Actualiza la distribución del presupuesto por canal.
-function updateBudgetDistribution(channelId, value) {
-  strategyData.budget.distribution[channelId] = Number.parseInt(value, 10) || 0;
-  renderStepContent();
-}
-
-// Almacena la descripción de la actividad para un mes dado.
-function updateActivity(index, value) {
-  if (!Array.isArray(strategyData.timeline.activities)) {
-    strategyData.timeline.activities = [];
-  }
-
-  strategyData.timeline.activities[index] = value;
-}
-
-// Ajusta el estado de los botones de navegación.
-function updateNavigationButtons() {
-  if (previousButton) {
-    previousButton.disabled = currentStep === 0;
-  }
-
-  if (nextButton) {
-    nextButton.disabled = currentStep === steps.length - 1;
-    nextButton.textContent = currentStep === steps.length - 1 ? "Completado" : "Siguiente →";
-  }
-}
-
-// Construye una opción para un elemento select de forma reutilizable.
-function buildSelectOption(value, label, current) {
-  return `<option value="${value}" ${current === value ? "selected" : ""}>${label}</option>`;
-}
-
-initializeModule();

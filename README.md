@@ -78,7 +78,12 @@ CREATE TABLE public.usuarios (
       /css/
         estrategias.css
       /js/
+        charts.js
+        constants.js
         estrategias.js
+        persistence.js
+        stateManager.js
+        validation.js
 ```
 
 Cada módulo cuenta con sus propias carpetas de estilos y scripts, lo que facilita el mantenimiento y la escalabilidad.
@@ -106,6 +111,19 @@ Cada módulo cuenta con sus propias carpetas de estilos y scripts, lo que facili
 - El Dashboard muestra un saludo personalizado, ofrece un botón para cerrar sesión y tarjetas para los módulos **Costos** y **Estrategias de Ventas**.
 - Cada tarjeta utiliza rutas relativas (`../costos/index.html`, `../estrategias/index.html`) para evitar errores 404 en entornos estáticos.
 - Ambos módulos se encuentran protegidos por `requireAuth()` para asegurar que solo usuarios autenticados puedan navegar.
+- El módulo **Estrategias de Ventas** incorpora un asistente de 15 pasos con validaciones, guardado automático en `localStorage` y sincronización con Supabase.
+
+### Estrategias de Marketing
+
+El asistente guía al usuario por etapas de diagnóstico y planificación:
+
+- **Perfil corporativo, audiencia y buyer persona:** captura datos obligatorios con validaciones contextuales y permite registrar arquetipos detallados.
+- **Competencia y matriz SWOT:** agrega competidores, propuestas de valor y fortalezas/debilidades almacenadas por categoría.
+- **Plan táctico y calendario editorial:** define responsables, dependencias, costos y programación semanal con canal y hora.
+- **Campañas, automatizaciones, KPIs y tracking mensual:** calcula variaciones contra la meta, muestra tendencias y renderiza gráficas con Chart.js.
+- **Reporte ejecutivo:** ofrece acciones para guardar en Supabase, descargar en PDF (via `window.print()`), compartir por correo o volver al Dashboard.
+
+Los datos se guardan en Supabase respetando una tabla por entidad (ver sección siguiente) y también se conservan en `localStorage` para permitir la reanudación sin conexión. Cada función del módulo está documentada con comentarios según el estilo solicitado.
 
 ### Logout
 
@@ -133,6 +151,23 @@ npm test
 
 Estas pruebas simulan el DOM con **jsdom**, validan la lógica de validación de formularios, la interacción con Supabase y la
 generación de mensajes de retroalimentación al usuario.
+
+## Tablas adicionales de Supabase
+
+El asistente de estrategias utiliza tablas específicas para separar cada entidad de negocio. El archivo [`supabase-schema.sql`](./supabase-schema.sql) incluye las sentencias `CREATE TABLE` recomendadas para:
+
+- Estrategias maestras (`marketing_strategies`).
+- Perfil corporativo (`marketing_company_profiles`).
+- Audiencias y buyer personas (`marketing_audiences`, `marketing_buyer_personas`).
+- Objetivos, canales y presupuesto (`marketing_objectives`, `marketing_channels`, `marketing_budgets`).
+- Cronograma y plan táctico (`marketing_timeline_activities`).
+- Calendario editorial (`marketing_calendar_entries`).
+- KPIs y resultados mensuales (`marketing_kpis`, `marketing_kpi_results`).
+- Competidores y matriz SWOT (`marketing_competitors`, `marketing_swot_entries`).
+- Campañas y automatizaciones (`marketing_campaigns`, `marketing_automations`).
+- Bitácora de versiones (`marketing_version_logs`).
+
+Ejecuta el script desde el panel SQL de Supabase o mediante `psql` antes de utilizar el módulo para asegurar la persistencia completa.
 
 ## Próximos pasos sugeridos
 

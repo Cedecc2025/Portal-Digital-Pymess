@@ -9,6 +9,9 @@
   </head>
   <body>
     <div class="container">
+      <div class="card status-card">
+        <p id="statusBanner">Sincroniza tu estrategia periódicamente para no perder avances.</p>
+      </div>
       <div class="card">
         <div class="header">
           <h1>Estrategia de Marketing PYME</h1>
@@ -23,7 +26,7 @@
         <div class="progress-container">
           <div class="progress-steps" id="progressSteps"></div>
           <div class="progress-info">
-            <div class="step-count" id="stepCount">Paso 1 de 11</div>
+            <div class="step-count" id="stepCount">Paso 1 de 15</div>
             <div class="step-name" id="stepName">Inicio</div>
           </div>
         </div>
@@ -45,6 +48,7 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="../../lib/supabaseClient.js"></script>
     <script type="module" src="../../lib/authGuard.js"></script>
     <script type="module" src="./js/estrategias.js"></script>
