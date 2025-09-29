@@ -1,7 +1,7 @@
 // home.js
 // Gestiona la portada principal con el carrusel de KPIs.
 
-const AUTO_PLAY_INTERVAL = 6000;
+const AUTO_PLAY_INTERVAL = 4500;
 let currentSlideIndex = 0;
 let autoPlayHandle = null;
 
