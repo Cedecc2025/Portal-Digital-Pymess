@@ -55,7 +55,8 @@ beforeEach(async () => {
         <input id="rememberMe" type="checkbox" />
         <span id="usernameFeedback"></span>
         <span id="passwordFeedback"></span>
-        <span id="generalFeedback"></span>
+        <button id="loginSubmit"><span class="spinner" hidden></span></button>
+        <p id="loginFeedback"></p>
       </form>
     </body></html>`,
     { url: "http://localhost/modules/auth/login.html" }
@@ -113,8 +114,8 @@ describe("login module", () => {
 
     await loginModule.handleLoginSubmit(new window.Event("submit"));
 
-    const generalFeedback = document.querySelector("#generalFeedback");
-    expect(generalFeedback.textContent).toBe("Usuario o contraseña incorrectos.");
+    const formFeedback = document.querySelector("#loginFeedback");
+    expect(formFeedback.textContent).toBe("Usuario o contraseña incorrectos.");
     expect(saveSessionMock).not.toHaveBeenCalled();
     expect(navigationMock).not.toHaveBeenCalled();
   });

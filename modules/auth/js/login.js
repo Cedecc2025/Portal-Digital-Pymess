@@ -12,9 +12,10 @@ let passwordInput = null;
 let rememberMeInput = null;
 let usernameFeedback = null;
 let passwordFeedback = null;
-let generalFeedback = null;
+let loginFeedback = null;
 let usernameWrapper = null;
 let passwordWrapper = null;
+let loginSubmitButton = null;
 let navigationHandler = (relativeTarget) => {
   // Navega utilizando rutas relativas calculadas desde este módulo.
   gotoFromModule(import.meta.url, relativeTarget);
@@ -27,9 +28,10 @@ if (typeof document !== "undefined") {
   rememberMeInput = document.querySelector("#rememberMe");
   usernameFeedback = document.querySelector("#usernameFeedback");
   passwordFeedback = document.querySelector("#passwordFeedback");
-  generalFeedback = document.querySelector("#generalFeedback");
+  loginFeedback = document.querySelector("#loginFeedback");
   usernameWrapper = document.querySelector("#usernameWrapper");
   passwordWrapper = document.querySelector("#passwordWrapper");
+  loginSubmitButton = document.querySelector("#loginSubmit");
 }
 
 // Inicializa la pantalla limpiando cualquier mensaje previo.
@@ -37,7 +39,7 @@ export function initializeForm(feedbackElements = {}) {
   // Se asegura que todos los contenedores de feedback estén vacíos.
   const usernameElement = feedbackElements.usernameFeedback ?? usernameFeedback;
   const passwordElement = feedbackElements.passwordFeedback ?? passwordFeedback;
-  const generalElement = feedbackElements.generalFeedback ?? generalFeedback;
+  const formElement = feedbackElements.loginFeedback ?? loginFeedback;
 
   if (usernameElement) {
     usernameElement.textContent = "";
@@ -47,8 +49,9 @@ export function initializeForm(feedbackElements = {}) {
     passwordElement.textContent = "";
   }
 
-  if (generalElement) {
-    generalElement.textContent = "";
+  if (formElement) {
+    formElement.textContent = "";
+    formElement.classList.remove("error");
   }
 
   if (usernameWrapper) {
@@ -72,6 +75,9 @@ export function validateUsername(username, feedbackElement = usernameFeedback) {
       usernameWrapper.classList.remove("input-valid");
       usernameWrapper.classList.add("input-invalid");
     }
+    if (usernameInput) {
+      usernameInput.setAttribute("aria-invalid", "true");
+    }
     return false;
   }
 
@@ -81,6 +87,9 @@ export function validateUsername(username, feedbackElement = usernameFeedback) {
   if (usernameWrapper) {
     usernameWrapper.classList.remove("input-invalid");
     usernameWrapper.classList.add("input-valid");
+  }
+  if (usernameInput) {
+    usernameInput.setAttribute("aria-invalid", "false");
   }
   return true;
 }
@@ -95,6 +104,9 @@ export function validatePassword(password, feedbackElement = passwordFeedback) {
       passwordWrapper.classList.remove("input-valid");
       passwordWrapper.classList.add("input-invalid");
     }
+    if (passwordInput) {
+      passwordInput.setAttribute("aria-invalid", "true");
+    }
     return false;
   }
 
@@ -105,7 +117,52 @@ export function validatePassword(password, feedbackElement = passwordFeedback) {
     passwordWrapper.classList.remove("input-invalid");
     passwordWrapper.classList.add("input-valid");
   }
+  if (passwordInput) {
+    passwordInput.setAttribute("aria-invalid", "false");
+  }
   return true;
+}
+
+// Cambia el estado de carga del formulario para evitar envíos duplicados.
+export function setLoadingState(isLoading) {
+  if (loginSubmitButton) {
+    const spinner = loginSubmitButton.querySelector(".spinner");
+    if (isLoading) {
+      loginSubmitButton.classList.add("is-loading");
+      loginSubmitButton.setAttribute("disabled", "true");
+      if (spinner) {
+        spinner.hidden = false;
+      }
+    } else {
+      loginSubmitButton.classList.remove("is-loading");
+      loginSubmitButton.removeAttribute("disabled");
+      if (spinner) {
+        spinner.hidden = true;
+      }
+    }
+  }
+
+  if (usernameInput) {
+    usernameInput.toggleAttribute("disabled", isLoading);
+  }
+
+  if (passwordInput) {
+    passwordInput.toggleAttribute("disabled", isLoading);
+  }
+
+  if (rememberMeInput) {
+    rememberMeInput.toggleAttribute("disabled", isLoading);
+  }
+}
+
+// Muestra un mensaje general en la parte inferior del formulario.
+function showLoginFeedback(message, type = "success") {
+  if (!loginFeedback) {
+    return;
+  }
+
+  loginFeedback.textContent = message;
+  loginFeedback.classList.toggle("error", type === "error");
 }
 
 // Busca al usuario en Supabase y retorna sus datos.
@@ -131,9 +188,7 @@ export async function fetchUserByUsername(username, client = supabaseClient) {
 // Procesa el envío del formulario de login.
 export async function handleLoginSubmit(event) {
   event.preventDefault();
-  if (generalFeedback) {
-    generalFeedback.textContent = "";
-  }
+  showLoginFeedback("", "success");
 
   const username = usernameInput ? usernameInput.value.trim() : "";
   const password = passwordInput ? passwordInput.value : "";
@@ -142,9 +197,7 @@ export async function handleLoginSubmit(event) {
   const isPasswordValid = validatePassword(password);
 
   if (isUsernameValid === false || isPasswordValid === false) {
-    if (generalFeedback) {
-      generalFeedback.textContent = "Verifica la información ingresada.";
-    }
+    showLoginFeedback("Verifica la información ingresada.", "error");
     if (!isUsernameValid && usernameWrapper) {
       usernameWrapper.classList.add("input-invalid");
     }
@@ -155,12 +208,12 @@ export async function handleLoginSubmit(event) {
   }
 
   try {
+    setLoadingState(true);
+    showLoginFeedback("Validando tus credenciales...", "success");
     const user = await fetchUserByUsername(username);
 
     if (!user) {
-      if (generalFeedback) {
-        generalFeedback.textContent = "Usuario o contraseña incorrectos.";
-      }
+      showLoginFeedback("Usuario o contraseña incorrectos.", "error");
       if (usernameWrapper) {
         usernameWrapper.classList.remove("input-valid");
         usernameWrapper.classList.add("input-invalid");
@@ -169,29 +222,28 @@ export async function handleLoginSubmit(event) {
         passwordWrapper.classList.remove("input-valid");
         passwordWrapper.classList.add("input-invalid");
       }
+      setLoadingState(false);
       return;
     }
 
     const passwordMatches = await bcrypt.compare(password, user.password);
 
     if (passwordMatches === false) {
-      if (generalFeedback) {
-        generalFeedback.textContent = "Usuario o contraseña incorrectos.";
-      }
+      showLoginFeedback("Usuario o contraseña incorrectos.", "error");
       if (passwordWrapper) {
         passwordWrapper.classList.remove("input-valid");
         passwordWrapper.classList.add("input-invalid");
       }
+      setLoadingState(false);
       return;
     }
 
     const rememberValue = rememberMeInput ? rememberMeInput.checked : false;
     saveSession({ username: user.username, id: user.id }, rememberValue);
+    showLoginFeedback("Credenciales validadas, preparando tu panel...", "success");
     redirectToDashboard();
   } catch (error) {
-    if (generalFeedback) {
-      generalFeedback.textContent = error.message;
-    }
+    showLoginFeedback(error.message, "error");
     if (usernameWrapper) {
       usernameWrapper.classList.remove("input-valid");
       usernameWrapper.classList.add("input-invalid");
@@ -200,6 +252,8 @@ export async function handleLoginSubmit(event) {
       passwordWrapper.classList.remove("input-valid");
       passwordWrapper.classList.add("input-invalid");
     }
+  } finally {
+    setLoadingState(false);
   }
 }
 
@@ -229,6 +283,7 @@ export default {
   initializeForm,
   validateUsername,
   validatePassword,
+  setLoadingState,
   fetchUserByUsername,
   handleLoginSubmit,
   setNavigationHandler,

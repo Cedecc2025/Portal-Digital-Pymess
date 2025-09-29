@@ -137,3 +137,9 @@ create table if not exists public.marketing_version_logs (
   updated_at timestamptz default timezone('utc', now()),
   author text
 );
+
+create table if not exists public.leads_demo (
+  id bigint generated always as identity primary key,
+  email text not null unique,
+  created_at timestamptz not null default timezone('utc', now())
+);

@@ -1,16 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JSDOM } from "jsdom";
 
-const hashMock = vi.fn(async (password) => `hashed::${password}`);
+const hashSyncMock = vi.fn((password) => `hashed::${password}`);
 
 vi.mock("https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm", () => ({
   default: {
-    hash: hashMock,
+    hashSync: hashSyncMock,
     compare: vi.fn()
   }
 }));
 
 const fromMock = vi.fn();
+let insertMock;
 
 vi.mock("../lib/supabaseClient.js", () => ({
   supabaseClient: {
@@ -21,12 +22,16 @@ vi.mock("../lib/supabaseClient.js", () => ({
 const registerModulePath = "../modules/auth/js/register.js";
 
 let registerModule;
-let insertMock;
 let navigationMock;
 
-function mockInsertResponse(response) {
-  insertMock = vi.fn().mockResolvedValue(response);
+function mockSupabaseResponses({ availabilityData = [], insertResponse = { error: null } }) {
+  insertMock = vi.fn().mockResolvedValue(insertResponse);
   fromMock.mockReturnValue({
+    select: () => ({
+      eq: () => ({
+        limit: () => Promise.resolve({ data: availabilityData, error: null })
+      })
+    }),
     insert: (...args) => insertMock(...args)
   });
 }
@@ -34,7 +39,7 @@ function mockInsertResponse(response) {
 beforeEach(async () => {
   vi.resetModules();
   fromMock.mockReset();
-  hashMock.mockClear();
+  hashSyncMock.mockClear();
   vi.useFakeTimers();
 
   const dom = new JSDOM(
@@ -44,7 +49,10 @@ beforeEach(async () => {
         <input id="password" />
         <span id="usernameFeedback"></span>
         <span id="passwordFeedback"></span>
-        <span id="generalFeedback"></span>
+        <p id="registerFeedback"></p>
+        <p id="usernameAvailability"></p>
+        <div class="strength-meter"><span class="strength-bar" data-level="0"></span><span id="strengthCopy"></span></div>
+        <button id="registerSubmit"><span class="spinner" hidden></span></button>
       </form>
     </body></html>`,
     { url: "http://localhost/modules/auth/register.html" }
@@ -74,11 +82,11 @@ describe("register module", () => {
   });
 
   it("inserta el usuario en Supabase con la contraseña hasheada", async () => {
-    mockInsertResponse({ error: null });
+    mockSupabaseResponses({ availabilityData: [], insertResponse: { error: null } });
 
     const usernameInput = document.querySelector("#username");
     const passwordInput = document.querySelector("#password");
-    const generalFeedback = document.querySelector("#generalFeedback");
+    const registerFeedback = document.querySelector("#registerFeedback");
 
     usernameInput.value = "usuario_demo";
     passwordInput.value = "ClaveSegura1";
@@ -86,21 +94,21 @@ describe("register module", () => {
     await registerModule.handleRegisterSubmit(new window.Event("submit"));
     await vi.runAllTimersAsync();
 
-    expect(hashMock).toHaveBeenCalledWith("ClaveSegura1", 10);
+    expect(hashSyncMock).toHaveBeenCalledWith("ClaveSegura1", 10);
     expect(insertMock).toHaveBeenCalledTimes(1);
     const payload = insertMock.mock.calls[0][0];
     expect(payload.username).toBe("usuario_demo");
     expect(payload.password).toBe("hashed::ClaveSegura1");
-    expect(generalFeedback.textContent).toBe("Registro exitoso. Ahora puedes iniciar sesión.");
+    expect(registerFeedback.textContent).toBe("Registro exitoso. Ahora puedes iniciar sesión.");
     expect(navigationMock).toHaveBeenCalledWith("../login.html");
   });
 
   it("informa cuando el usuario ya existe", async () => {
-    mockInsertResponse({ error: { code: "23505" } });
+    mockSupabaseResponses({ availabilityData: [{ id: 1 }], insertResponse: { error: { code: "23505" } } });
 
     const usernameInput = document.querySelector("#username");
     const passwordInput = document.querySelector("#password");
-    const generalFeedback = document.querySelector("#generalFeedback");
+    const registerFeedback = document.querySelector("#registerFeedback");
 
     usernameInput.value = "usuario_demo";
     passwordInput.value = "ClaveSegura1";
@@ -108,6 +116,6 @@ describe("register module", () => {
     await registerModule.handleRegisterSubmit(new window.Event("submit"));
     expect(navigationMock).not.toHaveBeenCalled();
 
-    expect(generalFeedback.textContent).toBe("El usuario ya se encuentra registrado. Elige otro nombre.");
+    expect(registerFeedback.textContent).toBe("El usuario ya se encuentra registrado. Elige otro nombre.");
   });
 });

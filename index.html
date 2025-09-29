@@ -8,67 +8,155 @@
     <link rel="stylesheet" href="./public/css/home.css" />
   </head>
   <body>
-    <main class="hero-shell">
-      <section class="hero-card glass-card">
+    <main class="home-shell">
+      <section class="intro-panel glass-card">
         <span class="badge-pill">🚀 Plataforma integral</span>
         <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
         <p>
-          Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar y hacer
-          crecer tu negocio de manera ágil y profesional.
+          Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar y hacer crecer tu
+          negocio de manera ágil y profesional.
         </p>
         <p>
           Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave de tu organización.
         </p>
-        <div class="modules-list">
-          <div class="module-row">
-            <span class="module-icon">🤝</span>
+        <div class="modules-list" aria-label="Módulos disponibles">
+          <article class="module-row" tabindex="0">
+            <span class="module-icon" aria-hidden="true">🤝</span>
             <div class="module-copy">
               <h3>CRM</h3>
               <p>Administra clientes, contactos y oportunidades de venta con visibilidad completa.</p>
             </div>
-          </div>
-          <div class="module-row">
-            <span class="module-icon">🛍️</span>
+          </article>
+          <article class="module-row" tabindex="0">
+            <span class="module-icon" aria-hidden="true">🛍️</span>
             <div class="module-copy">
               <h3>Catálogo</h3>
               <p>Organiza tu oferta de productos y servicios con información clara y accesible.</p>
             </div>
-          </div>
-          <div class="module-row">
-            <span class="module-icon">🤖</span>
+          </article>
+          <article class="module-row" tabindex="0">
+            <span class="module-icon" aria-hidden="true">🤖</span>
             <div class="module-copy">
               <h3>Chatbot Web</h3>
               <p>Ofrece atención automática y disponible 24/7 para tus clientes digitales.</p>
             </div>
-          </div>
-          <div class="module-row">
-            <span class="module-icon">📈</span>
+          </article>
+          <article class="module-row" tabindex="0">
+            <span class="module-icon" aria-hidden="true">📈</span>
             <div class="module-copy">
               <h3>Estrategias de Marketing</h3>
               <p>Planifica campañas efectivas y mide el impacto con datos accionables.</p>
             </div>
-          </div>
-          <div class="module-row">
-            <span class="module-icon">🧰</span>
+          </article>
+          <article class="module-row" tabindex="0">
+            <span class="module-icon" aria-hidden="true">🧰</span>
             <div class="module-copy">
               <h3>Herramientas Extra</h3>
               <p>Accede a utilidades complementarias que potencian tu operación diaria.</p>
             </div>
-          </div>
+          </article>
         </div>
       </section>
-      <section class="hero-cta glass-card">
-        <h2>Comienza tu sesión segura</h2>
-        <p>
-          Inicia sesión para acceder a tu panel centralizado, monitorear métricas, asignar tareas y coordinar a tu
-          equipo desde cualquier lugar.
-        </p>
-        <a class="primary-button" href="./modules/auth/login.html">Iniciar sesión</a>
-        <p>
-          ¿Aún no tienes cuenta? <a class="text-link" href="./modules/auth/register.html">Regístrate en minutos</a>
-          y mantén todo sincronizado con Supabase.
-        </p>
+
+      <section class="insights-panel glass-card">
+        <header class="insights-header">
+          <h2>Comienza tu sesión segura</h2>
+          <p>
+            Inicia sesión para acceder a tu panel centralizado, monitorear métricas y coordinar a tu equipo desde cualquier lugar.
+          </p>
+        </header>
+
+        <div class="cta-actions">
+          <a class="primary-button" href="./modules/auth/login.html">Iniciar sesión</a>
+          <a class="secondary-button" href="./modules/auth/register.html">Explorar demo</a>
+        </div>
+
+        <form id="demoForm" class="demo-form" novalidate>
+          <label class="demo-label" for="demoEmail">Recibir demo por correo</label>
+          <div class="demo-input-shell" id="demoInputWrapper">
+            <span class="input-icon" aria-hidden="true">📧</span>
+            <input
+              type="email"
+              id="demoEmail"
+              name="demoEmail"
+              placeholder="correo@empresa.com"
+              autocomplete="email"
+              aria-describedby="demoFeedback"
+              aria-invalid="false"
+              required
+            />
+            <button type="submit" class="primary-button demo-submit" id="demoSubmit">
+              Recibir demo
+              <span class="spinner" aria-hidden="true" hidden></span>
+            </button>
+          </div>
+          <p id="demoFeedback" class="form-feedback" role="alert" aria-live="polite"></p>
+        </form>
+
+        <div class="trust-indicators" aria-label="Indicadores de seguridad">
+          <button type="button" class="trust-chip" data-tooltip="Datos sincronizados con controles de acceso por filas (RLS).">
+            <span aria-hidden="true">🛡️</span>
+            Supabase secure
+          </button>
+          <button type="button" class="trust-chip" data-tooltip="Toda la información viaja con cifrado TLS.">
+            <span aria-hidden="true">🔐</span>
+            Cifrado
+          </button>
+          <button type="button" class="trust-chip" data-tooltip="Políticas activas de Row Level Security en módulos críticos.">
+            <span aria-hidden="true">🧩</span>
+            RLS enabled
+          </button>
+        </div>
+
+        <section class="kpi-carousel" aria-label="Métricas clave" id="kpiCarousel">
+          <div class="kpi-track" id="kpiTrack">
+            <article class="kpi-card" data-index="0">
+              <h4>Usuarios activos (24h)</h4>
+              <p class="kpi-value">1,248</p>
+              <small class="kpi-trend up">+8% vs ayer</small>
+            </article>
+            <article class="kpi-card" data-index="1">
+              <h4>Usuarios activos (30d)</h4>
+              <p class="kpi-value">4,972</p>
+              <small class="kpi-trend up">+4% mensual</small>
+            </article>
+            <article class="kpi-card" data-index="2">
+              <h4>Éxitos de login</h4>
+              <p class="kpi-value">96%</p>
+              <small class="kpi-trend up">+2 pts vs semana pasada</small>
+            </article>
+            <article class="kpi-card" data-index="3">
+              <h4>Planes creados</h4>
+              <p class="kpi-value">312</p>
+              <small class="kpi-trend up">+18 en los últimos 7 días</small>
+            </article>
+            <article class="kpi-card" data-index="4">
+              <h4>Tiempo promedio en app</h4>
+              <p class="kpi-value">18m</p>
+              <small class="kpi-trend steady">= vs trimestre anterior</small>
+            </article>
+          </div>
+          <div class="kpi-controls" id="kpiControls" role="tablist" aria-label="Controles de métricas">
+            <button type="button" class="dot is-active" data-target="0" role="tab" aria-selected="true" aria-controls="kpi-slide-0">
+              <span class="sr-only">Usuarios activos 24h</span>
+            </button>
+            <button type="button" class="dot" data-target="1" role="tab" aria-selected="false" aria-controls="kpi-slide-1">
+              <span class="sr-only">Usuarios activos 30d</span>
+            </button>
+            <button type="button" class="dot" data-target="2" role="tab" aria-selected="false" aria-controls="kpi-slide-2">
+              <span class="sr-only">Éxitos de login</span>
+            </button>
+            <button type="button" class="dot" data-target="3" role="tab" aria-selected="false" aria-controls="kpi-slide-3">
+              <span class="sr-only">Planes creados</span>
+            </button>
+            <button type="button" class="dot" data-target="4" role="tab" aria-selected="false" aria-controls="kpi-slide-4">
+              <span class="sr-only">Tiempo promedio en app</span>
+            </button>
+          </div>
+        </section>
       </section>
     </main>
+    <script type="module" src="./lib/supabaseClient.js"></script>
+    <script type="module" src="./public/js/home.js"></script>
   </body>
 </html>

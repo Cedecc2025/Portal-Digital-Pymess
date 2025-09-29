@@ -10,11 +10,26 @@
   <body>
     <main class="dashboard-shell glass-card">
       <header class="dashboard-header">
-        <div>
+        <div class="header-copy">
           <p class="welcome-label">Bienvenido de nuevo</p>
           <h1 id="usernameDisplay">Usuario</h1>
         </div>
-        <button id="logoutButton" class="logout-button">Cerrar sesión</button>
+        <div class="header-actions">
+          <nav class="quick-links" aria-label="Acciones rápidas">
+            <a class="quick-link" href="#perfil" id="linkProfile">Ver perfil</a>
+            <a class="quick-link" href="#notificaciones" id="linkNotifications">Notificaciones</a>
+            <a class="quick-link" href="#ayuda" id="linkHelp">Centro de ayuda</a>
+          </nav>
+          <button id="logoutButton" class="logout-button">Cerrar sesión</button>
+          <button class="more-actions" id="moreActions" aria-haspopup="true" aria-expanded="false" aria-label="Más acciones">
+            ⋯
+          </button>
+          <div class="more-menu" id="moreMenu" role="menu">
+            <a role="menuitem" href="#perfil">Ver perfil</a>
+            <a role="menuitem" href="#notificaciones">Notificaciones</a>
+            <a role="menuitem" href="#ayuda">Centro de ayuda</a>
+          </div>
+        </div>
       </header>
       <section class="dashboard-summary">
         <p>
@@ -22,26 +37,52 @@
           claras, acciones rápidas y una experiencia ágil en cualquier dispositivo.
         </p>
       </section>
+      <section class="dashboard-widgets" aria-label="Indicadores rápidos">
+        <a class="widget-card" href="#estado-cuenta">
+          <span class="widget-label">Estado de cuenta</span>
+          <strong class="widget-value">$12,450</strong>
+          <small class="widget-meta">Actualizado hace 4h</small>
+        </a>
+        <a class="widget-card" href="#tareas">
+          <span class="widget-label">Tareas pendientes</span>
+          <strong class="widget-value">7</strong>
+          <small class="widget-meta">3 vencen hoy</small>
+        </a>
+        <a class="widget-card" href="#actualizaciones">
+          <span class="widget-label">Próximas actualizaciones</span>
+          <strong class="widget-value">4</strong>
+          <small class="widget-meta">Módulos en despliegue</small>
+        </a>
+        <a class="widget-card" href="#ultimo-acceso">
+          <span class="widget-label">Último acceso</span>
+          <strong class="widget-value">Ayer 22:14</strong>
+          <small class="widget-meta">IP segura detectada</small>
+        </a>
+      </section>
       <section class="modules-grid">
         <a class="module-card" href="../costos/index.html" data-module="costos">
+          <span class="module-badge badge--active">Actualizado</span>
           <div class="module-icon">💼</div>
           <h2>Costos</h2>
           <p>Administra estructuras de costos, flujo de caja y métricas financieras clave.</p>
           <span class="module-button">Ir a Costos</span>
         </a>
         <a class="module-card" href="../estrategias/index.html" data-module="estrategias">
+          <span class="module-badge badge--new">Nuevo</span>
           <div class="module-icon">🚀</div>
           <h2>Estrategias de Ventas</h2>
           <p>Planifica campañas y automatizaciones para acelerar tus resultados comerciales.</p>
           <span class="module-button">Ir a Estrategias</span>
         </a>
         <div class="module-card disabled-card">
+          <span class="module-badge badge--beta">En beta</span>
           <div class="module-icon">🤖</div>
           <h2>Chatbot Web</h2>
           <p>Muy pronto podrás configurar asistentes inteligentes para tu sitio web.</p>
           <span class="module-button ghost">Próximamente</span>
         </div>
         <div class="module-card disabled-card">
+          <span class="module-badge badge--soon">Próximamente</span>
           <div class="module-icon">📇</div>
           <h2>CRM</h2>
           <p>Gestiona embudos de venta y relacionamiento. Disponible en la siguiente iteración.</p>

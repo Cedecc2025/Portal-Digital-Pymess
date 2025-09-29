@@ -10,12 +10,11 @@
   <body>
     <main class="register-shell">
       <section class="register-card glass-card">
-        <header>
+        <header class="register-header">
           <span class="badge-pill">🆕 Registro de usuario</span>
           <h1>Crea una cuenta para empezar</h1>
           <p>
-            Completa tus datos para sincronizar tus módulos con Supabase. Gestiona tu negocio con seguridad y
-            flexibilidad desde cualquier dispositivo.
+            Completa tus datos para sincronizar tus módulos con Supabase y colaborar con tu equipo desde cualquier dispositivo.
           </p>
         </header>
         <form id="registerForm" novalidate>
@@ -29,10 +28,13 @@
                 name="username"
                 placeholder="mi_negocio"
                 autocomplete="username"
+                aria-describedby="usernameFeedback usernameAvailability"
+                aria-invalid="false"
                 required
               />
             </div>
-            <span class="feedback" id="usernameFeedback"></span>
+            <span class="feedback" id="usernameFeedback" role="alert" aria-live="polite"></span>
+            <p class="availability" id="usernameAvailability" role="status" aria-live="polite"></p>
           </div>
           <div class="input-control">
             <label for="password">Contraseña</label>
@@ -44,16 +46,38 @@
                 name="password"
                 placeholder="Mínimo 8 caracteres"
                 autocomplete="new-password"
+                aria-describedby="passwordFeedback passwordStrength"
+                aria-invalid="false"
                 required
               />
             </div>
-            <span class="feedback" id="passwordFeedback"></span>
+            <span class="feedback" id="passwordFeedback" role="alert" aria-live="polite"></span>
+            <div class="strength-meter" aria-live="polite" id="passwordStrength" role="status">
+              <span class="strength-bar" data-level="0"></span>
+              <span class="strength-copy" id="strengthCopy">Fortaleza: desconocida</span>
+            </div>
           </div>
-          <button type="submit" class="primary-button">Registrar</button>
-          <span class="feedback" id="generalFeedback"></span>
+          <button type="submit" id="registerSubmit" class="primary-button">
+            Registrar
+            <span class="spinner" aria-hidden="true" hidden></span>
+          </button>
+          <p id="registerFeedback" class="form-feedback" role="alert" aria-live="polite"></p>
         </form>
-        <footer>
+        <section class="benefits" aria-label="Próximos pasos">
+          <h2>¿Qué sigue después del registro?</h2>
+          <ul>
+            <li>Confirmaremos tu cuenta por correo.</li>
+            <li>Accede al Dashboard de Costos para empezar.</li>
+            <li>Podrás editar tu perfil y configurar tu empresa.</li>
+          </ul>
+        </section>
+        <footer class="register-footer">
           <p>¿Ya tienes cuenta? <a class="text-link" href="./login.html">Inicia sesión</a></p>
+          <p class="legal-links">
+            <a href="https://example.com/privacy" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>
+            <span aria-hidden="true">•</span>
+            <a href="https://example.com/terms" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>
+          </p>
         </footer>
       </section>
     </main>

@@ -90,26 +90,33 @@ Cada módulo cuenta con sus propias carpetas de estilos y scripts, lo que facili
 
 ## Guía de flujos principales
 
+### Portada (Index)
+
+- Presenta la bienvenida con descripción de módulos y un carrusel de KPIs animado que rota cada 6 segundos.
+- Incluye un micro-formulario para solicitar la demo; los correos se validan y se almacenan en la tabla `leads_demo` de Supabase.
+- Muestra indicadores de confianza (Supabase secure, Cifrado, RLS) con tooltips accesibles.
+- Los estilos siguen un look glassmorphism con tipografía Poppins e interacciones suaves.
+
 ### Registro
 
 1. Accede a `/modules/auth/register.html`.
-2. Completa usuario y contraseña (mínimo 8 caracteres).
-3. Al enviar, el password se hashea en el navegador con **bcryptjs** antes de enviarse a Supabase.
-4. Se inserta el nuevo registro en `public.usuarios`.
-5. Se muestra confirmación y un enlace para volver al login.
+2. Completa usuario y contraseña (mínimo 8 caracteres) mientras observas el medidor de fortaleza y la disponibilidad del usuario en vivo.
+3. Al enviar, la contraseña se hashea con `bcrypt.hashSync` antes de enviarse a Supabase.
+4. Se valida que el usuario no exista (`checkUsernameAvailability`) y se inserta el nuevo registro en `public.usuarios`.
+5. Se muestra confirmación, beneficios posteriores y enlaces legales.
 
 ### Inicio de sesión
 
 1. Accede a `/modules/auth/login.html`.
 2. Ingresa usuario y contraseña.
-3. Se valida la existencia del usuario en Supabase y se compara la contraseña con el hash almacenado.
+3. El formulario deshabilita controles, muestra un spinner y valida las credenciales contra Supabase comparando el hash almacenado con `bcrypt.compare`.
 4. Activa "Recordarme" para guardar la sesión en `localStorage`. De lo contrario se usa `sessionStorage`.
-5. Tras autenticación exitosa se redirige al Dashboard.
+5. Tras autenticación exitosa se muestra un mensaje accesible y se redirige al Dashboard.
 
 ### Dashboard y módulos
 
-- El Dashboard muestra un saludo personalizado, ofrece un botón para cerrar sesión y tarjetas para los módulos **Costos** y **Estrategias de Ventas**.
-- Cada tarjeta utiliza rutas relativas (`../costos/index.html`, `../estrategias/index.html`) para evitar errores 404 en entornos estáticos.
+- El Dashboard muestra un saludo personalizado, widgets accionables (estado de cuenta, tareas, próximas actualizaciones, último acceso) y accesos rápidos a perfil, notificaciones y ayuda.
+- Cada tarjeta utiliza rutas relativas (`../costos/index.html`, `../estrategias/index.html`) para evitar errores 404 en entornos estáticos y luce badges dinámicos (Nuevo, En beta, Actualizado).
 - Ambos módulos se encuentran protegidos por `requireAuth()` para asegurar que solo usuarios autenticados puedan navegar.
 - El módulo **Estrategias de Ventas** incorpora un asistente de 15 pasos con validaciones, guardado automático en `localStorage` y sincronización con Supabase.
 
@@ -166,6 +173,7 @@ El asistente de estrategias utiliza tablas específicas para separar cada entida
 - Competidores y matriz SWOT (`marketing_competitors`, `marketing_swot_entries`).
 - Campañas y automatizaciones (`marketing_campaigns`, `marketing_automations`).
 - Bitácora de versiones (`marketing_version_logs`).
+- Leads captados desde la portada (`leads_demo`).
 
 Ejecuta el script desde el panel SQL de Supabase o mediante `psql` antes de utilizar el módulo para asegurar la persistencia completa.
 

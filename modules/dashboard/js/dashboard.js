@@ -6,6 +6,8 @@ import { requireAuth, getCurrentUsername, logout } from "../../../lib/authGuard.
 const usernameDisplay = document.querySelector("#usernameDisplay");
 const logoutButton = document.querySelector("#logoutButton");
 const moduleCards = document.querySelectorAll(".module-card");
+const moreActionsButton = document.querySelector("#moreActions");
+const moreMenu = document.querySelector("#moreMenu");
 
 // Carga la información del usuario autenticado en el encabezado.
 function loadUsername() {
@@ -42,6 +44,21 @@ function registerEventListeners() {
       }
     }
   });
+
+  if (moreActionsButton && moreMenu) {
+    moreActionsButton.addEventListener("click", () => {
+      const isExpanded = moreActionsButton.getAttribute("aria-expanded") === "true";
+      moreActionsButton.setAttribute("aria-expanded", String(!isExpanded));
+      moreMenu.classList.toggle("show", !isExpanded);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!moreMenu.contains(event.target) && !moreActionsButton.contains(event.target)) {
+        moreActionsButton.setAttribute("aria-expanded", "false");
+        moreMenu.classList.remove("show");
+      }
+    });
+  }
 }
 
 requireAuth();

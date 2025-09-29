@@ -10,9 +10,13 @@ let usernameInput = null;
 let passwordInput = null;
 let usernameFeedback = null;
 let passwordFeedback = null;
-let generalFeedback = null;
+let registerFeedback = null;
 let usernameWrapper = null;
 let passwordWrapper = null;
+let usernameAvailability = null;
+let strengthBar = null;
+let strengthCopy = null;
+let registerSubmitButton = null;
 let navigationHandler = (relativeTarget) => {
   // Utiliza la ruta del módulo actual para calcular el destino final.
   gotoFromModule(import.meta.url, relativeTarget);
@@ -24,16 +28,20 @@ if (typeof document !== "undefined") {
   passwordInput = document.querySelector("#password");
   usernameFeedback = document.querySelector("#usernameFeedback");
   passwordFeedback = document.querySelector("#passwordFeedback");
-  generalFeedback = document.querySelector("#generalFeedback");
+  registerFeedback = document.querySelector("#registerFeedback");
   usernameWrapper = document.querySelector("#usernameWrapper");
   passwordWrapper = document.querySelector("#passwordWrapper");
+  usernameAvailability = document.querySelector("#usernameAvailability");
+  strengthBar = document.querySelector(".strength-bar");
+  strengthCopy = document.querySelector("#strengthCopy");
+  registerSubmitButton = document.querySelector("#registerSubmit");
 }
 
 // Inicializa la pantalla asegurando que no existan mensajes previos.
 export function initializeForm(feedbackElements = {}) {
   const usernameElement = feedbackElements.usernameFeedback ?? usernameFeedback;
   const passwordElement = feedbackElements.passwordFeedback ?? passwordFeedback;
-  const generalElement = feedbackElements.generalFeedback ?? generalFeedback;
+  const registerElement = feedbackElements.registerFeedback ?? registerFeedback;
 
   if (usernameElement) {
     usernameElement.textContent = "";
@@ -43,9 +51,9 @@ export function initializeForm(feedbackElements = {}) {
     passwordElement.textContent = "";
   }
 
-  if (generalElement) {
-    generalElement.textContent = "";
-    generalElement.style.color = "#fca5a5";
+  if (registerElement) {
+    registerElement.textContent = "";
+    registerElement.classList.remove("error");
   }
 
   if (usernameWrapper) {
@@ -55,6 +63,13 @@ export function initializeForm(feedbackElements = {}) {
   if (passwordWrapper) {
     passwordWrapper.classList.remove("input-valid", "input-invalid");
   }
+
+  if (usernameAvailability) {
+    usernameAvailability.textContent = "";
+    usernameAvailability.classList.remove("available", "unavailable");
+  }
+
+  updatePasswordStrengthDisplay(0);
 }
 
 // Verifica que el username cumpla con la política establecida.
@@ -69,6 +84,9 @@ export function validateUsername(username, feedbackElement = usernameFeedback) {
       usernameWrapper.classList.remove("input-valid");
       usernameWrapper.classList.add("input-invalid");
     }
+    if (usernameInput) {
+      usernameInput.setAttribute("aria-invalid", "true");
+    }
     return false;
   }
 
@@ -78,6 +96,9 @@ export function validateUsername(username, feedbackElement = usernameFeedback) {
   if (usernameWrapper) {
     usernameWrapper.classList.remove("input-invalid");
     usernameWrapper.classList.add("input-valid");
+  }
+  if (usernameInput) {
+    usernameInput.setAttribute("aria-invalid", "false");
   }
   return true;
 }
@@ -92,6 +113,9 @@ export function validatePassword(password, feedbackElement = passwordFeedback) {
       passwordWrapper.classList.remove("input-valid");
       passwordWrapper.classList.add("input-invalid");
     }
+    if (passwordInput) {
+      passwordInput.setAttribute("aria-invalid", "true");
+    }
     return false;
   }
 
@@ -102,13 +126,16 @@ export function validatePassword(password, feedbackElement = passwordFeedback) {
     passwordWrapper.classList.remove("input-invalid");
     passwordWrapper.classList.add("input-valid");
   }
+  if (passwordInput) {
+    passwordInput.setAttribute("aria-invalid", "false");
+  }
   return true;
 }
 
 // Inserta al nuevo usuario en Supabase con contraseña hasheada.
 export async function registerUser(username, password, client = supabaseClient) {
   try {
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = bcrypt.hashSync(password, 10);
 
     const { error } = await client.from("usuarios").insert({
       username: username,
@@ -130,9 +157,9 @@ export async function registerUser(username, password, client = supabaseClient) 
 }
 
 // Resetea el formulario mostrando un mensaje de éxito.
-export function showSuccessMessage(form = registerForm, feedbackElement = generalFeedback) {
+export function showSuccessMessage(form = registerForm, feedbackElement = registerFeedback) {
   if (feedbackElement) {
-    feedbackElement.style.color = "#bbf7d0";
+    feedbackElement.classList.remove("error");
     feedbackElement.textContent = "Registro exitoso. Ahora puedes iniciar sesión.";
   }
 
@@ -149,6 +176,138 @@ export function showSuccessMessage(form = registerForm, feedbackElement = genera
   if (form) {
     form.reset();
   }
+}
+
+// Calcula una puntuación simple para la contraseña en función de su complejidad.
+export function passwordScore(password) {
+  let score = 0;
+
+  if (password.length >= 8) {
+    score += 1;
+  }
+
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) {
+    score += 1;
+  }
+
+  if (/\d/.test(password) || /[^A-Za-z0-9]/.test(password)) {
+    score += 1;
+  }
+
+  return Math.min(score, 3);
+}
+
+// Actualiza la interfaz de la barra de fortaleza de contraseña.
+export function updatePasswordStrengthDisplay(score) {
+  if (!strengthBar || !strengthCopy) {
+    return;
+  }
+
+  strengthBar.dataset.level = String(score);
+
+  switch (score) {
+    case 0:
+      strengthCopy.textContent = "Fortaleza: muy débil";
+      break;
+    case 1:
+      strengthCopy.textContent = "Fortaleza: débil";
+      break;
+    case 2:
+      strengthCopy.textContent = "Fortaleza: media";
+      break;
+    case 3:
+      strengthCopy.textContent = "Fortaleza: fuerte";
+      break;
+    default:
+      strengthCopy.textContent = "Fortaleza: desconocida";
+      break;
+  }
+}
+
+// Cambia el estado de carga del formulario para evitar envíos duplicados.
+export function setRegisterLoading(isLoading) {
+  if (registerSubmitButton) {
+    const spinner = registerSubmitButton.querySelector(".spinner");
+    if (isLoading) {
+      registerSubmitButton.classList.add("is-loading");
+      registerSubmitButton.setAttribute("disabled", "true");
+      if (spinner) {
+        spinner.hidden = false;
+      }
+    } else {
+      registerSubmitButton.classList.remove("is-loading");
+      registerSubmitButton.removeAttribute("disabled");
+      if (spinner) {
+        spinner.hidden = true;
+      }
+    }
+  }
+
+  if (usernameInput) {
+    usernameInput.toggleAttribute("disabled", isLoading);
+  }
+
+  if (passwordInput) {
+    passwordInput.toggleAttribute("disabled", isLoading);
+  }
+}
+
+// Consulta en Supabase si el nombre de usuario ya está registrado.
+export async function checkUsernameAvailability(username, client = supabaseClient) {
+  if (validateUsername(username) === false) {
+    return false;
+  }
+
+  try {
+    const { data, error } = await client
+      .from("usuarios")
+      .select("id")
+      .eq("username", username)
+      .limit(1);
+
+    if (error) {
+      throw error;
+    }
+
+    const isAvailable = !data || data.length === 0;
+
+    if (usernameAvailability) {
+      usernameAvailability.textContent = isAvailable
+        ? "Disponible"
+        : "Este usuario ya está registrado.";
+      usernameAvailability.classList.toggle("available", isAvailable);
+      usernameAvailability.classList.toggle("unavailable", !isAvailable);
+    }
+
+    if (!isAvailable && usernameWrapper) {
+      usernameWrapper.classList.remove("input-valid");
+      usernameWrapper.classList.add("input-invalid");
+    }
+
+    if (!isAvailable && usernameInput) {
+      usernameInput.setAttribute("aria-invalid", "true");
+    }
+
+    return isAvailable;
+  } catch (error) {
+    console.error("Error al validar disponibilidad", error);
+    if (usernameAvailability) {
+      usernameAvailability.textContent = "No pudimos validar la disponibilidad.";
+      usernameAvailability.classList.remove("available");
+      usernameAvailability.classList.add("unavailable");
+    }
+    return false;
+  }
+}
+
+// Muestra mensajes generales en la parte inferior del formulario.
+function showRegisterFeedback(message, type = "success") {
+  if (!registerFeedback) {
+    return;
+  }
+
+  registerFeedback.textContent = message;
+  registerFeedback.classList.toggle("error", type === "error");
 }
 
 // Permite inyectar un manejador personalizado de navegación (útil en pruebas unitarias).
@@ -168,10 +327,7 @@ export function redirectToLogin(handler = navigationHandler) {
 // Maneja el envío del formulario de registro.
 export async function handleRegisterSubmit(event) {
   event.preventDefault();
-  if (generalFeedback) {
-    generalFeedback.style.color = "#fca5a5";
-    generalFeedback.textContent = "";
-  }
+  showRegisterFeedback("", "success");
 
   const username = usernameInput ? usernameInput.value.trim() : "";
   const password = passwordInput ? passwordInput.value : "";
@@ -180,9 +336,7 @@ export async function handleRegisterSubmit(event) {
   const isPasswordValid = validatePassword(password);
 
   if (isUsernameValid === false || isPasswordValid === false) {
-    if (generalFeedback) {
-      generalFeedback.textContent = "Verifica la información ingresada.";
-    }
+    showRegisterFeedback("Verifica la información ingresada.", "error");
     if (!isUsernameValid && usernameWrapper) {
       usernameWrapper.classList.add("input-invalid");
     }
@@ -193,15 +347,23 @@ export async function handleRegisterSubmit(event) {
   }
 
   try {
+    setRegisterLoading(true);
+    showRegisterFeedback("Creando tu cuenta...", "success");
+    const available = await checkUsernameAvailability(username);
+
+    if (!available) {
+      showRegisterFeedback("El usuario ya se encuentra registrado. Elige otro nombre.", "error");
+      setRegisterLoading(false);
+      return;
+    }
+
     await registerUser(username, password);
     showSuccessMessage();
     window.setTimeout(() => {
       redirectToLogin();
     }, 1200);
   } catch (error) {
-    if (generalFeedback) {
-      generalFeedback.textContent = error.message;
-    }
+    showRegisterFeedback(error.message, "error");
     if (error.message.includes("usuario")) {
       if (usernameWrapper) {
         usernameWrapper.classList.remove("input-valid");
@@ -212,6 +374,8 @@ export async function handleRegisterSubmit(event) {
       passwordWrapper.classList.remove("input-valid");
       passwordWrapper.classList.add("input-invalid");
     }
+  } finally {
+    setRegisterLoading(false);
   }
 }
 
@@ -221,12 +385,31 @@ if (typeof document !== "undefined") {
   if (registerForm) {
     registerForm.addEventListener("submit", handleRegisterSubmit);
   }
+
+  if (usernameInput) {
+    usernameInput.addEventListener("blur", () => {
+      if (usernameInput.value.trim().length >= 3) {
+        checkUsernameAvailability(usernameInput.value.trim());
+      }
+    });
+  }
+
+  if (passwordInput) {
+    passwordInput.addEventListener("input", () => {
+      const score = passwordScore(passwordInput.value);
+      updatePasswordStrengthDisplay(score);
+    });
+  }
 }
 
 export default {
   initializeForm,
   validateUsername,
   validatePassword,
+  passwordScore,
+  updatePasswordStrengthDisplay,
+  setRegisterLoading,
+  checkUsernameAvailability,
   registerUser,
   showSuccessMessage,
   setNavigationHandler,
