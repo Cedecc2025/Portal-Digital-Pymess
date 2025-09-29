@@ -9,117 +9,122 @@
   </head>
   <body>
     <main class="home-shell">
-      <section class="insights-panel surface-card">
+      <section class="intro-panel surface-card">
         <header class="insights-header">
           <span class="badge-pill">🚀 Plataforma integral</span>
-          <h1>Comienza tu sesión segura</h1>
-          <p>
-            Inicia sesión para acceder a tu panel centralizado, monitorear métricas y coordinar a tu equipo desde cualquier lugar.
-          </p>
-          <p>
-            Explora los módulos disponibles y activa las herramientas diseñadas para impulsar la gestión de tu negocio.
-          </p>
+          <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
         </header>
-
+        <p>
+          Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar y hacer crecer tu negocio de manera ágil y profesional.
+        </p>
+        <p>
+          Desde aquí podrás acceder a módulos especializados que cubren las áreas críticas de tu organización y que trabajan juntos para ofrecer una experiencia integrada.
+        </p>
+        <ul class="module-overview">
+          <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
+          <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios.</li>
+          <li><strong>Chatbot Web:</strong> brinda atención automática 24/7 a tus clientes.</li>
+          <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas.</li>
+          <li><strong>Herramientas Extra:</strong> utilidades complementarias para la gestión diaria.</li>
+        </ul>
+        <p>
+          Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo suficientemente robusto para ayudarte a tomar decisiones basadas en datos.
+        </p>
         <div class="cta-actions">
           <a class="primary-button" href="./modules/auth/login.html">Iniciar sesión</a>
-          <a class="secondary-button" href="./modules/tareas/index.html">Registrar tareas</a>
+          <a class="secondary-button" href="./modules/auth/register.html">Registrarse</a>
         </div>
+      </section>
 
-        <div class="trust-indicators" aria-label="Indicadores de seguridad">
-          <button type="button" class="trust-chip" data-tooltip="Datos sincronizados con controles de acceso por filas (RLS).">
-            <span aria-hidden="true">🛡️</span>
-            Supabase secure
-          </button>
-          <button type="button" class="trust-chip" data-tooltip="Toda la información viaja con cifrado TLS.">
-            <span aria-hidden="true">🔐</span>
-            Cifrado
-          </button>
-          <button type="button" class="trust-chip" data-tooltip="Políticas activas de Row Level Security en módulos críticos.">
-            <span aria-hidden="true">🧩</span>
-            RLS enabled
-          </button>
-        </div>
+      <section class="insights-panel surface-card">
+        <header class="insights-header">
+          <h2>Explora los módulos clave</h2>
+          <p>Desplázate por las tarjetas para conocer los beneficios de cada aplicación del portal.</p>
+        </header>
 
-        <section class="kpi-carousel" aria-label="Tareas destacadas" id="kpiCarousel">
+        <section class="kpi-carousel" aria-label="Módulos disponibles" id="kpiCarousel">
           <div class="kpi-track" id="kpiTrack">
-            <article class="kpi-card task-card" data-index="0">
-              <header class="task-card__header">
-                <span class="task-status status--progress">En progreso</span>
-                <time class="task-due" datetime="2024-07-22T16:00">Vence hoy · 4:00&nbsp;p.m.</time>
+            <article class="kpi-card module-slide" id="kpi-slide-0" data-index="0">
+              <header class="module-slide__header">
+                <span class="module-icon" aria-hidden="true">📇</span>
+                <span class="module-badge badge--available">Disponible</span>
               </header>
-              <h4>Actualizar plan comercial Q3</h4>
-              <p class="task-summary">Revisa el pipeline, estima conversiones y prepara el informe ejecutivo para la reunión semanal.</p>
-              <ul class="task-bullets">
-                <li>Consolidar ventas proyectadas por ejecutivo</li>
-                <li>Ajustar metas trimestrales según inventario</li>
+              <h3>CRM</h3>
+              <p>Gestiona prospectos, clientes y oportunidades con seguimiento accionable.</p>
+              <ul class="module-slide__highlights">
+                <li>Segmentación inteligente por etapa del pipeline</li>
+                <li>Alertas de seguimiento automático</li>
+                <li>Reportes en tiempo real sobre cierres</li>
               </ul>
-              <footer class="task-card__footer">
-                <span class="task-owner">Responsable: Camila</span>
-                <span class="task-label">Área Comercial</span>
-              </footer>
             </article>
-            <article class="kpi-card task-card" data-index="1">
-              <header class="task-card__header">
-                <span class="task-status status--review">En revisión</span>
-                <time class="task-due" datetime="2024-07-23">Entrega mañana</time>
+            <article class="kpi-card module-slide" id="kpi-slide-1" data-index="1">
+              <header class="module-slide__header">
+                <span class="module-icon" aria-hidden="true">🛍️</span>
+                <span class="module-badge badge--available">Disponible</span>
               </header>
-              <h4>Diseñar campaña de retención</h4>
-              <p class="task-summary">Define mensaje clave, incentivos y automatizaciones para clientes premium inactivos.</p>
-              <ul class="task-bullets">
-                <li>Segmentar base por antigüedad</li>
-                <li>Configurar flow en email marketing</li>
+              <h3>Catálogo</h3>
+              <p>Organiza tu portafolio de productos y servicios con fichas claras y actualizadas.</p>
+              <ul class="module-slide__highlights">
+                <li>Clasificación por categorías y atributos</li>
+                <li>Versionado de precios y existencias</li>
+                <li>Integración con chatbot y CRM</li>
               </ul>
-              <footer class="task-card__footer">
-                <span class="task-owner">Responsable: Luis</span>
-                <span class="task-label">Marketing</span>
-              </footer>
             </article>
-            <article class="kpi-card task-card" data-index="2">
-              <header class="task-card__header">
-                <span class="task-status status--blocked">Bloqueada</span>
-                <time class="task-due" datetime="2024-07-25">Esperando insumos</time>
+            <article class="kpi-card module-slide" id="kpi-slide-2" data-index="2">
+              <header class="module-slide__header">
+                <span class="module-icon" aria-hidden="true">🤖</span>
+                <span class="module-badge badge--beta">En beta</span>
               </header>
-              <h4>Integrar catálogo con chatbot</h4>
-              <p class="task-summary">Carga fichas técnicas y respuestas frecuentes para garantizar asesoría 24/7.</p>
-              <ul class="task-bullets">
-                <li>Recopilar precios actualizados</li>
-                <li>Validar intención de compra con equipo</li>
+              <h3>Chatbot Web</h3>
+              <p>Automatiza respuestas frecuentes y atiende a tus clientes a cualquier hora.</p>
+              <ul class="module-slide__highlights">
+                <li>Scripts guiados según intención de contacto</li>
+                <li>Entrenamiento con contenido de tu catálogo</li>
+                <li>Métricas de satisfacción en vivo</li>
               </ul>
-              <footer class="task-card__footer">
-                <span class="task-owner">Responsable: Sofía</span>
-                <span class="task-label">Automatización</span>
-              </footer>
             </article>
-            <article class="kpi-card task-card" data-index="3">
-              <header class="task-card__header">
-                <span class="task-status status--completed">Completada</span>
-                <time class="task-due" datetime="2024-07-20">Cerrada el 20/07</time>
+            <article class="kpi-card module-slide" id="kpi-slide-3" data-index="3">
+              <header class="module-slide__header">
+                <span class="module-icon" aria-hidden="true">🚀</span>
+                <span class="module-badge badge--new">Nuevo</span>
               </header>
-              <h4>Auditar costos recurrentes</h4>
-              <p class="task-summary">Revisa contratos de proveedores y detecta oportunidades de ahorro mensual.</p>
-              <ul class="task-bullets">
-                <li>Comparar facturación de los últimos 6 meses</li>
-                <li>Identificar renegociaciones prioritarias</li>
+              <h3>Estrategias de Marketing</h3>
+              <p>Planifica campañas, asigna responsables y monitoriza KPIs en un solo asistente.</p>
+              <ul class="module-slide__highlights">
+                <li>Asistente guiado con pasos configurables</li>
+                <li>Calendario editorial sincronizado</li>
+                <li>Exportación a PDF ejecutiva</li>
               </ul>
-              <footer class="task-card__footer">
-                <span class="task-owner">Responsable: Andrés</span>
-                <span class="task-label">Finanzas</span>
-              </footer>
+            </article>
+            <article class="kpi-card module-slide" id="kpi-slide-4" data-index="4">
+              <header class="module-slide__header">
+                <span class="module-icon" aria-hidden="true">🧰</span>
+                <span class="module-badge badge--soon">Próximamente</span>
+              </header>
+              <h3>Herramientas Extra</h3>
+              <p>Accede a utilidades que simplifican procesos financieros, operativos y legales.</p>
+              <ul class="module-slide__highlights">
+                <li>Plantillas para documentación clave</li>
+                <li>Integraciones con servicios externos</li>
+                <li>Centro de recursos colaborativos</li>
+              </ul>
             </article>
           </div>
           <div class="kpi-controls" id="kpiControls" role="tablist" aria-label="Controles de módulos">
             <button type="button" class="dot is-active" data-target="0" role="tab" aria-selected="true" aria-controls="kpi-slide-0">
-              <span class="sr-only">Actualizar plan comercial</span>
+              <span class="sr-only">CRM</span>
             </button>
             <button type="button" class="dot" data-target="1" role="tab" aria-selected="false" aria-controls="kpi-slide-1">
-              <span class="sr-only">Diseñar campaña de retención</span>
+              <span class="sr-only">Catálogo</span>
             </button>
             <button type="button" class="dot" data-target="2" role="tab" aria-selected="false" aria-controls="kpi-slide-2">
-              <span class="sr-only">Integrar catálogo con chatbot</span>
+              <span class="sr-only">Chatbot Web</span>
             </button>
             <button type="button" class="dot" data-target="3" role="tab" aria-selected="false" aria-controls="kpi-slide-3">
-              <span class="sr-only">Auditar costos recurrentes</span>
+              <span class="sr-only">Estrategias de Marketing</span>
+            </button>
+            <button type="button" class="dot" data-target="4" role="tab" aria-selected="false" aria-controls="kpi-slide-4">
+              <span class="sr-only">Herramientas Extra</span>
             </button>
           </div>
         </section>
