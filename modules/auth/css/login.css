@@ -1,0 +1,131 @@
+/* login.css
+ * Estilos para la pantalla de acceso con look & feel moderno. */
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: linear-gradient(160deg, #020713 0%, #0c1630 55%, #010309 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.login-shell {
+  width: min(1200px, 100%);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 36px;
+}
+
+.login-hero {
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(26px);
+}
+
+.login-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 2.8vw, 2.6rem);
+}
+
+.login-hero p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.hero-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: var(--color-text-muted);
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.hero-list strong {
+  color: var(--color-primary);
+}
+
+.login-card {
+  padding: 48px 44px;
+  border-radius: var(--radius-lg);
+  background: rgba(7, 13, 26, 0.85);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.login-header h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.6rem, 2.2vw, 2rem);
+}
+
+.login-header p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.input-control label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.form-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -6px;
+}
+
+.remember-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.remember-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.primary-button {
+  margin-top: 6px;
+}
+
+.feedback#generalFeedback {
+  margin-top: 12px;
+}
+
+@media (max-width: 960px) {
+  body {
+    padding: 40px 18px;
+  }
+
+  .login-card,
+  .login-hero {
+    padding: 36px 28px;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Portal Empresarial</title>
+    <link rel="stylesheet" href="../../public/css/base.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
+  </head>
+  <body>
+    <main class="dashboard-shell glass-card">
+      <header class="dashboard-header">
+        <div>
+          <p class="welcome-label">Bienvenido de nuevo</p>
+          <h1 id="usernameDisplay">Usuario</h1>
+        </div>
+        <button id="logoutButton" class="logout-button">Cerrar sesión</button>
+      </header>
+      <section class="dashboard-summary">
+        <p>
+          Explora las herramientas disponibles para tu negocio. Cada módulo está diseñado para ofrecerte métricas
+          claras, acciones rápidas y una experiencia ágil en cualquier dispositivo.
+        </p>
+      </section>
+      <section class="modules-grid">
+        <a class="module-card" href="../costos/index.html" data-module="costos">
+          <div class="module-icon">💼</div>
+          <h2>Costos</h2>
+          <p>Administra estructuras de costos, flujo de caja y métricas financieras clave.</p>
+          <span class="module-button">Ir a Costos</span>
+        </a>
+        <a class="module-card" href="../estrategias/index.html" data-module="estrategias">
+          <div class="module-icon">🚀</div>
+          <h2>Estrategias de Ventas</h2>
+          <p>Planifica campañas y automatizaciones para acelerar tus resultados comerciales.</p>
+          <span class="module-button">Ir a Estrategias</span>
+        </a>
+        <div class="module-card disabled-card">
+          <div class="module-icon">🤖</div>
+          <h2>Chatbot Web</h2>
+          <p>Muy pronto podrás configurar asistentes inteligentes para tu sitio web.</p>
+          <span class="module-button ghost">Próximamente</span>
+        </div>
+        <div class="module-card disabled-card">
+          <div class="module-icon">📇</div>
+          <h2>CRM</h2>
+          <p>Gestiona embudos de venta y relacionamiento. Disponible en la siguiente iteración.</p>
+          <span class="module-button ghost">Próximamente</span>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="../../lib/supabaseClient.js"></script>
+    <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/dashboard.js"></script>
+  </body>
+</html>

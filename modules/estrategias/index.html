@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Estrategia de Marketing PYME</title>
+    <link rel="stylesheet" href="../../public/css/base.css">
+    <link rel="stylesheet" href="./css/estrategias.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="card status-card">
+        <p id="statusBanner">Sincroniza tu estrategia periódicamente para no perder avances.</p>
+      </div>
+      <div class="card">
+        <div class="header">
+          <h1>Estrategia de Marketing PYME</h1>
+          <div class="header-badge">
+            <span>📈</span>
+            <span>Plataforma Profesional</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="progress-container">
+          <div class="progress-steps" id="progressSteps"></div>
+          <div class="progress-info">
+            <div class="step-count" id="stepCount">Paso 1 de 15</div>
+            <div class="step-name" id="stepName">Inicio</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="content" id="contentArea"></div>
+      </div>
+
+      <div class="card">
+        <div class="navigation">
+          <button class="btn btn-secondary" id="prevBtn" type="button">
+            ← Anterior
+          </button>
+          <button class="btn btn-primary" id="nextBtn" type="button">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script type="module" src="../../lib/supabaseClient.js"></script>
+    <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/estrategias.js"></script>
+  </body>
+</html>

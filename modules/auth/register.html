@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear cuenta - Portal Empresarial</title>
+    <link rel="stylesheet" href="../../public/css/base.css" />
+    <link rel="stylesheet" href="./css/register.css" />
+  </head>
+  <body>
+    <main class="register-shell">
+      <section class="register-card glass-card">
+        <header>
+          <span class="badge-pill">🆕 Registro de usuario</span>
+          <h1>Crea una cuenta para empezar</h1>
+          <p>
+            Completa tus datos para sincronizar tus módulos con Supabase. Gestiona tu negocio con seguridad y
+            flexibilidad desde cualquier dispositivo.
+          </p>
+        </header>
+        <form id="registerForm" novalidate>
+          <div class="input-control">
+            <label for="username">Nombre de usuario</label>
+            <div class="input-shell" id="usernameWrapper">
+              <span class="input-icon" aria-hidden="true">👤</span>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="mi_negocio"
+                autocomplete="username"
+                required
+              />
+            </div>
+            <span class="feedback" id="usernameFeedback"></span>
+          </div>
+          <div class="input-control">
+            <label for="password">Contraseña</label>
+            <div class="input-shell" id="passwordWrapper">
+              <span class="input-icon" aria-hidden="true">🔒</span>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Mínimo 8 caracteres"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+            <span class="feedback" id="passwordFeedback"></span>
+          </div>
+          <button type="submit" class="primary-button">Registrar</button>
+          <span class="feedback" id="generalFeedback"></span>
+        </form>
+        <footer>
+          <p>¿Ya tienes cuenta? <a class="text-link" href="./login.html">Inicia sesión</a></p>
+        </footer>
+      </section>
+    </main>
+    <script type="module" src="../../lib/supabaseClient.js"></script>
+    <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/register.js"></script>
+  </body>
+</html>

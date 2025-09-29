@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceso - Portal Empresarial</title>
+    <link rel="stylesheet" href="../../public/css/base.css" />
+    <link rel="stylesheet" href="./css/login.css" />
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="login-hero glass-card">
+        <span class="badge-pill">🔐 Acceso seguro</span>
+        <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
+        <p>
+          Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar y hacer
+          crecer tu negocio de manera ágil y profesional.
+        </p>
+        <p>
+          Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave de tu organización:
+        </p>
+        <ul class="hero-list">
+          <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
+          <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios de forma clara y accesible.</li>
+          <li><strong>Chatbot Web:</strong> brinda atención automática y disponible 24/7 para tus clientes.</li>
+          <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas para impulsar tus resultados.</li>
+          <li><strong>Herramientas Extra:</strong> utilidades complementarias que facilitan la gestión diaria.</li>
+        </ul>
+        <p>
+          Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo suficientemente robusto para
+          ayudarte a tomar decisiones basadas en datos y optimizar tus procesos.
+        </p>
+      </section>
+      <section class="login-card glass-card">
+        <header class="login-header">
+          <h2>Inicia sesión</h2>
+          <p>Ingresa tus credenciales para acceder al panel general.</p>
+        </header>
+        <form id="loginForm" novalidate>
+          <div class="input-control">
+            <label for="username">Usuario</label>
+            <div class="input-shell" id="usernameWrapper">
+              <span class="input-icon" aria-hidden="true">👤</span>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="usuario_empresarial"
+                autocomplete="username"
+                required
+              />
+            </div>
+            <span class="feedback" id="usernameFeedback"></span>
+          </div>
+          <div class="input-control">
+            <label for="password">Contraseña</label>
+            <div class="input-shell" id="passwordWrapper">
+              <span class="input-icon" aria-hidden="true">🔒</span>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+            <span class="feedback" id="passwordFeedback"></span>
+          </div>
+          <div class="form-meta">
+            <label class="remember-option">
+              <input type="checkbox" id="rememberMe" name="rememberMe" />
+              <span>Recordarme</span>
+            </label>
+            <a class="text-link" href="./register.html">Crear cuenta</a>
+          </div>
+          <button type="submit" class="primary-button">Ingresar</button>
+          <span class="feedback" id="generalFeedback"></span>
+        </form>
+      </section>
+    </main>
+    <script type="module" src="../../lib/supabaseClient.js"></script>
+    <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/login.js"></script>
+  </body>
+</html>

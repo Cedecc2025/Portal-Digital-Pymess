@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Gestión Financiera para Negocios</title>
+    <link rel="stylesheet" href="../../public/css/base.css" />
+    <link rel="stylesheet" href="./css/costos.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  </head>
+  <body>
+    <div id="loading">✓ Datos guardados</div>
+
+    <div class="container hidden" id="costosApp">
+      <div class="card">
+        <div class="header">
+          <div>
+            <h1>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                <path d="M8 7h8M8 12h8M8 17h6"></path>
+              </svg>
+              Sistema de Gestión Financiera
+            </h1>
+            <p class="subtitle">
+              Gestiona costos, calcula punto de equilibrio y controla tu flujo de
+              caja
+            </p>
+          </div>
+
+          <div class="header-actions">
+            <div class="dropdown">
+              <button class="btn btn-secondary" data-dropdown="dataMenu">
+                📊 Datos ▼
+              </button>
+              <div id="dataMenu" class="dropdown-content">
+                <h3>Gestión de Datos</h3>
+                <button class="btn btn-success" data-action="exportar">
+                  💾 Exportar JSON
+                </button>
+                <label class="btn" for="fileInput">
+                  📁 Importar JSON
+                  <input type="file" id="fileInput" accept=".json" />
+                </label>
+                <button class="btn btn-danger" data-action="limpiar">
+                  🗑️ Limpiar Todo
+                </button>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button class="btn" data-dropdown="currencyMenu">
+                <span id="monedaActual">₡ CRC</span> ▼
+              </button>
+              <div id="currencyMenu" class="dropdown-content">
+                <h3>Configuración de Moneda</h3>
+                <div class="form-group">
+                  <label for="selectMoneda">Moneda Principal</label>
+                  <select id="selectMoneda">
+                    <option value="CRC">₡ Colones (CRC)</option>
+                    <option value="USD">$ Dólares (USD)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="tasaCambio">Tasa de Cambio</label>
+                  <input type="number" id="tasaCambio" value="520" />
+                  <p class="help-text">
+                    ₡1 = $<span id="tasaDolar">0.0019</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button id="logoutButton" class="btn btn-logout" type="button">
+              🚪 Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" data-tab="productos">
+            📦 Productos/Servicios
+          </button>
+          <button class="tab" data-tab="costos">📋 Costos Fijos</button>
+          <button class="tab" data-tab="flujo">💰 Flujo de Caja</button>
+          <button class="tab" data-tab="analisis">
+            📈 Análisis y Punto de Equilibrio
+          </button>
+        </div>
+
+        <div id="tab-productos" class="tab-content active">
+          <div class="section-header">
+            <h2>Productos y Servicios</h2>
+            <button class="btn btn-refresh" data-action="refrescar-productos">
+              🔄 Refrescar
+            </button>
+          </div>
+
+          <section class="panel panel-blue">
+            <h3 id="prod-form-title">Agregar Producto/Servicio</h3>
+            <div class="form-row">
+              <div>
+                <label for="prod-nombre">Nombre</label>
+                <input type="text" id="prod-nombre" placeholder="Ej: Café" />
+              </div>
+              <div>
+                <label for="prod-tipo">Tipo</label>
+                <select id="prod-tipo">
+                  <option value="producto">Producto</option>
+                  <option value="servicio">Servicio</option>
+                </select>
+              </div>
+              <div>
+                <label for="prod-moneda">Moneda</label>
+                <select id="prod-moneda">
+                  <option value="CRC">₡ CRC</option>
+                  <option value="USD">$ USD</option>
+                </select>
+              </div>
+              <div>
+                <label for="prod-costo">Costo Unitario</label>
+                <input type="number" id="prod-costo" placeholder="0.00" />
+              </div>
+              <div>
+                <label for="prod-precio">Precio de Venta</label>
+                <input type="number" id="prod-precio" placeholder="0.00" />
+              </div>
+              <div>
+                <label for="prod-unidades">Unidades Vendidas</label>
+                <input type="number" id="prod-unidades" placeholder="0" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn" data-action="guardar-producto">
+                ➕ Agregar Producto
+              </button>
+              <button
+                class="btn btn-secondary hidden"
+                data-action="cancelar-producto"
+                type="button"
+              >
+                ✖️ Cancelar edición
+              </button>
+            </div>
+          </section>
+
+          <div id="lista-productos" class="module-list"></div>
+        </div>
+
+        <div id="tab-costos" class="tab-content">
+          <div class="section-header">
+            <h2>Costos Fijos</h2>
+            <button class="btn btn-refresh" data-action="refrescar-costos">
+              🔄 Refrescar
+            </button>
+          </div>
+
+          <section class="panel panel-red">
+            <h3 id="costo-form-title">Agregar Costo Fijo</h3>
+            <div class="form-row">
+              <div>
+                <label for="costo-concepto">Concepto</label>
+                <input
+                  type="text"
+                  id="costo-concepto"
+                  placeholder="Ej: Alquiler"
+                />
+              </div>
+              <div>
+                <label for="costo-moneda">Moneda</label>
+                <select id="costo-moneda">
+                  <option value="CRC">₡ CRC</option>
+                  <option value="USD">$ USD</option>
+                </select>
+              </div>
+              <div>
+                <label for="costo-monto">Monto</label>
+                <input type="number" id="costo-monto" placeholder="0.00" />
+              </div>
+              <div>
+                <label for="costo-frecuencia">Frecuencia</label>
+                <select id="costo-frecuencia">
+                  <option value="mensual">Mensual</option>
+                  <option value="anual">Anual</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-cost" data-action="guardar-costo">
+                ➕ Agregar Costo Fijo
+              </button>
+              <button
+                class="btn btn-secondary hidden"
+                data-action="cancelar-costo"
+                type="button"
+              >
+                ✖️ Cancelar edición
+              </button>
+            </div>
+          </section>
+
+          <div class="metric-card metric-total">
+            <p class="metric-label">Total Costos Fijos Mensuales</p>
+            <p class="metric-value" id="total-costos-fijos">₡0</p>
+          </div>
+
+          <div id="lista-costos" class="module-list"></div>
+        </div>
+
+        <div id="tab-flujo" class="tab-content">
+          <div class="section-header">
+            <h2>Flujo de Caja</h2>
+            <button class="btn btn-refresh" data-action="refrescar-flujo">
+              🔄 Refrescar
+            </button>
+          </div>
+
+          <section class="panel panel-green">
+            <h3 id="trans-form-title">Agregar Transacción</h3>
+            <div class="form-row">
+              <div>
+                <label for="trans-fecha">Fecha</label>
+                <input type="date" id="trans-fecha" />
+              </div>
+              <div>
+                <label for="trans-tipo">Tipo</label>
+                <select id="trans-tipo">
+                  <option value="ingreso">Ingreso</option>
+                  <option value="egreso">Egreso</option>
+                </select>
+              </div>
+              <div>
+                <label for="trans-concepto">Concepto</label>
+                <input type="text" id="trans-concepto" placeholder="Descripción" />
+              </div>
+              <div>
+                <label for="trans-moneda">Moneda</label>
+                <select id="trans-moneda">
+                  <option value="CRC">₡ CRC</option>
+                  <option value="USD">$ USD</option>
+                </select>
+              </div>
+              <div>
+                <label for="trans-monto">Monto</label>
+                <input type="number" id="trans-monto" placeholder="0.00" />
+              </div>
+              <div>
+                <label for="trans-categoria">Categoría</label>
+                <select id="trans-categoria">
+                  <option value="venta">Venta</option>
+                  <option value="servicio">Servicio</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-success" data-action="guardar-transaccion">
+                ➕ Agregar Transacción
+              </button>
+              <button
+                class="btn btn-secondary hidden"
+                data-action="cancelar-transaccion"
+                type="button"
+              >
+                ✖️ Cancelar edición
+              </button>
+            </div>
+          </section>
+
+          <div class="form-group month-picker">
+            <label for="mes-seleccionado">Seleccionar Mes</label>
+            <input type="month" id="mes-seleccionado" />
+          </div>
+
+          <div class="grid">
+            <div class="metric-card metric-ingresos">
+              <p class="metric-label">Ingresos</p>
+              <p class="metric-value" id="flujo-ingresos">₡0</p>
+            </div>
+            <div class="metric-card metric-egresos">
+              <p class="metric-label">Egresos</p>
+              <p class="metric-value" id="flujo-egresos">₡0</p>
+            </div>
+            <div class="metric-card" id="saldo-card">
+              <p class="metric-label">Saldo</p>
+              <p class="metric-value" id="flujo-saldo">₡0</p>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="flujoChart" aria-label="Gráfico de flujo" role="img"></canvas>
+          </div>
+
+          <div id="lista-transacciones" class="module-list"></div>
+        </div>
+
+        <div id="tab-analisis" class="tab-content">
+          <div class="section-header">
+            <h2>Análisis y Punto de Equilibrio</h2>
+            <button class="btn btn-refresh" data-action="refrescar-analisis">
+              🔄 Refrescar
+            </button>
+          </div>
+
+          <div class="grid">
+            <div class="metric-card">
+              <p class="metric-label">Unidades para Equilibrio</p>
+              <p class="metric-value" id="pe-unidades">0</p>
+            </div>
+            <div class="metric-card">
+              <p class="metric-label">Ventas para Equilibrio</p>
+              <p class="metric-value" id="pe-ventas">₡0</p>
+            </div>
+            <div class="metric-card" id="pe-estado-card">
+              <p class="metric-label">Estado Actual</p>
+              <p class="metric-value" id="pe-estado">₡0</p>
+            </div>
+            <div class="metric-card metric-margen">
+              <p class="metric-label">Margen Promedio</p>
+              <p class="metric-value" id="margen-promedio">0%</p>
+            </div>
+          </div>
+
+          <div class="grid charts">
+            <div>
+              <h3>Margen por Producto</h3>
+              <div class="chart-container">
+                <canvas id="margenChart" aria-label="Margen por producto" role="img"></canvas>
+              </div>
+            </div>
+            <div>
+              <h3>Análisis de Equilibrio</h3>
+              <div class="chart-container">
+                <canvas id="equilibrioChart" aria-label="Análisis de equilibrio" role="img"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <section class="panel">
+            <h3>Recomendaciones</h3>
+            <div id="recomendaciones"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="../../lib/supabaseClient.js"></script>
+    <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/costos.js"></script>
+  </body>
+</html>

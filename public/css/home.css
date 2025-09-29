@@ -1,0 +1,121 @@
+/* home.css
+ * Estilos dedicados para la portada principal. */
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: radial-gradient(circle at top left, #040b1a, #0d162c 55%, #02060e 100%);
+}
+
+.hero-shell {
+  max-width: 1100px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  align-items: stretch;
+}
+
+.hero-intro {
+  padding: 42px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(22px);
+}
+
+.hero-intro h1 {
+  margin: 0 0 18px;
+  font-size: clamp(2.1rem, 3vw, 2.8rem);
+}
+
+.hero-intro p {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.hero-modules {
+  display: grid;
+  gap: 18px;
+}
+
+.module-item {
+  position: relative;
+  padding: 20px 22px;
+  border-radius: var(--radius-md);
+  background: rgba(10, 16, 28, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(18px);
+  overflow: hidden;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.module-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+  border-color: rgba(30, 144, 255, 0.45);
+}
+
+.module-item h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.module-item p {
+  margin: 10px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.module-icon {
+  position: absolute;
+  top: -24px;
+  right: -24px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(30, 144, 255, 0.28), transparent 65%);
+  filter: blur(0.4px);
+}
+
+.hero-cta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  padding: 42px;
+  border-radius: var(--radius-lg);
+  background: rgba(9, 15, 28, 0.85);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(26px);
+}
+
+.hero-cta h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.5vw, 2.4rem);
+}
+
+.hero-cta p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.hero-cta .primary-button {
+  align-self: flex-start;
+}
+
+@media (max-width: 720px) {
+  body {
+    padding: 32px 18px;
+  }
+
+  .hero-intro,
+  .hero-cta {
+    padding: 28px;
+  }
+}

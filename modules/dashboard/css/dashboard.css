@@ -1,0 +1,158 @@
+/* dashboard.css
+ * Estilos para la vista principal tras el login. */
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: radial-gradient(circle at top left, #030a1c, #0b1938 55%, #01040b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+}
+
+.dashboard-shell {
+  width: min(1180px, 100%);
+  padding: 48px 52px;
+  border-radius: var(--radius-lg);
+  background: rgba(8, 16, 33, 0.88);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.welcome-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+#usernameDisplay {
+  margin: 6px 0 0;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+}
+
+.logout-button {
+  border: 1px solid rgba(231, 76, 60, 0.65);
+  background: transparent;
+  color: #fca5a5;
+  padding: 12px 22px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background var(--transition-base), transform var(--transition-base);
+}
+
+.logout-button:hover {
+  background: rgba(231, 76, 60, 0.18);
+  transform: translateY(-1px);
+}
+
+.dashboard-summary p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.module-card {
+  position: relative;
+  padding: 28px 26px;
+  border-radius: var(--radius-md);
+  background: rgba(12, 22, 44, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.module-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.42);
+  border-color: rgba(30, 144, 255, 0.4);
+}
+
+.module-card.disabled-card {
+  cursor: default;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(11, 20, 41, 0.6);
+}
+
+.module-card.disabled-card:hover {
+  transform: none;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.module-card h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.module-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.module-icon {
+  font-size: 2rem;
+}
+
+.module-button {
+  align-self: flex-start;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+  color: #081224;
+  font-weight: 600;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.module-card:hover .module-button {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(30, 144, 255, 0.35);
+}
+
+.module-button.ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  cursor: default;
+  box-shadow: none;
+}
+
+@media (max-width: 840px) {
+  body {
+    padding: 40px 18px;
+  }
+
+  .dashboard-shell {
+    padding: 36px 28px;
+  }
+}
+
+@media (max-width: 620px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logout-button {
+    align-self: flex-start;
+  }
+}
