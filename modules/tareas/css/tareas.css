@@ -247,9 +247,15 @@ select.form-control,
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
   background: #ffffff;
   box-shadow: 0 14px 28px rgba(15, 30, 60, 0.08);
+}
+
+.task-list__content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .task-list li strong {
@@ -259,6 +265,41 @@ select.form-control,
 .task-list li span {
   color: #667085;
   font-size: 0.9rem;
+}
+
+.task-list__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.task-action {
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #f4f6ff;
+  color: #1f3b8c;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-action:hover {
+  background: #e2e7ff;
+  box-shadow: 0 8px 18px rgba(31, 59, 140, 0.18);
+  transform: translateY(-1px);
+}
+
+.task-action--delete {
+  border-color: #f7c5c5;
+  background: #fff3f3;
+  color: #9f1d1d;
+}
+
+.task-action--delete:hover {
+  background: #ffe3e3;
+  box-shadow: 0 8px 18px rgba(159, 29, 29, 0.18);
 }
 
 @media (max-width: 900px) {
