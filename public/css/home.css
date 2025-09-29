@@ -55,16 +55,6 @@ body {
   padding-right: clamp(0px, 10vw, 180px);
 }
 
-.badge-pill {
-  align-self: flex-start;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(30, 144, 255, 0.2);
-  color: #bfe0ff;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
 .welcome-header h1 {
   margin: 0;
   font-size: clamp(2.2rem, 4vw, 3.2rem);
@@ -77,31 +67,6 @@ body {
   color: rgba(248, 251, 255, 0.85);
   font-size: 1.05rem;
   line-height: 1.7;
-}
-
-.portal-overview {
-  display: grid;
-  gap: 16px;
-}
-
-.portal-copy {
-  margin: 0;
-  color: rgba(240, 248, 255, 0.82);
-  font-size: 0.98rem;
-  line-height: 1.65;
-}
-
-.module-overview {
-  margin: 0;
-  padding-left: 1.35rem;
-  display: grid;
-  gap: 10px;
-  color: rgba(232, 240, 255, 0.88);
-  font-size: 0.98rem;
-}
-
-.module-overview strong {
-  color: #ffffff;
 }
 
 .cta-actions {
