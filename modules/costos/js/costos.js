@@ -264,6 +264,25 @@ function shouldSyncWithSupabase() {
   return Boolean(state.remoteUser && state.remoteUser.id);
 }
 
+// Actualiza el mes seleccionado asegurando que las nuevas transacciones sean visibles.
+function updateSelectedMonthFromTransaction(transaction) {
+  if (!transaction || typeof transaction.fecha !== "string") {
+    return;
+  }
+
+  const normalizedMonth = transaction.fecha.slice(0, 7);
+
+  if (normalizedMonth.length !== 7) {
+    return;
+  }
+
+  state.selectedMonth = normalizedMonth;
+
+  if (elements.monthInput) {
+    elements.monthInput.value = normalizedMonth;
+  }
+}
+
 // Verifica si el identificador proviene de la base de datos (numérico).
 function isRemoteIdentifier(identifier) {
   if (identifier === null || identifier === undefined) {
@@ -1478,12 +1497,13 @@ async function guardarTransaccion() {
       }
     }
 
-      persistData();
-      cancelarEdicionTransaccion();
-      refrescarFlujoCaja();
-      refrescarAnalisis();
-      showToast("Datos editados correctamente.");
-      return;
+    updateSelectedMonthFromTransaction(transactionData);
+    persistData();
+    cancelarEdicionTransaccion();
+    refrescarFlujoCaja();
+    refrescarAnalisis();
+    showToast("Datos editados correctamente.");
+    return;
     }
 
   state.transactions.push({ ...transactionData });
@@ -1516,11 +1536,12 @@ async function guardarTransaccion() {
     }
   }
 
+  updateSelectedMonthFromTransaction(transactionData);
   persistData();
   cancelarEdicionTransaccion();
   refrescarFlujoCaja();
   refrescarAnalisis();
-  showToast("Transacción agregada.");
+  showToast("Transacción registrada correctamente.");
 }
 
 // Cancela la edición de la transacción.
