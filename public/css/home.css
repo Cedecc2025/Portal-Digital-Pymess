@@ -188,6 +188,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
+  overflow: hidden;
 }
 
 .kpi-track {
@@ -199,7 +201,7 @@ body {
 
 .kpi-card {
   min-width: 100%;
-  flex: 1 0 100%;
+  flex: 0 0 100%;
   padding: 22px;
   border-radius: 18px;
   background: #f5f7ff;
