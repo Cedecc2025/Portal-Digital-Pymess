@@ -113,18 +113,22 @@ body {
 }
 
 .kpi-carousel {
+  position: relative;
   display: grid;
   gap: 18px;
+  overflow: hidden;
 }
 
 .kpi-track {
   display: flex;
   width: 100%;
+  min-width: 0;
   transition: transform 0.45s ease;
 }
 
 .module-slide {
   width: 100%;
+  min-width: 0;
   flex: 0 0 100%;
   padding: 28px;
   border-radius: 18px;
