@@ -30,6 +30,11 @@ body {
   box-shadow: 0 28px 60px rgba(15, 30, 60, 0.08);
 }
 
+.intro-panel {
+  align-items: center;
+  text-align: center;
+}
+
 .badge-pill {
   background: rgba(30, 144, 255, 0.12);
   color: #1e3a8a;
@@ -127,6 +132,7 @@ body {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .primary-button {
