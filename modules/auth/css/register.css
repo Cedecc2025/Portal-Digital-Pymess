@@ -1,17 +1,24 @@
 /* register.css
- * Estilos para la pantalla de registro modernizada.
+ * Estilos para la pantalla de registro con enfoque claro y fondo blanco.
  */
+
+:root {
+  --color-text-primary: #101828;
+  --color-text-secondary: #475467;
+  --color-surface: #ffffff;
+  --color-surface-light: #f8fafc;
+  --color-surface-strong: #e4e7ec;
+}
 
 body {
   min-height: 100vh;
   margin: 0;
-  background: radial-gradient(circle at top left, rgba(30, 144, 255, 0.3), transparent 45%),
-    radial-gradient(circle at bottom right, rgba(46, 204, 113, 0.25), transparent 45%),
-    linear-gradient(135deg, #0a1e2b 0%, #10463f 55%, #167358 100%);
+  background: linear-gradient(160deg, #f5f7fb 0%, #ffffff 50%, #f1f5ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 64px 24px;
+  color: var(--color-text-primary);
 }
 
 .register-shell {
@@ -23,17 +30,17 @@ body {
   display: flex;
   flex-direction: column;
   gap: 28px;
-  border-radius: var(--radius-lg);
-  background: rgba(8, 25, 36, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(22px);
-  box-shadow: var(--shadow-lg);
+  border-radius: 24px;
+  background: var(--color-surface);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 32px 60px rgba(15, 23, 42, 0.08);
 }
 
 .register-header h1 {
   margin: 16px 0 12px;
   font-size: clamp(2rem, 2.8vw, 2.4rem);
   font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .register-header p {
@@ -49,30 +56,47 @@ body {
 
 .input-shell {
   gap: 12px;
+  background: var(--color-surface-light);
+  border-radius: 14px;
+  border: 1px solid rgba(208, 213, 221, 0.8);
+  padding: 0 16px;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base),
+    background var(--transition-base);
+}
+
+.input-shell:focus-within {
+  border-color: rgba(30, 144, 255, 0.65);
+  box-shadow: 0 0 0 4px rgba(30, 144, 255, 0.15);
+  transform: translateY(-1px);
+  background: #ffffff;
+}
+
+.input-shell input {
+  color: var(--color-text-primary);
 }
 
 .input-shell .input-icon {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-primary);
 }
 
 .feedback {
   min-height: 18px;
-  color: #fca5a5;
+  color: var(--color-danger);
   font-size: 0.85rem;
 }
 
 .availability {
   min-height: 18px;
   font-size: 0.85rem;
-  color: #cbd5f5;
+  color: var(--color-text-secondary);
 }
 
 .availability.available {
-  color: #bbf7d0;
+  color: var(--color-success);
 }
 
 .availability.unavailable {
-  color: #fca5a5;
+  color: var(--color-danger);
 }
 
 .strength-meter {
@@ -86,7 +110,7 @@ body {
   flex: 1;
   height: 8px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.05));
   position: relative;
   overflow: hidden;
 }
@@ -116,7 +140,7 @@ body {
 
 .strength-copy {
   font-size: 0.85rem;
-  color: #d6d8e1;
+  color: var(--color-text-secondary);
 }
 
 .primary-button {
@@ -126,7 +150,7 @@ body {
 }
 
 .primary-button:hover {
-  box-shadow: 0 22px 40px rgba(46, 204, 113, 0.4);
+  box-shadow: 0 22px 40px rgba(46, 204, 113, 0.22);
   filter: brightness(1.05);
 }
 
@@ -156,77 +180,65 @@ body {
 .form-feedback {
   min-height: 24px;
   font-size: 0.9rem;
-  color: #bbf7d0;
+  color: var(--color-success);
 }
 
 .form-feedback.error {
-  color: #fca5a5;
+  color: var(--color-danger);
 }
 
 .benefits {
-  background: rgba(12, 34, 46, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background: var(--color-surface-light);
+  border-radius: 18px;
   padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.7);
 }
 
 .benefits h2 {
-  margin: 0;
+  margin: 0 0 12px;
   font-size: 1.1rem;
-  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .benefits ul {
   margin: 0;
   padding-left: 18px;
-  color: #d6d8e1;
+  color: var(--color-text-secondary);
   display: grid;
   gap: 8px;
 }
 
 .register-footer {
-  text-align: center;
-  color: var(--color-text-secondary);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  text-align: center;
+  color: var(--color-text-secondary);
 }
 
-.register-footer a {
-  font-weight: 600;
-  color: #ffffff;
-  transition: color var(--transition-base);
-}
-
-.register-footer a:hover {
+.register-footer .text-link {
   color: var(--color-primary);
 }
 
 .legal-links {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
-.legal-links a {
-  color: #a5c8ff;
+@media (max-width: 720px) {
+  .register-card {
+    padding: 40px 32px;
+  }
 }
 
-.legal-links a:hover,
-.legal-links a:focus-visible {
-  color: #ffffff;
-}
-
-@media (max-width: 600px) {
+@media (max-width: 540px) {
   body {
-    padding: 44px 18px;
+    padding: 40px 16px;
   }
 
   .register-card {
-    padding: 40px 30px;
+    padding: 32px 24px;
   }
 }
