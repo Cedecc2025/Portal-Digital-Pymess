@@ -31,12 +31,6 @@
           </div>
         </div>
       </header>
-      <section class="dashboard-summary">
-        <p>
-          Explora las herramientas disponibles para tu negocio. Cada módulo está diseñado para ofrecerte métricas
-          claras, acciones rápidas y una experiencia ágil en cualquier dispositivo.
-        </p>
-      </section>
       <section class="dashboard-widgets" aria-label="Indicadores rápidos">
         <a class="widget-card" href="#estado-cuenta">
           <span class="widget-label">Estado de cuenta</span>
@@ -60,33 +54,77 @@
         </a>
       </section>
       <section class="modules-grid">
-        <a class="module-card" href="../costos/index.html" data-module="costos">
-          <span class="module-badge badge--active">Actualizado</span>
-          <div class="module-icon">💼</div>
-          <h2>Costos</h2>
-          <p>Administra estructuras de costos, flujo de caja y métricas financieras clave.</p>
-          <span class="module-button">Ir a Costos</span>
+        <a class="module-card module-card--primary" href="../costos/index.html" data-module="costos">
+          <header class="module-card__header">
+            <div class="module-card__icon" aria-hidden="true">💼</div>
+            <span class="module-badge badge--active">Actualizado</span>
+          </header>
+          <div class="module-card__body">
+            <h2>Costos</h2>
+            <p>Controla estructuras de costos, flujo de caja y márgenes para anticiparte a los números.</p>
+            <ul class="module-card__highlights">
+              <li>Flujo de caja con filtros mensuales</li>
+              <li>Alertas sobre gastos recurrentes</li>
+              <li>Reportes exportables en un clic</li>
+            </ul>
+          </div>
+          <footer class="module-card__footer">
+            <span class="module-button">Ir a Costos</span>
+          </footer>
         </a>
-        <a class="module-card" href="../estrategias/index.html" data-module="estrategias">
-          <span class="module-badge badge--new">Nuevo</span>
-          <div class="module-icon">🚀</div>
-          <h2>Estrategias de Ventas</h2>
-          <p>Planifica campañas y automatizaciones para acelerar tus resultados comerciales.</p>
-          <span class="module-button">Ir a Estrategias</span>
+        <a class="module-card module-card--accent" href="../estrategias/index.html" data-module="estrategias">
+          <header class="module-card__header">
+            <div class="module-card__icon" aria-hidden="true">🚀</div>
+            <span class="module-badge badge--new">Nuevo</span>
+          </header>
+          <div class="module-card__body">
+            <h2>Estrategias de Ventas</h2>
+            <p>Diseña campañas, automatizaciones y reportes ejecutivos sin salir del asistente.</p>
+            <ul class="module-card__highlights">
+              <li>Asistente guiado de 15 pasos</li>
+              <li>Calendario editorial listo para usar</li>
+              <li>Exportación a PDF con métricas</li>
+            </ul>
+          </div>
+          <footer class="module-card__footer">
+            <span class="module-button">Ir a Estrategias</span>
+          </footer>
         </a>
-        <div class="module-card disabled-card">
-          <span class="module-badge badge--beta">En beta</span>
-          <div class="module-icon">🤖</div>
-          <h2>Chatbot Web</h2>
-          <p>Muy pronto podrás configurar asistentes inteligentes para tu sitio web.</p>
-          <span class="module-button ghost">Próximamente</span>
+        <div class="module-card module-card--disabled">
+          <header class="module-card__header">
+            <div class="module-card__icon" aria-hidden="true">🤖</div>
+            <span class="module-badge badge--beta">En beta</span>
+          </header>
+          <div class="module-card__body">
+            <h2>Chatbot Web</h2>
+            <p>Configura asistentes conversacionales que atienden a tus clientes 24/7 de forma personalizada.</p>
+            <ul class="module-card__highlights">
+              <li>Plantillas de respuestas inteligentes</li>
+              <li>Integración con tu catálogo</li>
+              <li>Panel de entrenamiento contínuo</li>
+            </ul>
+          </div>
+          <footer class="module-card__footer">
+            <span class="module-button ghost">Próximamente</span>
+          </footer>
         </div>
-        <div class="module-card disabled-card">
-          <span class="module-badge badge--soon">Próximamente</span>
-          <div class="module-icon">📇</div>
-          <h2>CRM</h2>
-          <p>Gestiona embudos de venta y relacionamiento. Disponible en la siguiente iteración.</p>
-          <span class="module-button ghost">Próximamente</span>
+        <div class="module-card module-card--disabled">
+          <header class="module-card__header">
+            <div class="module-card__icon" aria-hidden="true">📇</div>
+            <span class="module-badge badge--soon">Próximamente</span>
+          </header>
+          <div class="module-card__body">
+            <h2>CRM</h2>
+            <p>Gestiona relaciones comerciales, oportunidades y pipelines con reportes inteligentes.</p>
+            <ul class="module-card__highlights">
+              <li>Seguimiento de prospectos en tiempo real</li>
+              <li>Emails automáticos integrados</li>
+              <li>Dashboards de conversión por etapa</li>
+            </ul>
+          </div>
+          <footer class="module-card__footer">
+            <span class="module-button ghost">Próximamente</span>
+          </footer>
         </div>
       </section>
     </main>

@@ -91,30 +91,40 @@ body {
   box-shadow: 0 18px 32px rgba(231, 76, 60, 0.35);
 }
 
-.dashboard-summary p {
-  margin: 0;
-  color: var(--color-text-secondary);
-  line-height: 1.7;
-}
-
 .modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 28px;
 }
 
+
 .module-card {
   position: relative;
   padding: 28px 26px;
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 26px 52px rgba(5, 12, 20, 0.35);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18px);
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.module-card--primary {
+  background: linear-gradient(160deg, rgba(30, 144, 255, 0.25), rgba(15, 43, 59, 0.92));
+}
+
+.module-card--accent {
+  background: linear-gradient(160deg, rgba(137, 91, 255, 0.28), rgba(25, 26, 55, 0.95));
+}
+
+.module-card--disabled {
+  background: rgba(15, 30, 40, 0.68);
+  border-color: rgba(255, 255, 255, 0.08);
+  cursor: not-allowed;
 }
 
 .module-card:hover {
@@ -123,10 +133,30 @@ body {
   box-shadow: 0 34px 66px rgba(5, 12, 20, 0.45);
 }
 
+.module-card--disabled:hover {
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 26px 52px rgba(5, 12, 20, 0.3);
+}
+
+.module-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.module-card__icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 2rem;
+}
+
 .module-badge {
-  position: absolute;
-  top: 18px;
-  right: 18px;
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -158,33 +188,52 @@ body {
   color: #d6d8e1;
 }
 
-.module-card.disabled-card {
-  cursor: not-allowed;
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(15, 30, 40, 0.6);
-}
-
-.module-card.disabled-card:hover {
-  transform: none;
-  box-shadow: 0 26px 52px rgba(5, 12, 20, 0.3);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.module-icon {
-  font-size: 2.1rem;
-}
-
 .module-card h2 {
   margin: 0;
   font-size: 1.35rem;
   font-weight: 600;
 }
 
-.module-card p {
+.module-card__body > p {
   margin: 0;
   color: var(--color-text-secondary);
   line-height: 1.6;
-  flex: 1;
+}
+
+.module-card__highlights {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--color-text-secondary);
+}
+
+.module-card__highlights li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.95rem;
+}
+
+.module-card__highlights li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: rgba(158, 215, 255, 0.9);
+}
+
+.module-card--accent .module-card__highlights li::before {
+  color: rgba(202, 174, 255, 0.95);
+}
+
+.module-card--disabled .module-card__highlights li::before {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.module-card__footer {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .module-button {
@@ -206,6 +255,15 @@ body {
   background: rgba(255, 255, 255, 0.12);
   color: var(--color-text-secondary);
   cursor: default;
+  box-shadow: none;
+}
+
+.module-card--disabled .module-button {
+  pointer-events: none;
+}
+
+.module-card--disabled:hover .module-button {
+  transform: none;
   box-shadow: none;
 }
 
