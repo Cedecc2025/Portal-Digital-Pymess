@@ -73,6 +73,12 @@ CREATE TABLE public.usuarios (
         costos.css
       /js/
         costos.js
+    /estrategias/
+      index.html
+      /css/
+        estrategias.css
+      /js/
+        estrategias.js
 ```
 
 Cada módulo cuenta con sus propias carpetas de estilos y scripts, lo que facilita el mantenimiento y la escalabilidad.
@@ -97,9 +103,9 @@ Cada módulo cuenta con sus propias carpetas de estilos y scripts, lo que facili
 
 ### Dashboard y módulos
 
-- El Dashboard muestra un saludo personalizado, ofrece un botón para cerrar sesión y la tarjeta del módulo **Costos**.
-- La tarjeta navega a `/modules/costos/index.html`.
-- El módulo de Costos es un placeholder y está protegido: requiere sesión activa para visualizarse.
+- El Dashboard muestra un saludo personalizado, ofrece un botón para cerrar sesión y tarjetas para los módulos **Costos** y **Estrategias de Ventas**.
+- Cada tarjeta utiliza rutas relativas (`../costos/index.html`, `../estrategias/index.html`) para evitar errores 404 en entornos estáticos.
+- Ambos módulos se encuentran protegidos por `requireAuth()` para asegurar que solo usuarios autenticados puedan navegar.
 
 ### Logout
 

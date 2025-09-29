@@ -28,8 +28,18 @@ function registerEventListeners() {
 
   moduleCards.forEach((card) => {
     // Se asegura que cada tarjeta mantenga un href correcto y sea navegable.
-    if (card.dataset.module === "costos") {
-      card.setAttribute("href", "../costos/index.html");
+    switch (card.dataset.module) {
+      case "costos": {
+        card.setAttribute("href", "../costos/index.html");
+        break;
+      }
+      case "estrategias": {
+        card.setAttribute("href", "../estrategias/index.html");
+        break;
+      }
+      default: {
+        break;
+      }
     }
   });
 }
