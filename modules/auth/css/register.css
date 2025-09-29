@@ -1,14 +1,15 @@
 /* register.css
- * Estilos para la pantalla de registro modernizada. */
+ * Estilos para la pantalla de registro modernizada.
+ */
 
 body {
   min-height: 100vh;
   margin: 0;
-  background: radial-gradient(circle at top, #06211a, #031029 60%, #01060c 100%);
+  background: linear-gradient(135deg, #0f2027 0%, #1c7c60 60%, #2ecc71 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 56px 24px;
+  padding: 64px 24px;
 }
 
 .register-shell {
@@ -16,19 +17,20 @@ body {
 }
 
 .register-card {
-  padding: 52px 46px;
+  padding: 56px 48px;
   display: flex;
   flex-direction: column;
   gap: 28px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(160deg, rgba(18, 46, 35, 0.9), rgba(4, 18, 30, 0.92));
+  background: rgba(10, 24, 34, 0.82);
+  backdrop-filter: blur(22px);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(28px);
 }
 
 .register-card header h1 {
-  margin: 12px 0 10px;
-  font-size: clamp(1.8rem, 2.6vw, 2.2rem);
+  margin: 16px 0 12px;
+  font-size: clamp(2rem, 2.8vw, 2.4rem);
+  font-weight: 700;
 }
 
 .register-card header p {
@@ -39,20 +41,32 @@ body {
 
 .input-control label {
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .primary-button {
-  background: linear-gradient(135deg, var(--color-secondary), #4ce18f);
-  color: #031019;
+  background: linear-gradient(135deg, var(--color-secondary), #4eea9a);
+  color: #ffffff;
 }
 
 .primary-button:hover {
-  box-shadow: 0 18px 34px rgba(46, 204, 113, 0.32);
+  box-shadow: 0 22px 40px rgba(46, 204, 113, 0.4);
+  filter: brightness(1.05);
 }
 
 .feedback#generalFeedback {
   margin-top: 10px;
+  min-height: 20px;
+}
+
+.input-valid {
+  border-color: rgba(46, 204, 113, 0.85) !important;
+  box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.22) !important;
+}
+
+.input-invalid {
+  border-color: rgba(231, 76, 60, 0.85) !important;
+  box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.22) !important;
 }
 
 footer {
@@ -62,14 +76,20 @@ footer {
 
 footer a {
   font-weight: 600;
+  color: #ffffff;
+  transition: color var(--transition-base);
+}
+
+footer a:hover {
+  color: var(--color-primary);
 }
 
 @media (max-width: 600px) {
   body {
-    padding: 40px 18px;
+    padding: 44px 18px;
   }
 
   .register-card {
-    padding: 38px 28px;
+    padding: 40px 30px;
   }
 }

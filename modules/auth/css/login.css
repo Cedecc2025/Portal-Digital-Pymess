@@ -1,62 +1,78 @@
 /* login.css
- * Estilos para la pantalla de acceso con look & feel moderno. */
+ * Estilos para la pantalla de acceso con look & feel moderno.
+ */
 
 body {
   min-height: 100vh;
   margin: 0;
-  background: linear-gradient(160deg, #020713 0%, #0c1630 55%, #010309 100%);
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 56px 24px;
 }
 
 .login-shell {
-  width: min(1200px, 100%);
+  width: min(1180px, 100%);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 36px;
+  gap: 40px;
+  align-items: stretch;
 }
 
 .login-hero {
-  padding: 48px 44px;
+  padding: 52px 48px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(26px);
+  gap: 20px;
+  color: var(--color-text-primary);
 }
 
 .login-hero h1 {
   margin: 0;
-  font-size: clamp(2rem, 2.8vw, 2.6rem);
+  font-size: clamp(2.2rem, 3.4vw, 3rem);
+  font-weight: 700;
 }
 
 .login-hero p {
   margin: 0;
   color: var(--color-text-secondary);
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 .hero-list {
   margin: 8px 0 0;
-  padding-left: 20px;
-  color: var(--color-text-muted);
+  padding: 0;
+  list-style: none;
   display: grid;
-  gap: 8px;
-  font-size: 0.95rem;
+  gap: 12px;
 }
 
-.hero-list strong {
+.hero-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.hero-list li::before {
+  content: "•";
   color: var(--color-primary);
+  font-weight: 700;
+  line-height: 1;
 }
 
 .login-card {
-  padding: 48px 44px;
+  padding: 52px 48px;
   border-radius: var(--radius-lg);
-  background: rgba(7, 13, 26, 0.85);
+  background: rgba(10, 24, 34, 0.85);
+  backdrop-filter: blur(18px);
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
@@ -64,18 +80,19 @@ body {
 }
 
 .login-header h2 {
-  margin: 0 0 6px;
-  font-size: clamp(1.6rem, 2.2vw, 2rem);
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 2.5vw, 2.2rem);
+  font-weight: 600;
 }
 
 .login-header p {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .input-control label {
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .form-meta {
@@ -83,49 +100,56 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: -6px;
 }
 
 .remember-option {
   display: inline-flex;
-  align-items: center;
   gap: 10px;
-  font-size: 0.9rem;
+  align-items: center;
   color: var(--color-text-secondary);
+  font-size: 0.92rem;
 }
 
 .remember-option input[type="checkbox"] {
   width: 18px;
   height: 18px;
+  border-radius: 4px;
   accent-color: var(--color-primary);
+  cursor: pointer;
 }
 
 .primary-button {
-  margin-top: 6px;
+  width: 100%;
+  margin-top: 8px;
 }
 
 .feedback#generalFeedback {
   margin-top: 12px;
+  min-height: 20px;
+}
+
+.text-link {
+  color: var(--color-primary);
+}
+
+.text-link:hover {
+  color: var(--color-primary-strong);
 }
 
 @media (max-width: 960px) {
   body {
-    padding: 40px 18px;
+    padding: 48px 20px;
   }
 
   .login-card,
   .login-hero {
-    padding: 36px 28px;
+    padding: 38px 32px;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 620px) {
   .form-meta {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .hero-list {
-    grid-template-columns: 1fr;
   }
 }
