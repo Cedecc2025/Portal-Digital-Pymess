@@ -13,6 +13,7 @@ import {
 } from "./validation.js";
 import { saveStrategyToSupabase, loadStrategyFromSupabase } from "./persistence.js";
 import { renderTrackingChart } from "./charts.js";
+import { generateStrategyPdf } from "./pdf.js";
 
 let currentStepIndex = 0;
 let contentArea = null;
@@ -908,7 +909,11 @@ function renderReportStep(state) {
     }
   });
   contentArea.querySelector("#downloadPdf").addEventListener("click", () => {
-    window.print();
+    generateStrategyPdf(state);
+    const message = contentArea.querySelector("#confirmationMessage");
+    if (message) {
+      message.textContent = "📄 Reporte PDF generado correctamente.";
+    }
   });
   contentArea.querySelector("#goDashboard").addEventListener("click", () => {
     window.location.href = "../dashboard/index.html";

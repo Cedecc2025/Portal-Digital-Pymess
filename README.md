@@ -121,7 +121,7 @@ El asistente guía al usuario por etapas de diagnóstico y planificación:
 - **Competencia y matriz SWOT:** agrega competidores, propuestas de valor y fortalezas/debilidades almacenadas por categoría.
 - **Plan táctico y calendario editorial:** define responsables, dependencias, costos y programación semanal con canal y hora.
 - **Campañas, automatizaciones, KPIs y tracking mensual:** calcula variaciones contra la meta, muestra tendencias y renderiza gráficas con Chart.js.
-- **Reporte ejecutivo:** ofrece acciones para guardar en Supabase, descargar en PDF (via `window.print()`), compartir por correo o volver al Dashboard.
+- **Reporte ejecutivo:** ofrece acciones para guardar en Supabase, descargar un PDF generado con jsPDF, compartir por correo o volver al Dashboard.
 
 Los datos se guardan en Supabase respetando una tabla por entidad (ver sección siguiente) y también se conservan en `localStorage` para permitir la reanudación sin conexión. Cada función del módulo está documentada con comentarios según el estilo solicitado.
 
