@@ -4,7 +4,13 @@
 import { requireAuth, getCurrentUser } from "../../../lib/authGuard.js";
 import { STEPS, OBJECTIVES, MARKETING_CHANNELS, KPI_OPTIONS, CONTENT_TYPES, DAYS_OF_WEEK } from "./constants.js";
 import { getState, setState, mergeState, loadStateFromStorage, saveState } from "./stateManager.js";
-import { validateRequired, validatePositiveNumber, setFieldError, clearFeedback } from "./validation.js";
+import {
+  validateRequired,
+  validatePositiveNumber,
+  validateEmail,
+  setFieldError,
+  clearFeedback
+} from "./validation.js";
 import { saveStrategyToSupabase, loadStrategyFromSupabase } from "./persistence.js";
 import { renderTrackingChart } from "./charts.js";
 
