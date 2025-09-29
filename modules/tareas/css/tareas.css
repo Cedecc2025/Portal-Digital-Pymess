@@ -1,0 +1,214 @@
+/* tareas.css
+ * Estilos del módulo de registro de tareas.
+ */
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  background: radial-gradient(circle at top, rgba(30, 144, 255, 0.2), transparent 45%),
+    radial-gradient(circle at bottom, rgba(46, 204, 113, 0.18), transparent 45%),
+    linear-gradient(135deg, #06151e 0%, #0b2431 50%, #103547 100%);
+}
+
+.tasks-shell {
+  width: min(1080px, 100%);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.logout-button {
+  border: 1px solid rgba(231, 76, 60, 0.65);
+  background: rgba(231, 76, 60, 0.18);
+  color: #ffb4a9;
+  padding: 12px 24px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), background var(--transition-base);
+}
+
+.logout-button:hover {
+  transform: translateY(-2px);
+  background: rgba(231, 76, 60, 0.3);
+  box-shadow: 0 18px 32px rgba(231, 76, 60, 0.35);
+}
+
+.tasks-eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.tasks-header h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+}
+
+.tasks-intro {
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tasks-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+  gap: 28px;
+}
+
+.task-form {
+  padding: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 25, 35, 0.6);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  box-shadow: var(--shadow-md);
+}
+
+.task-form h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.input-shell textarea,
+.input-shell select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  padding: 16px 10px;
+  font-size: 0.96rem;
+  outline: none;
+  appearance: none;
+}
+
+.select-shell,
+.textarea-shell {
+  position: relative;
+}
+
+.select-shell::after {
+  content: "▾";
+  position: absolute;
+  right: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+.textarea-shell textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-feedback {
+  min-height: 20px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.form-feedback.error {
+  color: var(--color-danger);
+}
+
+.task-help {
+  padding: 28px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.task-help h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.task-help ul {
+  margin: 0;
+  padding-left: 20px;
+  color: rgba(255, 255, 255, 0.75);
+  display: grid;
+  gap: 10px;
+}
+
+.task-dashboard-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  transition: color var(--transition-base);
+}
+
+.task-dashboard-link:hover {
+  color: var(--color-primary-strong);
+}
+
+.tasks-placeholder {
+  padding: 28px;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background: rgba(15, 30, 45, 0.55);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tasks-placeholder h2 {
+  margin: 0 0 12px;
+}
+
+@media (max-width: 900px) {
+  .tasks-shell {
+    padding: 36px;
+  }
+
+  .tasks-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 48px 16px;
+  }
+
+  .tasks-shell {
+    padding: 28px;
+  }
+
+  .tasks-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

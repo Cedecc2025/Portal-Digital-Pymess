@@ -143,3 +143,24 @@ create table if not exists public.leads_demo (
   email text not null unique,
   created_at timestamptz not null default timezone('utc', now())
 );
+
+create table if not exists public.tareas (
+  id bigint generated always as identity primary key,
+  user_id bigint not null references public.usuarios (id) on delete cascade,
+  title text not null,
+  description text,
+  owner text not null,
+  priority text not null default 'media',
+  status text not null default 'pendiente',
+  due_date date not null,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.tareas_historial (
+  id bigint generated always as identity primary key,
+  tarea_id bigint not null references public.tareas (id) on delete cascade,
+  action text not null,
+  notes text,
+  created_at timestamptz not null default timezone('utc', now())
+);

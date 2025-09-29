@@ -117,6 +117,10 @@ body {
   background: linear-gradient(160deg, rgba(30, 144, 255, 0.25), rgba(15, 43, 59, 0.92));
 }
 
+.module-card--success {
+  background: linear-gradient(160deg, rgba(46, 204, 113, 0.28), rgba(19, 60, 45, 0.92));
+}
+
 .module-card--accent {
   background: linear-gradient(160deg, rgba(137, 91, 255, 0.28), rgba(25, 26, 55, 0.95));
 }

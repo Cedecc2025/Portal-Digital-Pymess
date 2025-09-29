@@ -23,6 +23,7 @@
 
         <div class="cta-actions">
           <a class="primary-button" href="./modules/auth/login.html">Iniciar sesión</a>
+          <a class="secondary-button" href="./modules/tareas/index.html">Registrar tareas</a>
         </div>
 
         <div class="trust-indicators" aria-label="Indicadores de seguridad">
@@ -40,74 +41,85 @@
           </button>
         </div>
 
-        <section class="kpi-carousel" aria-label="Módulos clave" id="kpiCarousel">
+        <section class="kpi-carousel" aria-label="Tareas destacadas" id="kpiCarousel">
           <div class="kpi-track" id="kpiTrack">
-            <article class="kpi-card module-slide" data-index="0">
-              <header class="module-slide-header">
-                <span class="module-icon" aria-hidden="true">🤝</span>
-                <div>
-                  <h4>CRM</h4>
-                  <p class="module-intro">Administra clientes, contactos y oportunidades de venta con visibilidad completa.</p>
-                </div>
+            <article class="kpi-card task-card" data-index="0">
+              <header class="task-card__header">
+                <span class="task-status status--progress">En progreso</span>
+                <time class="task-due" datetime="2024-07-22T16:00">Vence hoy · 4:00&nbsp;p.m.</time>
               </header>
-              <a class="module-link" href="./modules/dashboard/index.html">Acceder al CRM</a>
+              <h4>Actualizar plan comercial Q3</h4>
+              <p class="task-summary">Revisa el pipeline, estima conversiones y prepara el informe ejecutivo para la reunión semanal.</p>
+              <ul class="task-bullets">
+                <li>Consolidar ventas proyectadas por ejecutivo</li>
+                <li>Ajustar metas trimestrales según inventario</li>
+              </ul>
+              <footer class="task-card__footer">
+                <span class="task-owner">Responsable: Camila</span>
+                <span class="task-label">Área Comercial</span>
+              </footer>
             </article>
-            <article class="kpi-card module-slide" data-index="1">
-              <header class="module-slide-header">
-                <span class="module-icon" aria-hidden="true">🛍️</span>
-                <div>
-                  <h4>Catálogo</h4>
-                  <p class="module-intro">Organiza y presenta tu oferta de productos y servicios de forma clara y accesible.</p>
-                </div>
+            <article class="kpi-card task-card" data-index="1">
+              <header class="task-card__header">
+                <span class="task-status status--review">En revisión</span>
+                <time class="task-due" datetime="2024-07-23">Entrega mañana</time>
               </header>
-              <a class="module-link" href="./modules/dashboard/index.html">Ver Catálogo</a>
+              <h4>Diseñar campaña de retención</h4>
+              <p class="task-summary">Define mensaje clave, incentivos y automatizaciones para clientes premium inactivos.</p>
+              <ul class="task-bullets">
+                <li>Segmentar base por antigüedad</li>
+                <li>Configurar flow en email marketing</li>
+              </ul>
+              <footer class="task-card__footer">
+                <span class="task-owner">Responsable: Luis</span>
+                <span class="task-label">Marketing</span>
+              </footer>
             </article>
-            <article class="kpi-card module-slide" data-index="2">
-              <header class="module-slide-header">
-                <span class="module-icon" aria-hidden="true">🤖</span>
-                <div>
-                  <h4>Chatbot Web</h4>
-                  <p class="module-intro">Automatiza la atención al cliente y mantente disponible 24/7 sin complicaciones.</p>
-                </div>
+            <article class="kpi-card task-card" data-index="2">
+              <header class="task-card__header">
+                <span class="task-status status--blocked">Bloqueada</span>
+                <time class="task-due" datetime="2024-07-25">Esperando insumos</time>
               </header>
-              <a class="module-link" href="./modules/dashboard/index.html">Configurar Chatbot</a>
+              <h4>Integrar catálogo con chatbot</h4>
+              <p class="task-summary">Carga fichas técnicas y respuestas frecuentes para garantizar asesoría 24/7.</p>
+              <ul class="task-bullets">
+                <li>Recopilar precios actualizados</li>
+                <li>Validar intención de compra con equipo</li>
+              </ul>
+              <footer class="task-card__footer">
+                <span class="task-owner">Responsable: Sofía</span>
+                <span class="task-label">Automatización</span>
+              </footer>
             </article>
-            <article class="kpi-card module-slide" data-index="3">
-              <header class="module-slide-header">
-                <span class="module-icon" aria-hidden="true">📈</span>
-                <div>
-                  <h4>Estrategias</h4>
-                  <p class="module-intro">Planifica campañas de marketing, asigna presupuestos y mide resultados en un solo lugar.</p>
-                </div>
+            <article class="kpi-card task-card" data-index="3">
+              <header class="task-card__header">
+                <span class="task-status status--completed">Completada</span>
+                <time class="task-due" datetime="2024-07-20">Cerrada el 20/07</time>
               </header>
-              <a class="module-link" href="./modules/dashboard/index.html">Diseñar Estrategia</a>
-            </article>
-            <article class="kpi-card module-slide" data-index="4">
-              <header class="module-slide-header">
-                <span class="module-icon" aria-hidden="true">🧰</span>
-                <div>
-                  <h4>Herramientas Extra</h4>
-                  <p class="module-intro">Utilidades complementarias que potencian tus operaciones y análisis diarios.</p>
-                </div>
-              </header>
-              <a class="module-link" href="./modules/dashboard/index.html">Explorar Herramientas</a>
+              <h4>Auditar costos recurrentes</h4>
+              <p class="task-summary">Revisa contratos de proveedores y detecta oportunidades de ahorro mensual.</p>
+              <ul class="task-bullets">
+                <li>Comparar facturación de los últimos 6 meses</li>
+                <li>Identificar renegociaciones prioritarias</li>
+              </ul>
+              <footer class="task-card__footer">
+                <span class="task-owner">Responsable: Andrés</span>
+                <span class="task-label">Finanzas</span>
+              </footer>
             </article>
           </div>
           <div class="kpi-controls" id="kpiControls" role="tablist" aria-label="Controles de módulos">
             <button type="button" class="dot is-active" data-target="0" role="tab" aria-selected="true" aria-controls="kpi-slide-0">
-              <span class="sr-only">CRM</span>
+              <span class="sr-only">Actualizar plan comercial</span>
             </button>
             <button type="button" class="dot" data-target="1" role="tab" aria-selected="false" aria-controls="kpi-slide-1">
-              <span class="sr-only">Catálogo</span>
+              <span class="sr-only">Diseñar campaña de retención</span>
             </button>
             <button type="button" class="dot" data-target="2" role="tab" aria-selected="false" aria-controls="kpi-slide-2">
-              <span class="sr-only">Chatbot Web</span>
+              <span class="sr-only">Integrar catálogo con chatbot</span>
             </button>
             <button type="button" class="dot" data-target="3" role="tab" aria-selected="false" aria-controls="kpi-slide-3">
-              <span class="sr-only">Estrategias</span>
-            </button>
-            <button type="button" class="dot" data-target="4" role="tab" aria-selected="false" aria-controls="kpi-slide-4">
-              <span class="sr-only">Herramientas Extra</span>
+              <span class="sr-only">Auditar costos recurrentes</span>
             </button>
           </div>
         </section>

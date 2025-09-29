@@ -35,6 +35,10 @@ function registerEventListeners() {
         card.setAttribute("href", "../costos/index.html");
         break;
       }
+      case "tareas": {
+        card.setAttribute("href", "../tareas/index.html");
+        break;
+      }
       case "estrategias": {
         card.setAttribute("href", "../estrategias/index.html");
         break;
