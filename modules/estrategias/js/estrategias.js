@@ -286,10 +286,10 @@ function createStepMarkup(stepIndex) {
         .map((objective) => {
           const selected = data.objectives.includes(objective);
           return `
-            <button type="button" class="selectable-card ${selected ? "selected" : ""}" data-action="toggle-objective" data-value="${escapeHtml(objective)}">
+            <div class="selectable-card ${selected ? "selected" : ""}" data-action="toggle-objective" data-value="${escapeHtml(objective)}">
               <span>${escapeHtml(objective)}</span>
-              <span aria-hidden="true">${selected ? "✓" : "+"}</span>
-            </button>
+              ${selected ? "✓" : ""}
+            </div>
           `;
         })
         .join("");
@@ -316,13 +316,13 @@ function createStepMarkup(stepIndex) {
         .map((channel) => {
           const selected = data.channels.includes(channel.id);
           return `
-            <button type="button" class="selectable-card ${selected ? "selected" : ""}" data-action="toggle-channel" data-value="${channel.id}">
+            <div class="selectable-card ${selected ? "selected" : ""}" data-action="toggle-channel" data-value="${channel.id}">
               <div class="channel-card">
                 <div class="channel-icon ${channel.className}">${channel.icon}</div>
                 <span>${channel.name}</span>
               </div>
-              <span aria-hidden="true">${selected ? "✓" : "+"}</span>
-            </button>
+              ${selected ? "✓" : ""}
+            </div>
           `;
         })
         .join("");
@@ -495,10 +495,10 @@ function createStepMarkup(stepIndex) {
         .map((kpi) => {
           const selected = data.kpis.includes(kpi);
           return `
-            <button type="button" class="selectable-card ${selected ? "selected" : ""}" data-action="toggle-kpi" data-value="${escapeHtml(kpi)}">
+            <div class="selectable-card ${selected ? "selected" : ""}" data-action="toggle-kpi" data-value="${escapeHtml(kpi)}">
               <span>${escapeHtml(kpi)}</span>
-              <span aria-hidden="true">${selected ? "✓" : "+"}</span>
-            </button>
+              ${selected ? "✓" : ""}
+            </div>
           `;
         })
         .join("");
@@ -515,35 +515,26 @@ function createStepMarkup(stepIndex) {
       `;
     }
     case 9: {
-      if (strategyState.data.kpis.length === 0) {
-        return `
-          <h2>Sistema de Tracking Mensual</h2>
-          <p>Configura cómo medirás y registrarás tus resultados cada mes</p>
-          <div class="alert alert-info">
-            <span>ℹ️</span>
-            <div>Selecciona al menos un KPI en el paso anterior para comenzar el seguimiento mensual.</div>
-          </div>
-        `;
-      }
-
-      const metricCards = strategyState.data.kpis
-        .map((kpi) => `
-          <div class="metric-card">
-            <div class="metric-header">
-              <span>${escapeHtml(kpi)}</span>
-              <span>📊</span>
+      const metrics = strategyState.data.kpis
+        .map((kpi) => {
+          return `
+            <div class="metric-card">
+              <div class="metric-header">
+                <span>${escapeHtml(kpi)}</span>
+                <span>📊</span>
+              </div>
+              <input type="text" class="form-control" placeholder="Meta mensual" style="margin-bottom: 8px;" />
+              <select class="form-control">
+                <option>Medición numérica</option>
+                <option>Porcentaje</option>
+                <option>Escala 1-10</option>
+              </select>
             </div>
-            <input type="text" class="form-control" placeholder="Meta mensual" style="margin-bottom: 8px;" />
-            <select class="form-control">
-              <option>Medición numérica</option>
-              <option>Porcentaje</option>
-              <option>Escala 1-10</option>
-            </select>
-          </div>
-        `)
+          `;
+        })
         .join("");
 
-      const monthCount = Number(strategyState.data.timeline.duration || "3");
+      const monthCount = Number.parseInt(strategyState.data.timeline.duration || "3", 10) || 0;
       const headers = Array.from({ length: monthCount })
         .map((_, index) => `<th>Mes ${index + 1}</th>`)
         .join("");
@@ -558,36 +549,59 @@ function createStepMarkup(stepIndex) {
         })
         .join("");
 
+      const statusOptions = strategyState.data.kpis
+        .map((kpi) => `<option>${escapeHtml(kpi)}</option>`)
+        .join("");
+
       return `
         <h2>Sistema de Tracking Mensual</h2>
         <p>Configura cómo medirás y registrarás tus resultados cada mes</p>
         <h3>Métricas a trackear mensualmente</h3>
-        <div class="tracking-grid">${metricCards}</div>
+        <div class="tracking-grid">
+          ${metrics}
+        </div>
         <h3>Dashboard de Resultados Mensuales</h3>
         <table class="table">
-          <thead><tr><th>Métrica</th>${headers}<th>Promedio</th></tr></thead>
-          <tbody>${rows}</tbody>
+          <thead>
+            <tr>
+              <th>Métrica</th>
+              ${headers}
+              <th>Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
         </table>
         <div class="status-cards">
           <div class="status-card green">
-            <div class="status-header"><span style="color: #166534;">Mejor rendimiento</span><span>📈</span></div>
+            <div class="status-header">
+              <span style="color: #166534;">Mejor rendimiento</span>
+              <span>📈</span>
+            </div>
             <select class="form-control">
               <option>Seleccionar KPI</option>
-              ${strategyState.data.kpis.map((kpi) => `<option>${escapeHtml(kpi)}</option>`).join("")}
+              ${statusOptions}
             </select>
           </div>
           <div class="status-card yellow">
-            <div class="status-header"><span style="color: #854d0e;">Necesita atención</span><span>⚠️</span></div>
+            <div class="status-header">
+              <span style="color: #854d0e;">Necesita atención</span>
+              <span>⚠️</span>
+            </div>
             <select class="form-control">
               <option>Seleccionar KPI</option>
-              ${strategyState.data.kpis.map((kpi) => `<option>${escapeHtml(kpi)}</option>`).join("")}
+              ${statusOptions}
             </select>
           </div>
           <div class="status-card blue">
-            <div class="status-header"><span style="color: #1e40af;">En objetivo</span><span>✅</span></div>
+            <div class="status-header">
+              <span style="color: #1e40af;">En objetivo</span>
+              <span>✅</span>
+            </div>
             <select class="form-control">
               <option>Seleccionar KPI</option>
-              ${strategyState.data.kpis.map((kpi) => `<option>${escapeHtml(kpi)}</option>`).join("")}
+              ${statusOptions}
             </select>
           </div>
         </div>
