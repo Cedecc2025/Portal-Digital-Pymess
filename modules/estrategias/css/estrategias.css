@@ -14,6 +14,7 @@ body {
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
   padding: 20px;
+  color: #1f2937;
 }
 
 .container {
@@ -84,6 +85,7 @@ body {
   transition: all 0.3s;
   z-index: 2;
   position: relative;
+  color: #1f2937;
 }
 
 .step.active .step-circle {
