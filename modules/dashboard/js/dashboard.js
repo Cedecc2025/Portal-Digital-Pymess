@@ -137,10 +137,6 @@ function registerEventListeners() {
         card.setAttribute("href", "../tareas/index.html");
         break;
       }
-      case "estrategias": {
-        card.setAttribute("href", "../estrategias/index.html");
-        break;
-      }
       default: {
         break;
       }
