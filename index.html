@@ -3,66 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal Empresarial Modular</title>
+    <title>Portal de Herramientas Empresariales</title>
     <link rel="stylesheet" href="./public/css/base.css" />
-    <link rel="stylesheet" href="./public/css/home.css" />
   </head>
   <body>
-    <main class="main-hero">
-      <section class="welcome-card">
-        <span class="kpi-chip" aria-label="Usuarios activos en las últimas 24 horas">Usuarios activos (24h): 1,248</span>
-        <header class="welcome-header">
-          <h1>Accede a tus herramientas empresariales</h1>
-          <p class="welcome-description">
-            Inicia sesión para gestionar los módulos habilitados y mantener el control de tus operaciones clave.
+    <main class="landing-shell">
+      <section class="landing-card" aria-labelledby="portal-title">
+        <header class="landing-header">
+          <h1 id="portal-title">Bienvenido a tu Portal de Herramientas Empresariales</h1>
+          <p class="landing-subtitle">
+            Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar y hacer crecer tu negocio de manera ágil y profesional.
           </p>
         </header>
-        <div class="cta-actions">
-          <a class="primary-button" href="./modules/auth/login.html">Iniciar sesión</a>
-          <a class="secondary-button" href="./modules/auth/register.html">Registrarse</a>
+        <div class="landing-body">
+          <p>
+            Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave de tu organización:
+          </p>
+          <ul class="landing-list">
+            <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
+            <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios de forma clara y accesible.</li>
+            <li><strong>Chatbot Web:</strong> brinda atención automática y disponible 24/7 para tus clientes.</li>
+            <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas para impulsar tus resultados.</li>
+            <li><strong>Herramientas Extra:</strong> utilidades complementarias que facilitan la gestión diaria.</li>
+          </ul>
+          <p>
+            Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo suficientemente robusto para ayudarte a tomar decisiones basadas en datos y optimizar tus procesos.
+          </p>
         </div>
-        <section class="kpi-carousel" aria-label="Módulos disponibles" id="kpiCarousel">
-          <div class="kpi-track" id="kpiTrack">
-            <article class="kpi-card module-slide" id="kpi-slide-0" data-index="0">
-              <header class="module-slide__header">
-                <span class="module-icon" aria-hidden="true">💼</span>
-                <span class="module-badge badge--available">Disponible</span>
-              </header>
-              <h3>Costos</h3>
-              <p>Controla estructuras de gastos, flujo de caja y márgenes para anticiparte a tus finanzas.</p>
-            </article>
-            <article class="kpi-card module-slide" id="kpi-slide-1" data-index="1">
-              <header class="module-slide__header">
-                <span class="module-icon" aria-hidden="true">🚀</span>
-                <span class="module-badge badge--new">Nuevo</span>
-              </header>
-              <h3>Estrategias de Ventas</h3>
-              <p>Planifica campañas, automatizaciones y reportes ejecutivos con un asistente guiado.</p>
-            </article>
-            <article class="kpi-card module-slide" id="kpi-slide-2" data-index="2">
-              <header class="module-slide__header">
-                <span class="module-icon" aria-hidden="true">🗂️</span>
-                <span class="module-badge badge--available">Disponible</span>
-              </header>
-              <h3>Tareas</h3>
-              <p>Centraliza pendientes del equipo, asigna responsables y controla fechas límite desde un solo lugar.</p>
-            </article>
-          </div>
-          <div class="kpi-controls" id="kpiControls" role="tablist" aria-label="Controles de módulos">
-            <button type="button" class="dot is-active" data-target="0" role="tab" aria-selected="true" aria-controls="kpi-slide-0">
-              <span class="sr-only">Costos</span>
-            </button>
-            <button type="button" class="dot" data-target="1" role="tab" aria-selected="false" aria-controls="kpi-slide-1">
-              <span class="sr-only">Estrategias de Ventas</span>
-            </button>
-            <button type="button" class="dot" data-target="2" role="tab" aria-selected="false" aria-controls="kpi-slide-2">
-              <span class="sr-only">Tareas</span>
-            </button>
-          </div>
-        </section>
+        <div class="landing-actions">
+          <a class="primary-button" href="./modules/auth/login.html">Iniciar sesión</a>
+          <a class="secondary-button" href="./modules/auth/register.html">Crear cuenta</a>
+        </div>
       </section>
     </main>
-    <script type="module" src="./lib/supabaseClient.js"></script>
-    <script type="module" src="./public/js/home.js"></script>
   </body>
 </html>

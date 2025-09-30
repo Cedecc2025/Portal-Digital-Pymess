@@ -205,18 +205,29 @@ export function updatePasswordStrengthDisplay(score) {
 
   strengthBar.dataset.level = String(score);
 
+  const strengthSettings = [
+    { text: "Fortaleza: muy débil", width: "20%", color: "#e74c3c" },
+    { text: "Fortaleza: débil", width: "40%", color: "#f1c40f" },
+    { text: "Fortaleza: media", width: "70%", color: "#3498db" },
+    { text: "Fortaleza: fuerte", width: "100%", color: "#2ecc71" }
+  ];
+
+  const { text, width, color } = strengthSettings[Math.min(score, strengthSettings.length - 1)];
+  strengthBar.style.setProperty("--strength-width", width);
+  strengthBar.style.setProperty("--strength-color", color);
+
   switch (score) {
     case 0:
-      strengthCopy.textContent = "Fortaleza: muy débil";
+      strengthCopy.textContent = text;
       break;
     case 1:
-      strengthCopy.textContent = "Fortaleza: débil";
+      strengthCopy.textContent = text;
       break;
     case 2:
-      strengthCopy.textContent = "Fortaleza: media";
+      strengthCopy.textContent = text;
       break;
     case 3:
-      strengthCopy.textContent = "Fortaleza: fuerte";
+      strengthCopy.textContent = text;
       break;
     default:
       strengthCopy.textContent = "Fortaleza: desconocida";

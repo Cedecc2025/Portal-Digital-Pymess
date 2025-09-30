@@ -1,33 +1,12 @@
-# Sistema Modular - Portal Digital
+# Sistema Modular Empresarial (HTML/CSS/JS)
 
-Proyecto de ejemplo en HTML/CSS/JS vanilla que implementa un flujo de autenticación sencillo contra Supabase. Está organizado de forma modular para facilitar la futura incorporación de nuevos componentes.
+Este repositorio contiene un portal web modular desarrollado únicamente con HTML, CSS y JavaScript "vanilla". Implementa un flujo de autenticación profesional contra Supabase y organiza la aplicación en módulos independientes para facilitar el crecimiento del sistema.
 
 ## Requisitos previos
 
-- Navegador moderno con soporte para módulos ES.
-- Acceso a Internet (se consumen dependencias desde CDN y se conecta a Supabase).
-
-## Cómo ejecutar el proyecto
-
-1. Clona o descarga este repositorio.
-2. Abre la carpeta raíz del proyecto (`Portal-Digital-Pymess`) en tu editor.
-3. Inicia un servidor estático desde la raíz, por ejemplo con la extensión **Live Server** de VS Code o con `npx serve`.
-4. Navega a `http://localhost:PORT/index.html` (sustituye `PORT` por el puerto real del servidor).
-
-> **Despliegue en GitHub Pages:** al estar `index.html` en la raíz, activa GitHub Pages desde la rama principal y selecciona el modo "Deploy from a branch" apuntando a `/(root)`.
-
-> **Tip:** Si usas Live Server, haz clic derecho sobre `index.html` en la raíz y selecciona **Open with Live Server**.
-
-## Configuración de Supabase
-
-El proyecto ya incluye la configuración necesaria en `lib/supabaseClient.js` con las credenciales públicas proporcionadas:
-
-```js
-const SUPABASE_URL = "https://jsjwgjaprgymeonsadny.supabase.co";
-const SUPABASE_ANON_KEY = "<clave_anon>";
-```
-
-La tabla `public.usuarios` debe existir con el esquema:
+- Navegador moderno con soporte para ES Modules.
+- Acceso a Internet para consumir el cliente de Supabase y `bcryptjs` desde CDN.
+- La tabla `public.usuarios` creada en tu proyecto de Supabase:
 
 ```sql
 CREATE TABLE public.usuarios (
@@ -38,106 +17,120 @@ CREATE TABLE public.usuarios (
 );
 ```
 
+## Cómo ejecutar el proyecto
+
+1. Clona el repositorio y abre la carpeta `Portal-Digital-Pymess` en tu editor.
+2. Levanta un servidor estático desde la raíz (por ejemplo con la extensión **Live Server** de VS Code o `npx serve`).
+3. Navega a `http://localhost:<PUERTO>/index.html`.
+4. Para desplegar en GitHub Pages, publica la rama principal apuntando a la carpeta raíz del proyecto.
+
+## Configuración de Supabase
+
+El cliente de Supabase se inicializa en `lib/supabaseClient.js` con las credenciales públicas proporcionadas:
+
+```js
+const SUPABASE_URL = "https://jsjwgjaprgymeonsadny.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzandnamFwcmd5bWVvbnNhZG55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2MzY5NjQsImV4cCI6MjA3NDIxMjk2NH0.4fjXkdOCyaubZuVIZNeViaA6MfdDK-4pdH9h-Ty2bfk";
+```
+
+No es necesario exponer la contraseña de la base de datos; todo el consumo se realiza mediante el cliente público.
+
 ## Estructura del proyecto
 
 ```
-/ (raíz del repositorio)
-  README.md
-  index.html                # Portada del sistema
-  /public/
-    /css/
-      global.css           # Estilos compartidos
-  /lib/
-    authGuard.js           # Gestión de sesión y protección de rutas
-    pathUtil.js            # Helper para resolver rutas relativas
-    supabaseClient.js      # Cliente único de Supabase
-  /modules/
-    /auth/
-      login.html
-      register.html
-      /css/
-        login.css
-        register.css
-      /js/
-        login.js
-        register.js
-    /dashboard/
-      index.html
-      /css/
-        dashboard.css
-      /js/
-        dashboard.js
-    /costos/
-      index.html
-      /css/
-        costos.css
-      /js/
-        costos.js
+Portal-Digital-Pymess/
+├── README.md
+├── index.html                     # Portada general del portal
+├── public/
+│   └── css/
+│       └── base.css                # Estilos globales y tokens de diseño
+├── lib/
+│   ├── authGuard.js               # Gestión de sesión y protección de rutas
+│   ├── pathUtil.js                # Helper para navegar entre módulos con rutas relativas
+│   └── supabaseClient.js          # Cliente único de Supabase
+├── modules/
+│   ├── auth/
+│   │   ├── login.html
+│   │   ├── register.html
+│   │   ├── css/
+│   │   │   ├── login.css
+│   │   │   └── register.css
+│   │   └── js/
+│   │       ├── login.js
+│   │       └── register.js
+│   ├── dashboard/
+│   │   ├── index.html
+│   │   ├── css/dashboard.css
+│   │   └── js/dashboard.js
+│   └── costos/
+│       ├── index.html
+│       ├── css/costos.css
+│       └── js/costos.js
+└── tests/
+    ├── login.test.js
+    └── register.test.js
 ```
 
-Cada módulo cuenta con sus propias carpetas de estilos y scripts, lo que facilita el mantenimiento y la escalabilidad.
+Cada módulo mantiene sus propios estilos y scripts, facilitando la escalabilidad y el mantenimiento del código.
 
-## Guía de flujos principales
-
-### Portada (Index)
-
-- Presenta la bienvenida con descripción de módulos y un carrusel de KPIs animado que rota cada 6 segundos.
-- Incluye un micro-formulario para solicitar la demo; los correos se validan y se almacenan en la tabla `leads_demo` de Supabase.
-- Muestra indicadores de confianza (Supabase secure, Cifrado, RLS) con tooltips accesibles.
-- Los estilos siguen un look glassmorphism con tipografía Poppins e interacciones suaves.
+## Flujos principales
 
 ### Registro
 
 1. Accede a `/modules/auth/register.html`.
-2. Completa usuario y contraseña (mínimo 8 caracteres) mientras observas el medidor de fortaleza y la disponibilidad del usuario en vivo.
-3. Al enviar, la contraseña se hashea con `bcrypt.hashSync` antes de enviarse a Supabase.
-4. Se valida que el usuario no exista (`checkUsernameAvailability`) y se inserta el nuevo registro en `public.usuarios`.
-5. Se muestra confirmación, beneficios posteriores y enlaces legales.
+2. Valida usuario (3-20 caracteres alfanuméricos, guion o guion bajo) y contraseña (≥ 8 caracteres).
+3. El formulario muestra en vivo la disponibilidad del usuario y la fortaleza de la contraseña.
+4. Al enviar, la contraseña se hashea con `bcrypt.hashSync` antes de insertarse en Supabase.
+5. Se muestra un mensaje de éxito y se redirige al login.
 
 ### Inicio de sesión
 
 1. Accede a `/modules/auth/login.html`.
-2. Ingresa usuario y contraseña.
-3. El formulario deshabilita controles, muestra un spinner y valida las credenciales contra Supabase comparando el hash almacenado con `bcrypt.compare`.
-4. Activa "Recordarme" para guardar la sesión en `localStorage`. De lo contrario se usa `sessionStorage`.
-5. Tras autenticación exitosa se muestra un mensaje accesible y se redirige al Dashboard.
+2. Ingresa tus credenciales y decide si deseas activar "Recordarme".
+3. Las credenciales se validan contra Supabase utilizando `bcrypt.compare`.
+4. Según la opción elegida, la sesión se guarda en `localStorage` o `sessionStorage`.
+5. Tras el éxito, se redirige al Dashboard.
 
-### Dashboard y módulos
+### Dashboard
 
-- El Dashboard muestra un saludo personalizado, widgets accionables (estado de cuenta, tareas, próximas actualizaciones, último acceso) y accesos rápidos a perfil, notificaciones y ayuda.
-- Cada tarjeta utiliza rutas relativas (por ejemplo, `../costos/index.html`) para evitar errores 404 en entornos estáticos y luce badges dinámicos (Nuevo, En beta, Actualizado).
-- Los módulos publicados se encuentran protegidos por `requireAuth()` para asegurar que solo usuarios autenticados puedan navegar.
+- Protegido mediante `requireAuth()`.
+- Muestra un saludo personalizado y un único acceso directo al módulo de **Costos**.
+- Incluye un botón de “Cerrar sesión” que elimina la sesión local y devuelve al login.
 
-### Logout
+### Módulo de Costos
 
-- El botón **Cerrar sesión** ejecuta `authGuard.logout()`, eliminando cualquier sesión almacenada y redirigiendo al login.
+- Actualmente se presenta como un placeholder protegido por autenticación.
+- Servirá como base para incorporar CRUD de productos, costos fijos y flujo de caja.
 
-## Riesgos y recomendaciones
+## Guardas y utilidades de sesión
 
-- **Hashing en el cliente:** la contraseña se hashea en el navegador antes de enviarse a Supabase. Esto protege la clave en tránsito, pero no sustituye un backend seguro. Un atacante podría inspeccionar el código y enviar hashes directamente.
-- **Recomendación futura:** utilizar **Supabase Auth** o funciones **Edge** para realizar el hashing y validación en el servidor, reduciendo la exposición y centralizando la lógica crítica de autenticación.
+`authGuard.js` expone:
 
-## Dependencias externas
-
-- [@supabase/supabase-js](https://supabase.com/docs/reference/javascript/installing) cargado vía CDN (ESM).
-- [bcryptjs](https://www.npmjs.com/package/bcryptjs) cargado vía CDN en formato ESM.
+- `isAuthenticated()` – indica si existe sesión almacenada.
+- `requireAuth()` – redirige al login cuando no hay sesión activa.
+- `saveSession(user, rememberMe)` – guarda la sesión en localStorage o sessionStorage.
+- `logout()` – borra la sesión y redirige al login.
+- `getCurrentUsername()` y `getCurrentUser()` – devuelven información de la sesión actual.
 
 ## Pruebas unitarias
 
-El proyecto incorpora pruebas unitarias con [Vitest](https://vitest.dev/) para los flujos de **Login** y **Registro**. Para
-ejecutarlas:
+El proyecto incluye pruebas con [Vitest](https://vitest.dev/) y jsdom para cubrir la lógica de login y registro.
 
 ```bash
 npm install
 npm test
 ```
 
-Estas pruebas simulan el DOM con **jsdom**, validan la lógica de validación de formularios, la interacción con Supabase y la
-generación de mensajes de retroalimentación al usuario.
+Las pruebas mockean Supabase y `bcryptjs`, garantizando que las validaciones de formularios, el guardado de sesión y la navegación se comporten correctamente.
+
+## Riesgos y recomendaciones
+
+- **Hashing en el cliente:** la contraseña se hashea en el navegador antes de enviarse. Esto evita enviar texto plano, pero el hash podría ser reutilizado por un atacante. Para ambientes productivos se recomienda implementar Supabase Auth o funciones Edge que centralicen la lógica de autenticación.
+- **Dependencia de red:** al cargar recursos desde CDN es necesario contar con conexión a Internet. Para entornos cerrados se sugiere empaquetar las dependencias localmente.
 
 ## Próximos pasos sugeridos
 
-- Implementar módulos adicionales (por ejemplo, Finanzas, Reportes).
-- Añadir manejo de roles/permiso avanzados en `authGuard`.
-- Integrar formularios y datos reales en el módulo de Costos.
-- Extender las pruebas automáticas y preparar un pipeline de despliegue continuo.
+- Implementar el CRUD completo del módulo de Costos (productos, costos fijos y flujo de caja).
+- Añadir más tarjetas en el Dashboard conforme se publiquen nuevos módulos.
+- Incorporar roles y permisos granulares en el guard de autenticación.
+- Automatizar despliegues y pruebas en un pipeline CI/CD.

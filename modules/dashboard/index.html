@@ -9,113 +9,28 @@
   </head>
   <body>
     <main class="dashboard-shell">
-      <header class="dashboard-header">
-        <div class="header-copy">
-          <p class="welcome-label">Bienvenido de nuevo</p>
-          <h1 id="usernameDisplay">Usuario</h1>
-        </div>
-        <nav class="dash-actions" aria-label="Acciones del dashboard">
-          <a class="btn btn-secondary" href="../tareas/index.html">Tareas</a>
-          <button id="logoutButton" class="btn btn-outline" type="button">Cerrar sesión</button>
-        </nav>
-      </header>
-      <section class="task-slider" aria-label="Tareas recientes">
-        <header class="task-slider__header">
+      <section class="dashboard-card" aria-labelledby="dashboard-title">
+        <header class="dashboard-header">
           <div>
-            <h2>Tus tareas recientes</h2>
-            <p id="taskSliderStatus">Consulta el avance de las últimas tareas registradas por tu equipo.</p>
+            <p class="dashboard-kicker">Panel principal</p>
+            <h1 id="dashboard-title">Hola, <span id="usernameDisplay">Usuario</span></h1>
+            <p class="dashboard-subtitle">
+              Selecciona un módulo para continuar trabajando con tus herramientas empresariales.
+            </p>
           </div>
+          <button id="logoutButton" class="secondary-button" type="button">Cerrar sesión</button>
         </header>
-        <div class="task-slider__shell">
-          <button class="task-slider__nav" id="taskSliderPrev" type="button" aria-label="Ver tareas anteriores">‹</button>
-          <div class="task-slider__viewport" id="taskSliderViewport">
-            <div class="task-slider__track" id="task-slider-track" role="list"></div>
-          </div>
-          <button class="task-slider__nav" id="taskSliderNext" type="button" aria-label="Ver más tareas">›</button>
-        </div>
-        <p class="task-slider__empty" id="taskSliderEmpty">
-          Aún no has registrado tareas. Captura la primera desde el módulo de Tareas para verla aquí.
-        </p>
-      </section>
-      <section class="modules-grid">
-        <a class="module-card module-card--primary" href="../costos/index.html" data-module="costos">
-          <header class="module-card__header">
-            <div class="module-card__icon" aria-hidden="true">💼</div>
-            <span class="module-badge badge--active">Actualizado</span>
-          </header>
-          <div class="module-card__body">
-            <h2>Costos</h2>
-            <p>Controla estructuras de costos, flujo de caja y márgenes para anticiparte a los números.</p>
-            <ul class="module-card__highlights">
-              <li>Flujo de caja con filtros mensuales</li>
-              <li>Alertas sobre gastos recurrentes</li>
-              <li>Reportes exportables en un clic</li>
-            </ul>
-          </div>
-          <footer class="module-card__footer">
-            <span class="module-button">Ir a Costos</span>
-          </footer>
-        </a>
-        <a class="module-card" href="../../estrategias/index.html" data-module="estrategias">
-          <header class="module-card__header">
-            <div class="module-card__icon" aria-hidden="true">🧠</div>
-            <span class="module-badge badge--active">Nuevo</span>
-          </header>
-          <div class="module-card__body">
-            <h2>Estrategias de Marketing</h2>
-            <p>Diseña campañas, selecciona canales y realiza seguimiento de KPIs en un asistente guiado.</p>
-            <ul class="module-card__highlights">
-              <li>11 pasos con objetivos, cronograma y KPIs</li>
-              <li>Calendario editorial personalizable</li>
-              <li>Resumen ejecutivo listo para compartir</li>
-            </ul>
-          </div>
-          <footer class="module-card__footer">
-            <span class="module-button">Abrir asistente</span>
-          </footer>
-        </a>
-        <div class="module-card module-card--disabled">
-          <header class="module-card__header">
-            <div class="module-card__icon" aria-hidden="true">🛠️</div>
-            <span class="module-badge badge--soon">En proceso</span>
-          </header>
-          <div class="module-card__body">
-            <h2>Más módulos</h2>
-            <p>Seguimos trabajando en nuevos módulos como CRM, Catálogo y Chatbot para complementar tu portal.</p>
-            <ul class="module-card__highlights">
-              <li>Disponibles próximamente</li>
-              <li>Integración total con el dashboard</li>
-              <li>Notificaciones cuando estén listos</li>
-            </ul>
-          </div>
-          <footer class="module-card__footer">
-            <span class="module-button ghost">Próximamente</span>
-          </footer>
-        </div>
+        <section class="dashboard-grid" aria-label="Módulos disponibles">
+          <article class="module-card" tabindex="0">
+            <h3>Costos</h3>
+            <p>Administra costos, registra transacciones y visualiza indicadores financieros clave.</p>
+            <div class="module-actions">
+              <a class="primary-button" href="../costos/index.html">Ir al módulo de Costos</a>
+            </div>
+          </article>
+        </section>
       </section>
     </main>
-    <section class="task-modal" id="taskModal" hidden>
-      <div class="task-modal__backdrop" id="taskModalBackdrop"></div>
-      <article
-        class="task-modal__dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="taskModalTitle"
-      >
-        <button class="task-modal__close" id="taskModalClose" type="button" aria-label="Cerrar detalle de tarea">
-          ×
-        </button>
-        <header class="task-modal__header">
-          <span class="task-modal__badge" id="taskModalPriority">Prioridad</span>
-          <h3 id="taskModalTitle">Título de la tarea</h3>
-          <p id="taskModalMeta" class="task-modal__meta"></p>
-        </header>
-        <section class="task-modal__body">
-          <h4>Descripción</h4>
-          <p id="taskModalDescription"></p>
-        </section>
-      </article>
-    </section>
     <script type="module" src="../../lib/supabaseClient.js"></script>
     <script type="module" src="../../lib/authGuard.js"></script>
     <script type="module" src="./js/dashboard.js"></script>

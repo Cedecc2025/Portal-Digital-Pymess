@@ -9,12 +9,11 @@
   </head>
   <body>
     <main class="register-shell">
-      <section class="register-card">
+      <section class="register-card" aria-labelledby="register-title">
         <header class="register-header">
-          <span class="badge-pill">🆕 Registro de usuario</span>
-          <h1>Crea una cuenta para empezar</h1>
-          <p>
-            Completa tus datos para sincronizar tus módulos con Supabase y colaborar con tu equipo desde cualquier dispositivo.
+          <h1 id="register-title" class="register-title">Crea una cuenta para empezar</h1>
+          <p class="register-subtitle">
+            Sincroniza tus datos con Supabase y habilita el acceso seguro a los módulos del portal empresarial.
           </p>
         </header>
         <form id="registerForm" novalidate>
@@ -34,7 +33,7 @@
               />
             </div>
             <span class="feedback" id="usernameFeedback" role="alert" aria-live="polite"></span>
-            <p class="availability" id="usernameAvailability" role="status" aria-live="polite"></p>
+            <p class="username-availability" id="usernameAvailability" role="status" aria-live="polite"></p>
           </div>
           <div class="input-control">
             <label for="password">Contraseña</label>
@@ -52,7 +51,7 @@
               />
             </div>
             <span class="feedback" id="passwordFeedback" role="alert" aria-live="polite"></span>
-            <div class="strength-meter" aria-live="polite" id="passwordStrength" role="status">
+            <div class="strength-meter" id="passwordStrength" role="status" aria-live="polite">
               <span class="strength-bar" data-level="0"></span>
               <span class="strength-copy" id="strengthCopy">Fortaleza: desconocida</span>
             </div>
@@ -60,13 +59,13 @@
           <button type="submit" id="registerSubmit" class="primary-button">Registrar</button>
           <p id="registerFeedback" class="form-feedback" role="alert" aria-live="polite"></p>
         </form>
-        <footer class="register-footer">
-          <p>¿Ya tienes cuenta? <a class="text-link" href="./login.html">Inicia sesión</a></p>
-          <p class="legal-links">
-            <a href="https://example.com/privacy" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>
+        <footer class="auth-footer">
+          <span>¿Ya tienes cuenta? <a class="text-link" href="./login.html">Inicia sesión</a></span>
+          <span>
+            <a class="text-link" href="https://example.com/privacy" target="_blank" rel="noopener noreferrer">Privacidad</a>
             <span aria-hidden="true">•</span>
-            <a href="https://example.com/terms" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>
-          </p>
+            <a class="text-link" href="https://example.com/terms" target="_blank" rel="noopener noreferrer">Términos</a>
+          </span>
         </footer>
       </section>
     </main>

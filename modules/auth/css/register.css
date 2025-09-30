@@ -1,204 +1,72 @@
-/* register.css
- * Estilos para la pantalla de registro con enfoque claro y fondo blanco.
- */
-
-:root {
-  --color-text-primary: #101828;
-  --color-text-secondary: #475467;
-  --color-surface: #ffffff;
-  --color-surface-light: #f8fafc;
-  --color-surface-strong: #e4e7ec;
-}
-
-body {
-  min-height: 100vh;
-  margin: 0;
-  background: linear-gradient(160deg, #f5f7fb 0%, #ffffff 50%, #f1f5ff 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 24px;
-  color: var(--color-text-primary);
-}
-
 .register-shell {
-  width: min(560px, 100%);
+  background: linear-gradient(135deg, #0f2027, #2ecc71);
 }
 
 .register-card {
-  padding: 56px 48px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  border-radius: 24px;
-  background: var(--color-surface);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 32px 60px rgba(15, 23, 42, 0.08);
+  text-align: left;
 }
 
-.register-header h1 {
-  margin: 16px 0 12px;
-  font-size: clamp(2rem, 2.8vw, 2.4rem);
-  font-weight: 700;
-  color: var(--color-text-primary);
+.register-header {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.register-header p {
+.register-title {
   margin: 0;
-  color: var(--color-text-secondary);
-  line-height: 1.7;
+  font-size: 2.2rem;
 }
 
-.input-control label {
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.register-card .input-shell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 18px;
-  min-height: 56px;
-  border-radius: 14px;
-  border: 1px solid #d0d5dd;
-  background: #f8fafc;
-  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.05);
-  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base), background var(--transition-base);
-}
-
-.register-card .input-shell:focus-within {
-  border-color: #1e90ff;
-  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
-  background: #ffffff;
-  transform: translateY(-1px);
-}
-
-.register-card .input-shell input {
-  color: #0f172a;
-  background: transparent;
-}
-
-.register-card .input-shell .input-icon {
-  color: #1e3a8a;
-}
-
-.feedback {
-  min-height: 18px;
-  color: var(--color-danger);
-  font-size: 0.85rem;
-}
-
-.availability {
-  min-height: 18px;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-}
-
-.availability.available {
-  color: var(--color-success);
-}
-
-.availability.unavailable {
-  color: var(--color-danger);
+.register-subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
 }
 
 .strength-meter {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
 }
 
 .strength-bar {
-  flex: 1;
-  height: 8px;
+  height: 0.45rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.05));
-  position: relative;
+  background: rgba(255, 255, 255, 0.12);
   overflow: hidden;
+  position: relative;
 }
 
 .strength-bar::after {
   content: "";
   position: absolute;
   inset: 0;
-  transform-origin: left;
-  transform: scaleX(0);
-  border-radius: inherit;
-  background: linear-gradient(135deg, #ff6b6b, #ffd93d, #2ecc71);
-  transition: transform var(--transition-base);
-}
-
-.strength-bar[data-level="1"]::after {
-  transform: scaleX(0.33);
-}
-
-.strength-bar[data-level="2"]::after {
-  transform: scaleX(0.66);
-}
-
-.strength-bar[data-level="3"]::after {
-  transform: scaleX(1);
+  width: var(--strength-width, 0%);
+  background: var(--strength-color, var(--color-primary));
+  transition: width 0.3s ease, background 0.3s ease;
 }
 
 .strength-copy {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-}
-
-.primary-button {
-  background: linear-gradient(135deg, var(--color-secondary), #4eea9a);
-  color: #ffffff;
-  justify-content: center;
-}
-
-.primary-button:hover {
-  box-shadow: 0 22px 40px rgba(46, 204, 113, 0.22);
-  filter: brightness(1.05);
-}
-
-.form-feedback {
-  min-height: 24px;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+.username-availability {
+  font-size: 0.9rem;
+  min-height: 1.25rem;
+}
+
+.username-availability.available {
   color: var(--color-success);
 }
 
-.form-feedback.error {
+.username-availability.unavailable {
   color: var(--color-danger);
 }
 
-.register-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: center;
-  color: var(--color-text-secondary);
+#registerSubmit {
+  width: 100%;
 }
 
-.register-footer .text-link {
-  color: var(--color-primary);
-}
-
-.legal-links {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 720px) {
-  .register-card {
-    padding: 40px 32px;
-  }
-}
-
-@media (max-width: 540px) {
-  body {
-    padding: 40px 16px;
-  }
-
-  .register-card {
-    padding: 32px 24px;
-  }
+.auth-footer {
+  justify-content: space-between;
 }
