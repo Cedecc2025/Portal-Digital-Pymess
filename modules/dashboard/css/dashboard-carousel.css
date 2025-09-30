@@ -110,14 +110,20 @@
   box-sizing: border-box;
   display: flex;
   justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+
+.carousel-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .carousel-slide > * {
   margin: 0;
-}
-
-.carousel-slide[aria-hidden="true"] {
-  pointer-events: none;
 }
 
 .carousel-status {
@@ -199,16 +205,26 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 12px;
+  bottom: 18px;
+  width: calc(100% - (var(--gutter) * 2));
+  max-width: calc(var(--viewport-max) - (var(--gutter) * 2));
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
   z-index: 2;
 }
 
 .carousel-indicators .counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(79, 70, 229, 0.12);
   font: 600 12px/1 system-ui, -apple-system, "Segoe UI", Roboto;
-  color: #5b5f99;
+  color: #4f46e5;
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.18);
+  pointer-events: auto;
 }
 
 .task-card {
