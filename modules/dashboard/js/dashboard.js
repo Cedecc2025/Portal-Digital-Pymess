@@ -1,33 +1,40 @@
 // dashboard.js
 // Administra la vista principal tras un inicio de sesión válido.
 
-import { requireAuth, getCurrentUsername, logout } from "../../../lib/authGuard.js";
+import {
+  requireAuth,
+  getCurrentUsername,
+  logout,
+  resolveCurrentUserId
+} from "../../../lib/authGuard.js";
+import { supabaseClient } from "../../../lib/supabaseClient.js";
+import { initTasksCarousel } from "./dashboard-carousel.js";
 
 const usernameDisplay = document.querySelector("#usernameDisplay");
 const logoutButton = document.querySelector("#logoutButton");
 const moduleCards = document.querySelectorAll(".module-card");
+const tasksCarouselAllButton = document.querySelector("#tasksCarouselAllButton");
 
-// Carga la información del usuario autenticado en el encabezado.
+const tasksCarousel = initTasksCarousel({ containerSelector: "#tasksCarousel" });
+
+// Obtiene y coloca el nombre del usuario autenticado en la cabecera.
 function loadUsername() {
   const username = getCurrentUsername();
 
+  if (!usernameDisplay) {
+    return;
+  }
+
   if (username) {
-    usernameDisplay.textContent = username;
+    usernameDisplay.textContent = username; // Muestra el nombre real si existe.
   } else {
-    usernameDisplay.textContent = "Usuario";
+    usernameDisplay.textContent = "Usuario"; // Valor por defecto cuando no hay nombre.
   }
 }
 
-// Configura los listeners necesarios para la pantalla.
-function registerEventListeners() {
-  if (logoutButton) {
-    logoutButton.addEventListener("click", () => {
-      logout();
-    });
-  }
-
+// Renderiza los módulos accesibles del dashboard con sus enlaces definitivos.
+function configureModuleCards() {
   moduleCards.forEach((card) => {
-    // Se asegura que cada tarjeta mantenga un href correcto y sea navegable.
     switch (card.dataset.module) {
       case "costos": {
         card.setAttribute("href", "../costos/index.html");
@@ -44,6 +51,53 @@ function registerEventListeners() {
   });
 }
 
+// Solicita las tareas al backend y las procesa para el carrusel.
+async function loadTasksCarousel() {
+  if (!tasksCarousel) {
+    return;
+  }
+
+  tasksCarousel.showLoading();
+
+  const userId = await resolveCurrentUserId();
+
+  if (!userId) {
+    tasksCarousel.showMessage("No se pudo obtener tu información de usuario.", { tone: "error" });
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("tareas")
+      .select("id, title, description, owner, priority, status, due_date")
+      .eq("user_id", userId)
+      .order("due_date", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    tasksCarousel.setSlides(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error("Error al cargar las tareas del dashboard", error);
+    tasksCarousel.showMessage("No fue posible cargar tus tareas.", { tone: "error" });
+  }
+}
+
+function registerEventListeners() {
+  if (logoutButton) {
+    logoutButton.addEventListener("click", () => {
+      logout();
+    });
+  }
+
+  if (tasksCarouselAllButton) {
+    tasksCarouselAllButton.setAttribute("href", "../tareas/index.html");
+  }
+}
+
 requireAuth();
 loadUsername();
+configureModuleCards();
 registerEventListeners();
+loadTasksCarousel();

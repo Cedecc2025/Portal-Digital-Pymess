@@ -2,11 +2,11 @@
  * Estilos compartidos opcionales para todo el sistema. */
 
 :root {
-  --color-primary: #38bdf8;
-  --color-primary-dark: #0ea5e9;
-  --color-background: #0f172a;
-  --color-surface: #111c36;
-  --color-text: #e2e8f0;
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-background: #ffffff;
+  --color-surface: #f1f5f9;
+  --color-text: #0f172a;
   --border-radius-lg: 16px;
 }
 

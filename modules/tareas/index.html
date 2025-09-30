@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Tareas - Sistema Modular</title>
+    <link rel="stylesheet" href="../../public/css/global.css" />
+    <link rel="stylesheet" href="./css/tasks.css" />
+  </head>
+  <body>
+    <main class="tasks-app" id="tasksApp">
+      <header class="tasks-header">
+        <div>
+          <p class="tasks-breadcrumb">Módulos</p>
+          <h1>Gestión de Tareas</h1>
+          <p class="tasks-subtitle">
+            Coordina responsables, prioriza pendientes y registra avances en tiempo real.
+          </p>
+        </div>
+        <div class="tasks-header__actions">
+          <a class="tasks-back" href="../dashboard/index.html">← Volver al dashboard</a>
+          <button class="tasks-logout" id="logoutButton" type="button">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="tasks-form-card">
+        <div class="tasks-form-card__header">
+          <div>
+            <p class="tasks-form-card__eyebrow">Nueva tarea</p>
+            <h2 id="formTitle">Registrar tarea</h2>
+          </div>
+          <button class="tasks-refresh" id="refreshButton" type="button">🔄 Refrescar</button>
+        </div>
+
+        <form id="taskForm" novalidate>
+          <div class="tasks-form__grid">
+            <label class="tasks-field">
+              <span>Título</span>
+              <input type="text" id="taskTitle" name="title" placeholder="Ej: Llamar a proveedor" required />
+            </label>
+            <label class="tasks-field">
+              <span>Responsable</span>
+              <input type="text" id="taskOwner" name="owner" placeholder="Ej: Ana Martínez" required />
+            </label>
+            <label class="tasks-field">
+              <span>Fecha límite</span>
+              <input type="date" id="taskDueDate" name="dueDate" required />
+            </label>
+            <label class="tasks-field">
+              <span>Prioridad</span>
+              <select id="taskPriority" name="priority">
+                <option value="alta">Alta</option>
+                <option value="media" selected>Media</option>
+                <option value="baja">Baja</option>
+              </select>
+            </label>
+            <label class="tasks-field">
+              <span>Estado</span>
+              <select id="taskStatus" name="status">
+                <option value="pendiente" selected>Pendiente</option>
+                <option value="en progreso">En progreso</option>
+                <option value="completada">Completada</option>
+              </select>
+            </label>
+          </div>
+          <label class="tasks-field">
+            <span>Descripción</span>
+            <textarea
+              id="taskDescription"
+              name="description"
+              placeholder="Añade detalles, acuerdos o próximos pasos"
+              rows="3"
+            ></textarea>
+          </label>
+          <div class="tasks-form__actions">
+            <button class="tasks-primary" type="submit" id="submitButton">Guardar tarea</button>
+            <button class="tasks-secondary tasks-secondary--hidden" type="button" id="cancelEditButton">
+              Cancelar edición
+            </button>
+          </div>
+        </form>
+        <p class="tasks-feedback" id="formFeedback"></p>
+      </section>
+
+      <section class="tasks-list-card">
+        <header class="tasks-list-card__header">
+          <div>
+            <p class="tasks-form-card__eyebrow">Seguimiento</p>
+            <h2>Tareas registradas</h2>
+          </div>
+        </header>
+        <p class="tasks-feedback" id="listFeedback">Aún no has registrado tareas.</p>
+        <div class="tasks-list" id="tasksList"></div>
+      </section>
+    </main>
+
+    <script type="module" src="../../lib/supabaseClient.js"></script>
+    <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/tasks.js"></script>
+  </body>
+</html>

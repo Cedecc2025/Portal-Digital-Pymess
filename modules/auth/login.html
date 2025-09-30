@@ -1,37 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Sistema Modular</title>
-    <link rel="stylesheet" href="../../public/css/global.css">
-    <link rel="stylesheet" href="./css/login.css">
+    <link rel="stylesheet" href="../../public/css/global.css" />
+    <link rel="stylesheet" href="./css/login.css" />
   </head>
   <body>
     <main class="login-container">
-      <section class="login-overview">
-        <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
-        <p>
-          Este portal reúne en un solo lugar las principales aplicaciones que necesitas
-          para gestionar y hacer crecer tu negocio de manera ágil y profesional.
-        </p>
-        <p>
-          Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave
-          de tu organización:
-        </p>
-        <ul>
-          <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
-          <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios.</li>
-          <li><strong>Chatbot Web:</strong> brinda atención automática y disponible 24/7.</li>
-          <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas.</li>
-          <li><strong>Herramientas Extra:</strong> utilidades complementarias para la gestión diaria.</li>
-        </ul>
-        <p>
-          Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo
-          suficientemente robusto para ayudarte a tomar decisiones basadas en datos y optimizar
-          tus procesos.
-        </p>
-      </section>
       <section class="login-card">
         <header>
           <h2>Acceso al Sistema</h2>
@@ -40,24 +17,35 @@
         <form id="loginForm" novalidate>
           <div class="form-group">
             <label for="username">Usuario</label>
-            <input type="text" id="username" name="username" placeholder="usuario_profesional" autocomplete="username" required>
+            <input type="text" id="username" name="username" placeholder="usuario_profesional" autocomplete="username" required />
             <span class="feedback" id="usernameFeedback"></span>
           </div>
           <div class="form-group">
             <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" placeholder="********" autocomplete="current-password" required>
+            <input type="password" id="password" name="password" placeholder="********" autocomplete="current-password" required />
             <span class="feedback" id="passwordFeedback"></span>
           </div>
           <div class="form-options">
             <label class="checkbox">
-              <input type="checkbox" id="rememberMe" name="rememberMe">
+              <input type="checkbox" id="rememberMe" name="rememberMe" />
               <span>Recordarme</span>
             </label>
-    <a class="link" href="./register.html">Crear cuenta</a>
+            <a class="link" href="./register.html">Crear cuenta</a>
           </div>
           <button type="submit" class="primary-button">Ingresar</button>
           <span class="feedback" id="generalFeedback"></span>
         </form>
+        <section class="module-kpi" aria-live="polite">
+          <h3>Módulos activos</h3>
+          <article class="module-highlight" id="moduleHighlight">
+            <span class="module-icon" id="moduleIcon" aria-hidden="true"></span>
+            <div class="module-copy">
+              <span class="module-label">Mostrando:</span>
+              <span class="module-name" id="moduleName"></span>
+              <p class="module-description" id="moduleDescription"></p>
+            </div>
+          </article>
+        </section>
       </section>
     </main>
     <script type="module" src="../../lib/supabaseClient.js"></script>

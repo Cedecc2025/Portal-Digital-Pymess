@@ -13,10 +13,34 @@ let rememberMeInput = null;
 let usernameFeedback = null;
 let passwordFeedback = null;
 let generalFeedback = null;
+let moduleIconElement = null;
+let moduleNameElement = null;
+let moduleDescriptionElement = null;
+let moduleHighlightElement = null;
+let kpiRotationTimer = null;
 let navigationHandler = (relativeTarget) => {
   // Navega utilizando rutas relativas calculadas desde este módulo.
   gotoFromModule(import.meta.url, relativeTarget);
 };
+
+const ACTIVE_MODULES = [
+  {
+    name: "Costos",
+    description: "Controla gastos operativos y financieros en tiempo real.",
+    icon: "💼"
+  },
+  {
+    name: "Estrategias de Ventas",
+    description: "Diseña campañas comerciales con métricas claras y accionables.",
+    icon: "🚀"
+  },
+  {
+    name: "Gestión de Tareas",
+    description: "Organiza pendientes, responsables y fechas límite por proyecto.",
+    icon: "🗒️"
+  }
+];
+const KPI_ROTATION_INTERVAL = 1400;
 
 if (typeof document !== "undefined") {
   loginForm = document.querySelector("#loginForm");
@@ -26,6 +50,10 @@ if (typeof document !== "undefined") {
   usernameFeedback = document.querySelector("#usernameFeedback");
   passwordFeedback = document.querySelector("#passwordFeedback");
   generalFeedback = document.querySelector("#generalFeedback");
+  moduleIconElement = document.querySelector("#moduleIcon");
+  moduleNameElement = document.querySelector("#moduleName");
+  moduleDescriptionElement = document.querySelector("#moduleDescription");
+  moduleHighlightElement = document.querySelector("#moduleHighlight");
 }
 
 // Inicializa la pantalla limpiando cualquier mensaje previo.
@@ -46,6 +74,8 @@ export function initializeForm(feedbackElements = {}) {
   if (generalElement) {
     generalElement.textContent = "";
   }
+
+  startModuleRotation();
 }
 
 // Valida si el username cumple los criterios.
@@ -171,6 +201,53 @@ if (typeof document !== "undefined") {
   }
 }
 
+export function startModuleRotation(
+  modules = ACTIVE_MODULES,
+  elements = {},
+  interval = KPI_ROTATION_INTERVAL
+) {
+  const targetElements = {
+    icon: moduleIconElement,
+    name: moduleNameElement,
+    description: moduleDescriptionElement,
+    container: moduleHighlightElement,
+    ...elements
+  };
+
+  if (!targetElements.name || !targetElements.description || modules.length === 0) {
+    return;
+  }
+
+  let moduleIndex = 0;
+
+  const updateModule = () => {
+    const moduleData = modules[moduleIndex];
+
+    if (targetElements.icon) {
+      targetElements.icon.textContent = moduleData.icon ?? "";
+    }
+
+    targetElements.name.textContent = moduleData.name;
+    targetElements.description.textContent = moduleData.description;
+
+    if (targetElements.container) {
+      targetElements.container.classList.remove("is-visible");
+      void targetElements.container.offsetWidth;
+      targetElements.container.classList.add("is-visible");
+    }
+
+    moduleIndex = (moduleIndex + 1) % modules.length;
+  };
+
+  updateModule();
+
+  if (kpiRotationTimer) {
+    clearInterval(kpiRotationTimer);
+  }
+
+  kpiRotationTimer = setInterval(updateModule, interval);
+}
+
 export default {
   initializeForm,
   validateUsername,
@@ -178,5 +255,6 @@ export default {
   fetchUserByUsername,
   handleLoginSubmit,
   setNavigationHandler,
-  redirectToDashboard
+  redirectToDashboard,
+  startModuleRotation
 };
