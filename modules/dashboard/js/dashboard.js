@@ -18,12 +18,13 @@ const tasksCarouselStatusElement = document.querySelector("#tasksCarouselStatus"
 const tasksCarouselPrevButton = document.querySelector("#tasksCarouselPrev");
 const tasksCarouselNextButton = document.querySelector("#tasksCarouselNext");
 
-const TASKS_CAROUSEL_INTERVAL = 2200;
+const TASKS_CAROUSEL_INTERVAL = 6000;
 let tasksCarouselTimer = null;
 const tasksCarouselState = {
   tasks: [],
   activeIndex: 0
 };
+let isTasksCarouselPaused = false;
 
 // Carga la información del usuario autenticado en el encabezado.
 function loadUsername() {
@@ -46,6 +47,26 @@ function registerEventListeners() {
 
   if (tasksButton) {
     tasksButton.setAttribute("href", "../tareas/index.html");
+  }
+
+  if (tasksCarouselTrackElement) {
+    tasksCarouselTrackElement.addEventListener("pointerenter", () => {
+      if (!tasksCarouselState.tasks.length) {
+        return;
+      }
+
+      isTasksCarouselPaused = true;
+      stopTasksCarousel();
+    });
+
+    tasksCarouselTrackElement.addEventListener("pointerleave", () => {
+      if (!tasksCarouselState.tasks.length) {
+        return;
+      }
+
+      isTasksCarouselPaused = false;
+      scheduleTasksCarousel();
+    });
   }
 
   moduleCards.forEach((card) => {
@@ -117,6 +138,7 @@ function renderTasksCarousel(tasks) {
   if (!tasks || tasks.length === 0) {
     tasksCarouselStatusElement.textContent = "Aún no tienes tareas registradas.";
     stopTasksCarousel();
+    isTasksCarouselPaused = false;
     tasksCarouselState.tasks = [];
     tasksCarouselState.activeIndex = 0;
     updateTasksCarouselControls();
@@ -198,6 +220,10 @@ function goToTasksSlide(targetIndex) {
 function scheduleTasksCarousel(interval = TASKS_CAROUSEL_INTERVAL) {
   stopTasksCarousel();
 
+  if (isTasksCarouselPaused) {
+    return;
+  }
+
   if (!Array.isArray(tasksCarouselState.tasks) || tasksCarouselState.tasks.length <= 1) {
     return;
   }
@@ -236,6 +262,7 @@ async function loadTasksCarousel() {
     const tasks = data ?? [];
     tasksCarouselState.tasks = tasks;
     tasksCarouselState.activeIndex = 0;
+    isTasksCarouselPaused = false;
 
     renderTasksCarousel(tasks);
     updateTasksCarouselControls();
