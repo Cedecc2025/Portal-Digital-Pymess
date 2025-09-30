@@ -1,33 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Sistema Modular</title>
-    <link rel="stylesheet" href="../../public/css/global.css">
-    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="../../public/css/global.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
   </head>
   <body>
     <main class="dashboard-container">
       <header class="dashboard-header">
-        <div>
+        <div class="dashboard-header__copy">
           <p class="welcome-label">Bienvenido de nuevo</p>
-          <h1 id="usernameDisplay">Usuario</h1>
+          <h1 id="usernameDisplay" class="dashboard-title">Usuario</h1>
+          <p class="dashboard-subtitle">Revisa tus tareas clave y accede a los módulos activos.</p>
         </div>
-        <button id="logoutButton" class="logout-button">Cerrar sesión</button>
+        <div class="header-actions">
+          <button id="logoutButton" class="logout-button" type="button">Cerrar sesión</button>
+        </div>
       </header>
-      <section class="modules-grid">
-        <a class="module-card" href="../costos/index.html" data-module="costos">
-          <h2>Costos</h2>
-          <p>Administra y monitorea la estructura de costos de tu operación.</p>
-          <span class="module-button">Ir a Costos</span>
-        </a>
-        <a class="module-card" href="../estrategias/index.html" data-module="estrategias">
-          <h2>Estrategias de Ventas</h2>
-          <p>Diseña campañas y planes de marketing para impulsar tu crecimiento.</p>
-          <span class="module-button">Ir a Estrategias</span>
-        </a>
-      </section>
+
+      <div class="dashboard-layout">
+        <section class="tasks-panel" aria-labelledby="tasksPanelTitle">
+          <header class="tasks-panel__header">
+            <div>
+              <h2 id="tasksPanelTitle">Tareas asignadas</h2>
+              <p class="tasks-panel__summary">Mantén el foco en tus prioridades inmediatas.</p>
+            </div>
+          </header>
+          <div class="tasks-panel__content">
+            <p id="tasksStatus" class="tasks-panel__status" role="status">Cargando tus tareas...</p>
+            <ul class="tasks-list" id="tasksList" aria-live="polite"></ul>
+          </div>
+          <a class="tasks-panel__link" id="tasksViewAllButton" href="../tareas/index.html">Ver todas las tareas</a>
+        </section>
+
+        <section class="modules-panel" aria-labelledby="modulesPanelTitle">
+          <header class="modules-panel__header">
+            <h2 id="modulesPanelTitle">Módulos activos</h2>
+            <p class="modules-panel__summary">Accede rápidamente a tus herramientas clave.</p>
+          </header>
+          <div class="modules-grid">
+            <article class="module-card" data-module="costos">
+              <span class="module-card__icon" aria-hidden="true">💰</span>
+              <div class="module-card__body">
+                <h3 class="module-card__title">Costos</h3>
+                <p class="module-card__description">Registra y analiza tus costos fijos y variables.</p>
+              </div>
+              <a class="module-card__action" data-module-link href="../costos/index.html">Ir al módulo</a>
+            </article>
+            <article class="module-card" data-module="estrategias">
+              <span class="module-card__icon" aria-hidden="true">📊</span>
+              <div class="module-card__body">
+                <h3 class="module-card__title">Estrategias de Ventas</h3>
+                <p class="module-card__description">Planifica campañas y haz seguimiento a resultados.</p>
+              </div>
+              <a class="module-card__action" data-module-link href="../estrategias/index.html">Ir al módulo</a>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <footer class="dashboard-footer">
+        <p class="dashboard-footer__copy">Portal modular para la gestión de tu negocio.</p>
+      </footer>
     </main>
     <script type="module" src="../../lib/supabaseClient.js"></script>
     <script type="module" src="../../lib/authGuard.js"></script>
