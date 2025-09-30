@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Estrategia de Marketing PYME</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #1f2937;
+        }
+        
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+        }
+        
+        .step:last-child {
+            flex: 0;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .step.active .step-circle {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+        
+        .step-line {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+        
+        .step.completed .step-line {
+            background: #10b981;
+        }
+        
+        .step:last-child .step-line {
+            display: none;
+        }
+        
+        .progress-info {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .progress-info .step-count {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .progress-info .step-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 4px;
+        }
+        
+        .content {
+            min-height: 400px;
+            padding: 20px;
+        }
+        
+        .content h2 {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        
+        .content p {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        
+        .selectable-card {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .selectable-card:hover {
+            border-color: #9ca3af;
+        }
+        
+        .selectable-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .channel-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .channel-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .icon-social { background: #3b82f6; }
+        .icon-email { background: #10b981; }
+        .icon-content { background: #8b5cf6; }
+        .icon-seo { background: #eab308; }
+        .icon-video { background: #ef4444; }
+        .icon-paid { background: #6366f1; }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .table th {
+            background: #f9fafb;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .table td {
+            font-size: 14px;
+        }
+        
+        .table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .table input,
+        .table select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .alert-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+        
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        
+        .alert-warning {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            color: #854d0e;
+        }
+        
+        .budget-slider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .budget-slider .channel-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px;
+        }
+        
+        .budget-slider input[type="range"] {
+            flex: 1;
+        }
+        
+        .budget-slider .percentage {
+            min-width: 40px;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .kpi-card {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #d1d5db;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .summary-section {
+            background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .summary-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .tag-blue {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .tag-purple {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+        
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 32px;
+        }
+        
+        .welcome-hero {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+        
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+        
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 30px;
+        }
+        
+        .feature-card {
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+        
+        .feature-card.blue {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+        
+        .feature-card.purple {
+            background: #faf5ff;
+            border-color: #e9d5ff;
+        }
+        
+        .feature-card.green {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        
+        .tracking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .status-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .status-card {
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+        
+        .status-card.green {
+            background: #f0fdf4;
+            border-color: #86efac;
+        }
+        
+        .status-card.yellow {
+            background: #fefce8;
+            border-color: #fde047;
+        }
+        
+        .status-card.blue {
+            background: #eff6ff;
+            border-color: #93c5fd;
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <script src="/portal/router/guard.js"></script>
+    <div class="container">
+        <!-- Header -->
+        <div class="card">
+            <div class="header">
+                <h1>Estrategia de Marketing PYME</h1>
+                <div class="header-badge">
+                    <span>📈</span>
+                    <span>Plataforma Profesional</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="card">
+            <div class="progress-container">
+                <div class="progress-steps" id="progressSteps">
+                    <!-- Steps will be generated by JavaScript -->
+                </div>
+                <div class="progress-info">
+                    <div class="step-count" id="stepCount">Paso 1 de 11</div>
+                    <div class="step-name" id="stepName">Inicio</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="card">
+            <div class="content" id="contentArea">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="card">
+            <div class="navigation">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()">
+                    ← Anterior
+                </button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                    Siguiente →
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentStep = 0;
+        const strategyData = {
+            companyInfo: {
+                name: '',
+                industry: '',
+                size: '',
+                currentSituation: ''
+            },
+            targetAudience: {
+                demographics: '',
+                interests: '',
+                painPoints: ''
+            },
+            objectives: [],
+            channels: [],
+            budget: {
+                total: '',
+                distribution: {}
+            },
+            timeline: {
+                duration: '3',
+                activities: []
+            },
+            publicationCalendar: {
+                contentTypes: []
+            },
+            kpis: [],
+            monthlyTracking: {
+                months: []
+            }
+        };
+        
+        const steps = [
+            { name: 'Inicio', icon: '💡' },
+            { name: 'Información de Empresa', icon: '🏢' },
+            { name: 'Audiencia Objetivo', icon: '👥' },
+            { name: 'Objetivos', icon: '🎯' },
+            { name: 'Canales de Marketing', icon: '📢' },
+            { name: 'Presupuesto', icon: '💰' },
+            { name: 'Cronograma', icon: '📅' },
+            { name: 'Calendario de Publicaciones', icon: '✏️' },
+            { name: 'KPIs', icon: '📊' },
+            { name: 'Tracking Mensual', icon: '📈' },
+            { name: 'Resumen', icon: '📄' }
+        ];
+        
+        const objectives = [
+            'Aumentar reconocimiento de marca',
+            'Generar más leads',
+            'Incrementar ventas',
+            'Mejorar retención de clientes',
+            'Expandir a nuevos mercados',
+            'Lanzar nuevo producto/servicio'
+        ];
+        
+        const marketingChannels = [
+            { id: 'social', name: 'Redes Sociales', icon: '💬', class: 'icon-social' },
+            { id: 'email', name: 'Email Marketing', icon: '✉️', class: 'icon-email' },
+            { id: 'content', name: 'Marketing de Contenidos', icon: '📝', class: 'icon-content' },
+            { id: 'seo', name: 'SEO', icon: '🌐', class: 'icon-seo' },
+            { id: 'video', name: 'Video Marketing', icon: '🎥', class: 'icon-video' },
+            { id: 'paid', name: 'Publicidad Pagada', icon: '💸', class: 'icon-paid' }
+        ];
+        
+        const kpiOptions = [
+            'Tráfico web',
+            'Tasa de conversión',
+            'ROI de marketing',
+            'Costo por adquisición (CAC)',
+            'Valor de vida del cliente (CLV)',
+            'Engagement en redes sociales',
+            'Tasa de apertura de emails',
+            'Posicionamiento SEO'
+        ];
+        
+        const contentTypes = [
+            'Educativo',
+            'Promocional',
+            'Testimonios',
+            'Behind the scenes',
+            'Tips y consejos',
+            'Noticias',
+            'Entretenimiento',
+            'Casos de éxito'
+        ];
+        
+        function initializeProgress() {
+            const progressSteps = document.getElementById('progressSteps');
+            progressSteps.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = `step ${index < currentStep ? 'completed' : ''} ${index === currentStep ? 'active' : ''}`;
+                stepDiv.innerHTML = `
+                    <div class="step-circle">${step.icon}</div>
+                    ${index < steps.length - 1 ? '<div class="step-line"></div>' : ''}
+                `;
+                progressSteps.appendChild(stepDiv);
+            });
+            
+            document.getElementById('stepCount').textContent = `Paso ${currentStep + 1} de ${steps.length}`;
+            document.getElementById('stepName').textContent = steps[currentStep].name;
+        }
+        
+        function renderContent() {
+            const contentArea = document.getElementById('contentArea');
+            
+            switch(currentStep) {
+                case 0:
+                    contentArea.innerHTML = `
+                        <div class="welcome-hero">
+                            <div class="welcome-icon">📈</div>
+                            <h2 class="welcome-title">Bienvenido a tu Plataforma de Estrategia de Marketing</h2>
+                            <p style="color: #6b7280; max-width: 600px; margin: 0 auto;">
+                                Diseña una estrategia de marketing profesional para tu PYME en solo 11 pasos. 
+                                Esta herramienta te guiará a través del proceso completo, desde el análisis inicial 
+                                hasta la definición de métricas de éxito.
+                            </p>
+                            
+                            <div class="feature-cards">
+                                <div class="feature-card blue">
+                                    <div class="feature-icon">🎯</div>
+                                    <h3 style="color: #1e40af;">Define Objetivos</h3>
+                                    <p style="font-size: 14px; color: #3730a3;">Establece metas claras y medibles</p>
+                                </div>
+                                <div class="feature-card purple">
+                                    <div class="feature-icon">🎨</div>
+                                    <h3 style="color: #7c3aed;">Selecciona Canales</h3>
+                                    <p style="font-size: 14px; color: #6d28d9;">Elige los mejores canales para tu audiencia</p>
+                                </div>
+                                <div class="feature-card green">
+                                    <div class="feature-icon">📊</div>
+                                    <h3 style="color: #166534;">Mide Resultados</h3>
+                                    <p style="font-size: 14px; color: #15803d;">Define KPIs para evaluar el éxito</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 1:
+                    contentArea.innerHTML = `
+                        <h2>Información de tu Empresa</h2>
+                        <div class="form-group">
+                            <label>Nombre de la empresa</label>
+                            <input type="text" class="form-control" id="companyName" value="${strategyData.companyInfo.name}" 
+                                onchange="updateData('companyInfo', 'name', this.value)" placeholder="Tu empresa S.A.">
+                        </div>
+                        <div class="form-group">
+                            <label>Industria</label>
+                            <select class="form-control" id="industry" onchange="updateData('companyInfo', 'industry', this.value)">
+                                <option value="">Selecciona una industria</option>
+                                <option value="retail">Retail / Comercio</option>
+                                <option value="services">Servicios</option>
+                                <option value="technology">Tecnología</option>
+                                <option value="manufacturing">Manufactura</option>
+                                <option value="food">Alimentos y Bebidas</option>
+                                <option value="health">Salud y Bienestar</option>
+                                <option value="education">Educación</option>
+                                <option value="other">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tamaño de la empresa</label>
+                            <select class="form-control" id="size" onchange="updateData('companyInfo', 'size', this.value)">
+                                <option value="">Selecciona el tamaño</option>
+                                <option value="1-10">1-10 empleados</option>
+                                <option value="11-50">11-50 empleados</option>
+                                <option value="51-200">51-200 empleados</option>
+                                <option value="200+">200+ empleados</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Situación actual del marketing</label>
+                            <textarea class="form-control" id="currentSituation" 
+                                onchange="updateData('companyInfo', 'currentSituation', this.value)" 
+                                placeholder="Describe brevemente tu situación actual de marketing...">${strategyData.companyInfo.currentSituation}</textarea>
+                        </div>
+                    `;
+                    break;
+                    
+                case 2:
+                    contentArea.innerHTML = `
+                        <h2>Define tu Audiencia Objetivo</h2>
+                        <div class="form-group">
+                            <label>Demografía</label>
+                            <input type="text" class="form-control" value="${strategyData.targetAudience.demographics}" 
+                                onchange="updateData('targetAudience', 'demographics', this.value)" 
+                                placeholder="Ej: 25-45 años, profesionales, ingresos medios-altos">
+                        </div>
+                        <div class="form-group">
+                            <label>Intereses y comportamientos</label>
+                            <textarea class="form-control" onchange="updateData('targetAudience', 'interests', this.value)" 
+                                placeholder="¿Qué les interesa? ¿Cómo se comportan?">${strategyData.targetAudience.interests}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Problemas o necesidades (Pain Points)</label>
+                            <textarea class="form-control" onchange="updateData('targetAudience', 'painPoints', this.value)" 
+                                placeholder="¿Qué problemas resuelve tu producto/servicio?">${strategyData.targetAudience.painPoints}</textarea>
+                        </div>
+                        <div class="alert alert-info">
+                            <span>ℹ️</span>
+                            <div>
+                                <strong>Tip: Sé específico</strong><br>
+                                Mientras más específica sea tu audiencia, más efectiva será tu estrategia de marketing.
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 3:
+                    let objectivesHTML = objectives.map(obj => `
+                        <div class="selectable-card ${strategyData.objectives.includes(obj) ? 'selected' : ''}" 
+                             onclick="toggleObjective('${obj}')">
+                            <span>${obj}</span>
+                            ${strategyData.objectives.includes(obj) ? '✓' : ''}
+                        </div>
+                    `).join('');
+                    
+                    contentArea.innerHTML = `
+                        <h2>Establece tus Objetivos de Marketing</h2>
+                        <p>Selecciona hasta 3 objetivos principales para tu estrategia</p>
+                        <div class="grid grid-2">
+                            ${objectivesHTML}
+                        </div>
+                        ${strategyData.objectives.length === 3 ? `
+                            <div class="alert alert-warning">
+                                Has seleccionado el máximo de 3 objetivos. Deselecciona uno para elegir otro diferente.
+                            </div>
+                        ` : ''}
+                    `;
+                    break;
+                    
+                case 4:
+                    let channelsHTML = marketingChannels.map(channel => `
+                        <div class="selectable-card ${strategyData.channels.includes(channel.id) ? 'selected' : ''}" 
+                             onclick="toggleChannel('${channel.id}')">
+                            <div class="channel-card">
+                                <div class="channel-icon ${channel.class}">${channel.icon}</div>
+                                <span>${channel.name}</span>
+                            </div>
+                            ${strategyData.channels.includes(channel.id) ? '✓' : ''}
+                        </div>
+                    `).join('');
+                    
+                    contentArea.innerHTML = `
+                        <h2>Selecciona tus Canales de Marketing</h2>
+                        <p>Elige los canales más apropiados para alcanzar a tu audiencia</p>
+                        <div class="grid grid-3">
+                            ${channelsHTML}
+                        </div>
+                        <div class="alert alert-success">
+                            <strong>Recomendación:</strong> Comienza con 2-3 canales y domínalos antes de expandirte a más.
+                        </div>
+                    `;
+                    break;
+                    
+                case 5:
+                    let budgetHTML = '';
+                    if (strategyData.budget.total && strategyData.channels.length > 0) {
+                        budgetHTML = '<h3>Distribución por canal</h3>';
+                        strategyData.channels.forEach(channelId => {
+                            const channel = marketingChannels.find(c => c.id === channelId);
+                            const value = strategyData.budget.distribution[channelId] || 0;
+                            budgetHTML += `
+                                <div class="budget-slider">
+                                    <div class="channel-label">
+                                        <span class="channel-icon ${channel.class}" style="width: 30px; height: 30px; font-size: 16px;">${channel.icon}</span>
+                                        <span>${channel.name}</span>
+                                    </div>
+                                    <input type="range" min="0" max="100" value="${value}" 
+                                        onchange="updateBudgetDistribution('${channelId}', this.value)">
+                                    <span class="percentage">${value}%</span>
+                                </div>
+                            `;
+                        });
+                        
+                        const total = Object.values(strategyData.budget.distribution).reduce((a, b) => a + (parseInt(b) || 0), 0);
+                        budgetHTML += `
+                            <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 20px;">
+                                <strong>Total asignado: ${total}%</strong>
+                            </div>
+                        `;
+                    }
+                    
+                    contentArea.innerHTML = `
+                        <h2>Define tu Presupuesto de Marketing</h2>
+                        <div class="form-group">
+                            <label>Presupuesto mensual total (en tu moneda local)</label>
+                            <input type="number" class="form-control" value="${strategyData.budget.total}" 
+                                onchange="updateData('budget', 'total', this.value)" placeholder="Ej: 5000">
+                        </div>
+                        ${budgetHTML}
+                    `;
+                    break;
+                    
+                case 6:
+                    let activitiesHTML = '';
+                    const months = Math.min(parseInt(strategyData.timeline.duration), 6);
+                    for (let i = 0; i < months; i++) {
+                        activitiesHTML += `
+                            <div class="kpi-card">
+                                <label>Mes ${i + 1}</label>
+                                <input type="text" class="form-control" 
+                                    value="${strategyData.timeline.activities[i] || ''}"
+                                    onchange="updateActivity(${i}, this.value)"
+                                    placeholder="Ej: Lanzamiento de campaña en redes sociales">
+                            </div>
+                        `;
+                    }
+                    
+                    contentArea.innerHTML = `
+                        <h2>Planifica tu Cronograma</h2>
+                        <div class="form-group">
+                            <label>Duración de la campaña (meses)</label>
+                            <select class="form-control" value="${strategyData.timeline.duration}" 
+                                onchange="updateData('timeline', 'duration', this.value); renderContent();">
+                                <option value="1">1 mes</option>
+                                <option value="3" ${strategyData.timeline.duration === '3' ? 'selected' : ''}>3 meses</option>
+                                <option value="6">6 meses</option>
+                                <option value="12">12 meses</option>
+                            </select>
+                        </div>
+                        <h3>Actividades clave por mes</h3>
+                        ${activitiesHTML}
+                    `;
+                    break;
+                    
+                case 7:
+                    let contentTypesHTML = contentTypes.map(type => `
+                        <label class="checkbox-group">
+                            <input type="checkbox" ${strategyData.publicationCalendar.contentTypes.includes(type) ? 'checked' : ''}
+                                onchange="toggleContentType('${type}')">
+                            <span>${type}</span>
+                        </label>
+                    `).join('');
+                    
+                    let calendarHTML = '';
+                    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+                    days.forEach(day => {
+                        const channelOptions = strategyData.channels.map(channelId => {
+                            const channel = marketingChannels.find(c => c.id === channelId);
+                            return `<option value="${channelId}">${channel.name}</option>`;
+                        }).join('');
+                        
+                        const contentOptions = strategyData.publicationCalendar.contentTypes.map(type => 
+                            `<option value="${type}">${type}</option>`
+                        ).join('');
+                        
+                        calendarHTML += `
+                            <tr>
+                                <td><strong>${day}</strong></td>
+                                <td>
+                                    <select class="form-control">
+                                        <option value="">Seleccionar</option>
+                                        ${channelOptions}
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-control">
+                                        <option value="">Tipo</option>
+                                        ${contentOptions}
+                                    </select>
+                                </td>
+                                <td><input type="time" class="form-control"></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    contentArea.innerHTML = `
+                        <h2>Calendario de Publicaciones</h2>
+                        <p>Planifica tu contenido semanal para mantener consistencia</p>
+                        
+                        <h3>Tipos de contenido a publicar</h3>
+                        <div class="grid grid-4">
+                            ${contentTypesHTML}
+                        </div>
+                        
+                        <h3 style="margin-top: 30px;">Frecuencia de publicación semanal</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Día</th>
+                                    <th>Canal</th>
+                                    <th>Tipo de contenido</th>
+                                    <th>Hora</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${calendarHTML}
+                            </tbody>
+                        </table>
+                        
+                        <div class="alert alert-info">
+                            <span>🕐</span>
+                            <div>
+                                <strong>Mejores horarios para publicar:</strong><br>
+                                • LinkedIn: Martes a Jueves, 9-10am<br>
+                                • Instagram: 11am-1pm y 7-9pm<br>
+                                • Facebook: 1-4pm<br>
+                                • Twitter/X: 9-10am y 7-9pm
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 8:
+                    let kpisHTML = kpiOptions.map(kpi => `
+                        <div class="selectable-card ${strategyData.kpis.includes(kpi) ? 'selected' : ''}" 
+                             onclick="toggleKPI('${kpi}')">
+                            <span>${kpi}</span>
+                            ${strategyData.kpis.includes(kpi) ? '✓' : ''}
+                        </div>
+                    `).join('');
+                    
+                    contentArea.innerHTML = `
+                        <h2>Define tus KPIs (Indicadores Clave)</h2>
+                        <p>Selecciona las métricas que usarás para medir el éxito</p>
+                        <div class="grid grid-2">
+                            ${kpisHTML}
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>Tip:</strong> Elige KPIs que estén directamente relacionados con tus objetivos de negocio.
+                        </div>
+                    `;
+                    break;
+                    
+                case 9:
+                    let metricsHTML = '';
+                    let tableHTML = '';
+                    
+                    if (strategyData.kpis.length > 0) {
+                        metricsHTML = '<div class="tracking-grid">';
+                        strategyData.kpis.forEach(kpi => {
+                            metricsHTML += `
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <span>${kpi}</span>
+                                        <span>📊</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Meta mensual" style="margin-bottom: 8px;">
+                                    <select class="form-control">
+                                        <option>Medición numérica</option>
+                                        <option>Porcentaje</option>
+                                        <option>Escala 1-10</option>
+                                    </select>
+                                </div>
+                            `;
+                        });
+                        metricsHTML += '</div>';
+                        
+                        // Create tracking table
+                        let tableHeaders = '<th>Métrica</th>';
+                        const monthCount = parseInt(strategyData.timeline.duration || 3);
+                        for (let i = 0; i < monthCount; i++) {
+                            tableHeaders += `<th>Mes ${i + 1}</th>`;
+                        }
+                        tableHeaders += '<th>Promedio</th>';
+                        
+                        let tableRows = '';
+                        strategyData.kpis.forEach(kpi => {
+                            tableRows += `<tr><td><strong>${kpi}</strong></td>`;
+                            for (let i = 0; i < monthCount; i++) {
+                                tableRows += `<td><input type="number" placeholder="0" style="width: 80px; text-align: center;"></td>`;
+                            }
+                            tableRows += '<td style="text-align: center; color: #3b82f6; font-weight: 600;">-</td></tr>';
+                        });
+                        
+                        tableHTML = `
+                            <h3>Dashboard de Resultados Mensuales</h3>
+                            <table class="table">
+                                <thead><tr>${tableHeaders}</tr></thead>
+                                <tbody>${tableRows}</tbody>
+                            </table>
+                        `;
+                    }
+                    
+                    contentArea.innerHTML = `
+                        <h2>Sistema de Tracking Mensual</h2>
+                        <p>Configura cómo medirás y registrarás tus resultados cada mes</p>
+                        
+                        <h3>Métricas a trackear mensualmente</h3>
+                        ${metricsHTML}
+                        
+                        ${tableHTML}
+                        
+                        <div class="status-cards">
+                            <div class="status-card green">
+                                <div class="status-header">
+                                    <span style="color: #166534;">Mejor rendimiento</span>
+                                    <span>📈</span>
+                                </div>
+                                <select class="form-control">
+                                    <option>Seleccionar KPI</option>
+                                    ${strategyData.kpis.map(kpi => `<option>${kpi}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="status-card yellow">
+                                <div class="status-header">
+                                    <span style="color: #854d0e;">Necesita atención</span>
+                                    <span>⚠️</span>
+                                </div>
+                                <select class="form-control">
+                                    <option>Seleccionar KPI</option>
+                                    ${strategyData.kpis.map(kpi => `<option>${kpi}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="status-card blue">
+                                <div class="status-header">
+                                    <span style="color: #1e40af;">En objetivo</span>
+                                    <span>✅</span>
+                                </div>
+                                <select class="form-control">
+                                    <option>Seleccionar KPI</option>
+                                    ${strategyData.kpis.map(kpi => `<option>${kpi}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 10:
+                    let summaryHTML = '<div class="summary-section">';
+                    
+                    if (strategyData.companyInfo.name) {
+                        summaryHTML += `
+                            <div class="summary-card">
+                                <h3>📊 Información de la Empresa</h3>
+                                <p><strong>Empresa:</strong> ${strategyData.companyInfo.name}</p>
+                                <p><strong>Industria:</strong> ${strategyData.companyInfo.industry}</p>
+                                <p><strong>Tamaño:</strong> ${strategyData.companyInfo.size} empleados</p>
+                            </div>
+                        `;
+                    }
+                    
+                    if (strategyData.objectives.length > 0) {
+                        summaryHTML += `
+                            <div class="summary-card">
+                                <h3>🎯 Objetivos Principales</h3>
+                                ${strategyData.objectives.map(obj => `<p>✓ ${obj}</p>`).join('')}
+                            </div>
+                        `;
+                    }
+                    
+                    if (strategyData.channels.length > 0) {
+                        summaryHTML += `
+                            <div class="summary-card">
+                                <h3>📢 Canales de Marketing</h3>
+                                ${strategyData.channels.map(channelId => {
+                                    const channel = marketingChannels.find(c => c.id === channelId);
+                                    return `<span class="tag tag-blue">${channel.name}</span>`;
+                                }).join('')}
+                            </div>
+                        `;
+                    }
+                    
+                    if (strategyData.budget.total) {
+                        summaryHTML += `
+                            <div class="summary-card">
+                                <h3>💰 Presupuesto</h3>
+                                <p style="font-size: 24px; color: #3b82f6; font-weight: bold;">$${strategyData.budget.total}/mes</p>
+                                <p>Durante ${strategyData.timeline.duration} meses</p>
+                            </div>
+                        `;
+                    }
+                    
+                    summaryHTML += '</div>';
+                    
+                    contentArea.innerHTML = `
+                        <div style="text-align: center;">
+                            <div class="success-icon">✓</div>
+                            <h2 style="font-size: 28px; margin-bottom: 8px;">¡Tu Estrategia de Marketing está Lista!</h2>
+                            <p style="color: #6b7280;">Aquí está el resumen de tu plan estratégico</p>
+                        </div>
+                        
+                        ${summaryHTML}
+                        
+                        <div class="alert alert-success" style="margin-top: 20px;">
+                            <div>
+                                <strong>✨ Tu estrategia está completa y lista para implementar</strong><br><br>
+                                Próximos pasos:<br>
+                                • Implementa tu calendario de publicaciones<br>
+                                • Registra tus métricas mensualmente en el dashboard<br>
+                                • Ajusta la estrategia basándote en los resultados<br>
+                                • Revisa y actualiza trimestralmente
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            updateNavigation();
+        }
+        
+        function updateData(section, field, value) {
+            strategyData[section][field] = value;
+        }
+        
+        function toggleObjective(objective) {
+            const index = strategyData.objectives.indexOf(objective);
+            if (index > -1) {
+                strategyData.objectives.splice(index, 1);
+            } else if (strategyData.objectives.length < 3) {
+                strategyData.objectives.push(objective);
+            }
+            renderContent();
+        }
+        
+        function toggleChannel(channelId) {
+            const index = strategyData.channels.indexOf(channelId);
+            if (index > -1) {
+                strategyData.channels.splice(index, 1);
+            } else {
+                strategyData.channels.push(channelId);
+            }
+            renderContent();
+        }
+        
+        function toggleKPI(kpi) {
+            const index = strategyData.kpis.indexOf(kpi);
+            if (index > -1) {
+                strategyData.kpis.splice(index, 1);
+            } else {
+                strategyData.kpis.push(kpi);
+            }
+            renderContent();
+        }
+        
+        function toggleContentType(type) {
+            const index = strategyData.publicationCalendar.contentTypes.indexOf(type);
+            if (index > -1) {
+                strategyData.publicationCalendar.contentTypes.splice(index, 1);
+            } else {
+                strategyData.publicationCalendar.contentTypes.push(type);
+            }
+        }
+        
+        function updateBudgetDistribution(channelId, value) {
+            strategyData.budget.distribution[channelId] = parseInt(value);
+            renderContent();
+        }
+        
+        function updateActivity(index, value) {
+            if (!strategyData.timeline.activities) {
+                strategyData.timeline.activities = [];
+            }
+            strategyData.timeline.activities[index] = value;
+        }
+        
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentStep === 0;
+            nextBtn.disabled = currentStep === steps.length - 1;
+            
+            if (currentStep === steps.length - 1) {
+                nextBtn.textContent = 'Completado';
+            } else {
+                nextBtn.textContent = 'Siguiente →';
+            }
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                initializeProgress();
+                renderContent();
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                initializeProgress();
+                renderContent();
+            }
+        }
+        
+        // Initialize the application
+        initializeProgress();
+        renderContent();
+    </script>
+    <script src="/estrategias/persist.js"></script>
+    <script>
+      (function setupStrategyPersistence() {
+        if (!window.strategyStorage) {
+          return;
+        }
+
+        if (typeof window.strategyStorage.load === "function") {
+          try {
+            var savedState = window.strategyStorage.load();
+            if (savedState && typeof savedState === "object") {
+              Object.keys(savedState).forEach(function (key) {
+                if (Object.prototype.hasOwnProperty.call(strategyData, key) && typeof strategyData[key] === "object" && strategyData[key] !== null) {
+                  if (Array.isArray(strategyData[key])) {
+                    strategyData[key] = Array.isArray(savedState[key]) ? savedState[key].slice() : strategyData[key];
+                  } else {
+                    Object.assign(strategyData[key], savedState[key]);
+                  }
+                } else {
+                  strategyData[key] = savedState[key];
+                }
+              });
+            }
+          } catch (loadError) {
+            console.warn("No se pudo cargar la estrategia guardada:", loadError);
+          }
+        }
+
+        if (typeof initializeProgress === "function" && typeof renderContent === "function") {
+          initializeProgress();
+          renderContent();
+        }
+
+        function persist() {
+          try {
+            window.strategyStorage.save(strategyData);
+          } catch (saveError) {
+            console.warn("No se pudo guardar la estrategia:", saveError);
+          }
+        }
+
+        var originalUpdateData = window.updateData;
+        if (typeof originalUpdateData === "function") {
+          window.updateData = function (section, field, value) {
+            originalUpdateData(section, field, value);
+            persist();
+          };
+        }
+
+        ["toggleObjective", "toggleChannel", "toggleKPI", "toggleContentType", "updateBudgetDistribution", "updateActivity"].forEach(function (fnName) {
+          var originalFn = window[fnName];
+          if (typeof originalFn === "function") {
+            window[fnName] = function () {
+              originalFn.apply(this, arguments);
+              persist();
+            };
+          }
+        });
+
+        var originalNextStep = window.nextStep;
+        if (typeof originalNextStep === "function") {
+          window.nextStep = function () {
+            originalNextStep();
+            persist();
+          };
+        }
+
+        var originalPreviousStep = window.previousStep;
+        if (typeof originalPreviousStep === "function") {
+          window.previousStep = function () {
+            originalPreviousStep();
+            persist();
+          };
+        }
+
+        persist();
+      })();
+    </script>
+</body>
+</html>
