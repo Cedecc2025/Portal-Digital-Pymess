@@ -37,10 +37,14 @@
         </form>
         <section class="module-kpi" aria-live="polite">
           <h3>Módulos activos</h3>
-          <p>
-            <span class="module-label">Mostrando:</span>
-            <span class="module-value" id="activeModule"></span>
-          </p>
+          <article class="module-highlight" id="moduleHighlight">
+            <span class="module-icon" id="moduleIcon" aria-hidden="true"></span>
+            <div class="module-copy">
+              <span class="module-label">Mostrando:</span>
+              <span class="module-name" id="moduleName"></span>
+              <p class="module-description" id="moduleDescription"></p>
+            </div>
+          </article>
         </section>
       </section>
     </main>
