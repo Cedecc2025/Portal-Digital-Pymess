@@ -6,6 +6,210 @@ import { getCurrentUser } from "../../../lib/authGuard.js";
 import { TABLE_NAMES } from "./constants.js";
 import { getState, mergeState, createInitialState } from "./stateManager.js";
 
+// Normaliza valores de texto eliminando espacios o retornando null cuando sea necesario.
+function toNullableText(value) {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  return String(value);
+}
+
+// Convierte un valor a número o null cuando no es válido.
+function toNullableNumber(value) {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+// Elimina entradas vacías de un arreglo de cadenas.
+function sanitizeStringArray(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return items
+    .map((item) => toNullableText(item))
+    .filter((item) => item !== null);
+}
+
+// Convierte el diccionario de presupuesto en números confiables.
+function sanitizeDistribution(distribution) {
+  if (!distribution || typeof distribution !== "object") {
+    return {};
+  }
+
+  const entries = Object.entries(distribution).map(([channelId, value]) => {
+    const numericValue = toNullableNumber(value);
+    return [channelId, numericValue ?? 0];
+  });
+
+  return Object.fromEntries(entries);
+}
+
+// Normaliza las actividades del cronograma.
+function sanitizeActivities(activities) {
+  if (!Array.isArray(activities)) {
+    return [];
+  }
+
+  return activities
+    .map((activity) => ({
+      description: toNullableText(activity?.description),
+      responsible: toNullableText(activity?.responsible),
+      dependencies: toNullableText(activity?.dependencies),
+      cost: toNullableNumber(activity?.cost)
+    }))
+    .filter((activity) => activity.description || activity.responsible || activity.dependencies || activity.cost !== null);
+}
+
+// Normaliza las entradas del calendario editorial.
+function sanitizeCalendar(entries) {
+  if (!Array.isArray(entries)) {
+    return [];
+  }
+
+  return entries
+    .map((entry) => ({
+      day: toNullableText(entry?.day),
+      channel: toNullableText(entry?.channel),
+      contentType: toNullableText(entry?.contentType),
+      time: toNullableText(entry?.time)
+    }))
+    .filter((entry) => entry.day && (entry.channel || entry.contentType || entry.time));
+}
+
+// Normaliza los KPI configurados por el usuario.
+function sanitizeKpis(kpis) {
+  if (!Array.isArray(kpis)) {
+    return [];
+  }
+
+  return kpis
+    .map((kpi) => ({
+      name: toNullableText(kpi?.name),
+      measurement: toNullableText(kpi?.measurement),
+      target: toNullableNumber(kpi?.target)
+    }))
+    .filter((kpi) => kpi.name);
+}
+
+// Normaliza el seguimiento mensual de KPIs.
+function sanitizeMonthlyTracking(months) {
+  if (!Array.isArray(months)) {
+    return [];
+  }
+
+  return months
+    .map((month) => ({
+      label: toNullableText(month?.label),
+      metrics: Array.isArray(month?.metrics)
+        ? month.metrics
+            .map((metric) => ({
+              kpi: toNullableText(metric?.kpi),
+              target: toNullableNumber(metric?.target),
+              actual: toNullableNumber(metric?.actual),
+              variation: toNullableNumber(metric?.variation)
+            }))
+            .filter((metric) => metric.kpi && (metric.target !== null || metric.actual !== null || metric.variation !== null))
+        : []
+    }))
+    .filter((month) => month.label && month.metrics.length > 0);
+}
+
+// Normaliza la información de competidores.
+function sanitizeCompetitors(competitors) {
+  if (!Array.isArray(competitors)) {
+    return [];
+  }
+
+  return competitors
+    .map((competitor) => ({
+      name: toNullableText(competitor?.name),
+      value: toNullableText(competitor?.value),
+      notes: toNullableText(competitor?.notes)
+    }))
+    .filter((competitor) => competitor.name);
+}
+
+// Convierte la matriz SWOT en registros listos para persistir.
+function sanitizeSwot(swotState) {
+  if (!swotState) {
+    return [];
+  }
+
+  const buildEntries = (items, category) => sanitizeStringArray(items).map((description) => ({
+    category: category,
+    description: description
+  }));
+
+  return [
+    ...buildEntries(swotState.strengths, "strength"),
+    ...buildEntries(swotState.weaknesses, "weakness"),
+    ...buildEntries(swotState.opportunities, "opportunity"),
+    ...buildEntries(swotState.threats, "threat")
+  ];
+}
+
+// Normaliza la información de los buyer persona.
+function sanitizeArchetypes(archetypes) {
+  if (!Array.isArray(archetypes)) {
+    return [];
+  }
+
+  return archetypes
+    .map((persona) => ({
+      name: toNullableText(persona?.name),
+      motivations: toNullableText(persona?.motivations),
+      objections: toNullableText(persona?.objections),
+      channels: sanitizeStringArray(persona?.channels)
+    }))
+    .filter((persona) => persona.name);
+}
+
+// Normaliza campañas activas para evitar registros incompletos.
+function sanitizeCampaigns(campaigns) {
+  if (!Array.isArray(campaigns)) {
+    return [];
+  }
+
+  return campaigns
+    .map((campaign) => ({
+      name: toNullableText(campaign?.name),
+      channel: toNullableText(campaign?.channel),
+      budget: toNullableNumber(campaign?.budget),
+      startDate: toNullableText(campaign?.startDate),
+      endDate: toNullableText(campaign?.endDate),
+      goal: toNullableText(campaign?.goal),
+      status: toNullableText(campaign?.status)
+    }))
+    .filter((campaign) => campaign.name);
+}
+
+// Normaliza automatizaciones antes de enviarlas a la base de datos.
+function sanitizeAutomations(automations) {
+  if (!Array.isArray(automations)) {
+    return [];
+  }
+
+  return automations
+    .map((automation) => ({
+      name: toNullableText(automation?.name),
+      trigger: toNullableText(automation?.trigger),
+      cadence: toNullableText(automation?.cadence),
+      tool: toNullableText(automation?.tool)
+    }))
+    .filter((automation) => automation.name);
+}
+
 // Obtiene o crea un registro maestro en la tabla marketing_strategies.
 async function ensureStrategyRecord(userId) {
   const state = getState();
@@ -13,11 +217,28 @@ async function ensureStrategyRecord(userId) {
     return state.strategyId;
   }
 
+  const { data: existing, error: fetchError } = await supabaseClient
+    .from(TABLE_NAMES.strategies)
+    .select("id")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
+  if (fetchError) {
+    throw fetchError;
+  }
+
+  if (existing && existing.length > 0) {
+    const strategyId = existing[0].id;
+    mergeState({ strategyId: strategyId });
+    return strategyId;
+  }
+
   const { data, error } = await supabaseClient
     .from(TABLE_NAMES.strategies)
     .insert({
       user_id: userId,
-      status: state.versionLog.status,
+      status: state.versionLog.status ?? "En progreso",
       updated_at: new Date().toISOString(),
       strategy_name: state.companyInfo.name || "Estrategia sin título"
     })
@@ -68,13 +289,40 @@ export async function saveStrategyToSupabase() {
 
   const state = getState();
   const strategyId = await ensureStrategyRecord(user.userId);
+  const nowIso = new Date().toISOString();
+
+  const { error: strategyUpdateError } = await supabaseClient
+    .from(TABLE_NAMES.strategies)
+    .update({
+      strategy_name: state.companyInfo.name || "Estrategia sin título",
+      status: state.versionLog.status ?? "En progreso",
+      updated_at: nowIso
+    })
+    .eq("id", strategyId);
+
+  if (strategyUpdateError) {
+    throw strategyUpdateError;
+  }
+
+  const sanitizedObjectives = sanitizeStringArray(state.objectives);
+  const sanitizedChannels = [...new Set(sanitizeStringArray(state.channels))];
+  const sanitizedDistribution = sanitizeDistribution(state.budget.distribution);
+  const sanitizedActivities = sanitizeActivities(state.timeline.activities);
+  const sanitizedCalendar = sanitizeCalendar(state.publicationCalendar.entries);
+  const sanitizedKpis = sanitizeKpis(state.kpis);
+  const sanitizedTracking = sanitizeMonthlyTracking(state.monthlyTracking.months);
+  const sanitizedCompetitors = sanitizeCompetitors(state.competitiveAnalysis.competitors);
+  const sanitizedSwot = sanitizeSwot(state.swot);
+  const sanitizedArchetypes = sanitizeArchetypes(state.buyerPersona.archetypes);
+  const sanitizedCampaigns = sanitizeCampaigns(state.campaigns.active);
+  const sanitizedAutomations = sanitizeAutomations(state.campaigns.automations);
 
   const companyPayload = {
     strategy_id: strategyId,
-    name: state.companyInfo.name,
-    industry: state.companyInfo.industry,
-    size: state.companyInfo.size,
-    current_situation: state.companyInfo.currentSituation
+    name: toNullableText(state.companyInfo.name),
+    industry: toNullableText(state.companyInfo.industry),
+    size: toNullableText(state.companyInfo.size),
+    current_situation: toNullableText(state.companyInfo.currentSituation)
   };
 
   await supabaseClient
@@ -83,13 +331,13 @@ export async function saveStrategyToSupabase() {
 
   const audiencePayload = {
     strategy_id: strategyId,
-    demographics: state.targetAudience.demographics,
-    interests: state.targetAudience.interests,
-    pain_points: state.targetAudience.painPoints,
-    motivations: state.buyerPersona.motivations,
-    objections: state.buyerPersona.objections,
-    preferred_channels: state.buyerPersona.preferredChannels,
-    contact_email: state.buyerPersona.contactEmail
+    demographics: toNullableText(state.targetAudience.demographics),
+    interests: toNullableText(state.targetAudience.interests),
+    pain_points: toNullableText(state.targetAudience.painPoints),
+    motivations: toNullableText(state.buyerPersona.motivations),
+    objections: toNullableText(state.buyerPersona.objections),
+    preferred_channels: sanitizeStringArray(state.buyerPersona.preferredChannels),
+    contact_email: toNullableText(state.buyerPersona.contactEmail)
   };
   await supabaseClient
     .from(TABLE_NAMES.audience)
@@ -98,7 +346,7 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.objectives, strategyId);
   await bulkInsert(
     TABLE_NAMES.objectives,
-    state.objectives.map((objective, index) => ({
+    sanitizedObjectives.map((objective, index) => ({
       strategy_id: strategyId,
       objective_text: objective,
       priority_order: index + 1
@@ -108,10 +356,10 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.channels, strategyId);
   await bulkInsert(
     TABLE_NAMES.channels,
-    state.channels.map((channelId) => ({
+    sanitizedChannels.map((channelId) => ({
       strategy_id: strategyId,
       channel_id: channelId,
-      allocation: state.budget.distribution[channelId] ?? 0
+      allocation: sanitizedDistribution[channelId] ?? 0
     }))
   );
 
@@ -120,8 +368,8 @@ export async function saveStrategyToSupabase() {
     .upsert(
       {
         strategy_id: strategyId,
-        total_amount: state.budget.total,
-        distribution_json: state.budget.distribution
+        total_amount: toNullableNumber(state.budget.total),
+        distribution_json: sanitizedDistribution
       },
       { onConflict: "strategy_id" }
     );
@@ -129,7 +377,7 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.timeline, strategyId);
   await bulkInsert(
     TABLE_NAMES.timeline,
-    state.timeline.activities.map((activity, index) => ({
+    sanitizedActivities.map((activity, index) => ({
       strategy_id: strategyId,
       month_index: index + 1,
       description: activity.description,
@@ -142,7 +390,7 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.calendar, strategyId);
   await bulkInsert(
     TABLE_NAMES.calendar,
-    state.publicationCalendar.entries.map((entry) => ({
+    sanitizedCalendar.map((entry) => ({
       strategy_id: strategyId,
       day_of_week: entry.day,
       channel_id: entry.channel,
@@ -154,7 +402,7 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.kpis, strategyId);
   await bulkInsert(
     TABLE_NAMES.kpis,
-    state.kpis.map((kpi) => ({
+    sanitizedKpis.map((kpi) => ({
       strategy_id: strategyId,
       kpi_name: kpi.name,
       measurement_type: kpi.measurement,
@@ -165,7 +413,7 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.kpiResults, strategyId);
   await bulkInsert(
     TABLE_NAMES.kpiResults,
-    state.monthlyTracking.months.flatMap((month) =>
+    sanitizedTracking.flatMap((month) =>
       month.metrics.map((metric) => ({
         strategy_id: strategyId,
         month_label: month.label,
@@ -180,7 +428,7 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.competitors, strategyId);
   await bulkInsert(
     TABLE_NAMES.competitors,
-    state.competitiveAnalysis.competitors.map((competitor) => ({
+    sanitizedCompetitors.map((competitor) => ({
       strategy_id: strategyId,
       competitor_name: competitor.name,
       value_proposition: competitor.value,
@@ -191,30 +439,29 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.swot, strategyId);
   await bulkInsert(
     TABLE_NAMES.swot,
-    [
-      ...state.swot.strengths.map((description) => ({ strategy_id: strategyId, category: "strength", description })),
-      ...state.swot.weaknesses.map((description) => ({ strategy_id: strategyId, category: "weakness", description })),
-      ...state.swot.opportunities.map((description) => ({ strategy_id: strategyId, category: "opportunity", description })),
-      ...state.swot.threats.map((description) => ({ strategy_id: strategyId, category: "threat", description }))
-    ]
+    sanitizedSwot.map((entry) => ({
+      strategy_id: strategyId,
+      category: entry.category,
+      description: entry.description
+    }))
   );
 
   await clearTableForStrategy(TABLE_NAMES.buyerPersona, strategyId);
   await bulkInsert(
     TABLE_NAMES.buyerPersona,
-    state.buyerPersona.archetypes?.map((persona) => ({
+    sanitizedArchetypes.map((persona) => ({
       strategy_id: strategyId,
       persona_name: persona.name,
       motivations: persona.motivations,
       objections: persona.objections,
       preferred_channels: persona.channels
-    })) ?? []
+    }))
   );
 
   await clearTableForStrategy(TABLE_NAMES.campaigns, strategyId);
   await bulkInsert(
     TABLE_NAMES.campaigns,
-    state.campaigns.active.map((campaign) => ({
+    sanitizedCampaigns.map((campaign) => ({
       strategy_id: strategyId,
       campaign_name: campaign.name,
       channel: campaign.channel,
@@ -229,7 +476,7 @@ export async function saveStrategyToSupabase() {
   await clearTableForStrategy(TABLE_NAMES.automations, strategyId);
   await bulkInsert(
     TABLE_NAMES.automations,
-    state.campaigns.automations.map((automation) => ({
+    sanitizedAutomations.map((automation) => ({
       strategy_id: strategyId,
       automation_name: automation.name,
       trigger_event: automation.trigger,
@@ -249,7 +496,7 @@ export async function saveStrategyToSupabase() {
       },
       { onConflict: "strategy_id" }
     );
-  mergeState({ lastSyncedAt: new Date().toISOString() });
+  mergeState({ lastSyncedAt: nowIso });
 }
 
 // Recupera toda la información almacenada en Supabase para reanudar el asistente.
