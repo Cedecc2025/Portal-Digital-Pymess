@@ -159,6 +159,10 @@ function renderTasksCarousel(tasks) {
     metaElement.className = "tasks-carousel__meta";
     metaElement.textContent = `${task.owner} · Prioridad ${task.priority}`;
 
+    const descriptionElement = document.createElement("p");
+    descriptionElement.className = "tasks-carousel__description";
+    descriptionElement.textContent = task.description || "Sin descripción";
+
     const footerElement = document.createElement("div");
     footerElement.className = "tasks-carousel__footer";
 
@@ -168,13 +172,24 @@ function renderTasksCarousel(tasks) {
 
     const dateElement = document.createElement("p");
     dateElement.className = "tasks-carousel__date";
-    dateElement.textContent = formatDate(task.due_date);
+
+    const dateLabelElement = document.createElement("span");
+    dateLabelElement.className = "tasks-carousel__date-label";
+    dateLabelElement.textContent = "Fecha límite";
+
+    const dateValueElement = document.createElement("span");
+    dateValueElement.className = "tasks-carousel__date-value";
+    dateValueElement.textContent = formatDate(task.due_date);
+
+    dateElement.appendChild(dateLabelElement);
+    dateElement.appendChild(dateValueElement);
 
     footerElement.appendChild(statusBadge);
     footerElement.appendChild(dateElement);
 
     item.appendChild(titleElement);
     item.appendChild(metaElement);
+    item.appendChild(descriptionElement);
     item.appendChild(footerElement);
 
     tasksCarouselTrackElement.appendChild(item);
@@ -250,7 +265,7 @@ async function loadTasksCarousel() {
   try {
     const { data, error } = await supabaseClient
       .from("tareas")
-      .select("id, title, owner, priority, status, due_date")
+      .select("id, title, description, owner, priority, status, due_date")
       .eq("user_id", userId)
       .order("due_date", { ascending: true })
       .limit(4);
