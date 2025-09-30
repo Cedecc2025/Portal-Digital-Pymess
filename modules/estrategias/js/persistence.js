@@ -191,7 +191,21 @@ function sanitizeCampaigns(campaigns) {
       goal: toNullableText(campaign?.goal),
       status: toNullableText(campaign?.status)
     }))
-    .filter((campaign) => campaign.name);
+    .filter((campaign) =>
+      Boolean(
+        campaign.name ||
+          campaign.channel ||
+          campaign.goal ||
+          campaign.status ||
+          campaign.startDate ||
+          campaign.endDate ||
+          campaign.budget !== null
+      )
+    )
+    .map((campaign) => ({
+      ...campaign,
+      status: campaign.status || "Planificada"
+    }));
 }
 
 // Normaliza automatizaciones antes de enviarlas a la base de datos.
@@ -640,7 +654,7 @@ export async function loadStrategyFromSupabase() {
     startDate: row.start_date,
     endDate: row.end_date,
     goal: row.goal,
-    status: row.status
+    status: row.status ?? "Planificada"
   })) ?? [];
 
   newState.campaigns.automations = automations.data?.map((row) => ({
