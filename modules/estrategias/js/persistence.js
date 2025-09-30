@@ -125,6 +125,18 @@ function sanitizeMonthlyTracking(months) {
     .filter((month) => month.label && month.metrics.length > 0);
 }
 
+function sanitizeCampaignDetails(details) {
+  if (!details || typeof details !== "object") {
+    return {};
+  }
+  try {
+    return JSON.parse(JSON.stringify(details));
+  } catch (error) {
+    console.error("Detalles de campaña no serializables", error);
+    return {};
+  }
+}
+
 // Normaliza la información de competidores.
 function sanitizeCompetitors(competitors) {
   if (!Array.isArray(competitors)) {
@@ -189,7 +201,8 @@ function sanitizeCampaigns(campaigns) {
       startDate: toNullableText(campaign?.startDate),
       endDate: toNullableText(campaign?.endDate),
       goal: toNullableText(campaign?.goal),
-      status: toNullableText(campaign?.status)
+      status: toNullableText(campaign?.status),
+      details: sanitizeCampaignDetails(campaign?.details)
     }))
     .filter((campaign) =>
       Boolean(
@@ -199,7 +212,8 @@ function sanitizeCampaigns(campaigns) {
           campaign.status ||
           campaign.startDate ||
           campaign.endDate ||
-          campaign.budget !== null
+          campaign.budget !== null ||
+          (campaign.details && Object.keys(campaign.details).length > 0)
       )
     )
     .map((campaign) => ({
@@ -483,7 +497,8 @@ export async function saveStrategyToSupabase() {
       start_date: campaign.startDate,
       end_date: campaign.endDate,
       goal: campaign.goal,
-      status: campaign.status
+      status: campaign.status,
+      details: campaign.details ?? {}
     }))
   );
 
@@ -648,13 +663,15 @@ export async function loadStrategyFromSupabase() {
   })) ?? [];
 
   newState.campaigns.active = campaigns.data?.map((row) => ({
+    id: row.id,
     name: row.campaign_name,
     channel: row.channel,
     budget: row.budget,
     startDate: row.start_date,
     endDate: row.end_date,
     goal: row.goal,
-    status: row.status ?? "Planificada"
+    status: row.status ?? "Planificada",
+    details: typeof row.details === "object" && row.details !== null ? row.details : {}
   })) ?? [];
 
   newState.campaigns.automations = automations.data?.map((row) => ({

@@ -122,6 +122,24 @@ create table if not exists public.marketing_campaigns (
   status text
 );
 
+alter table public.marketing_campaigns
+  add column if not exists details jsonb default '{}'::jsonb;
+
+create index if not exists idx_marketing_campaigns_strategy_id
+  on public.marketing_campaigns (strategy_id);
+
+create index if not exists idx_marketing_campaigns_status
+  on public.marketing_campaigns (status);
+
+create index if not exists idx_marketing_campaigns_start_date
+  on public.marketing_campaigns (start_date);
+
+create index if not exists idx_mcamp_details_gin
+  on public.marketing_campaigns using gin (details);
+
+-- Escalar a payloads mayores: crear tabla marketing_campaign_details con campaign_id FK y columna details jsonb.
+-- Escenarios con archivos pesados: almacenar assets en Supabase Storage y guardar las URLs en details.assets[].
+
 create table if not exists public.marketing_automations (
   id bigint generated always as identity primary key,
   strategy_id bigint not null references public.marketing_strategies (id) on delete cascade,

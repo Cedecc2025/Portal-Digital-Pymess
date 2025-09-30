@@ -14,6 +14,7 @@ import {
 import { saveStrategyToSupabase, loadStrategyFromSupabase } from "./persistence.js";
 import { renderTrackingChart } from "./charts.js";
 import { generateStrategyPdf } from "./pdf.js";
+import { initializeCampaignsSection } from "./campaigns.ui.js";
 
 const CAMPAIGN_STEP_INDEX = STEPS.findIndex((step) => step.id === "campaigns");
 
@@ -225,8 +226,14 @@ function attachLandingEvents() {
   const newCampaignButton = campaignOverviewContainer.querySelector("#landingNewCampaign");
   if (newCampaignButton) {
     newCampaignButton.addEventListener("click", () => {
-      const stepIndex = CAMPAIGN_STEP_INDEX >= 0 ? CAMPAIGN_STEP_INDEX : 0;
-      startWizard(stepIndex);
+      const managerCard = document.querySelector("#campaignManagerCard");
+      if (managerCard) {
+        managerCard.scrollIntoView({ behavior: "smooth" });
+      }
+      const createButton = document.querySelector("#campaignCreateBtn");
+      if (createButton) {
+        createButton.dispatchEvent(new Event("click", { bubbles: true }));
+      }
     });
   }
   const syncButton = campaignOverviewContainer.querySelector("#landingSync");
@@ -1208,6 +1215,7 @@ async function initializeModule() {
   requireAuth();
   initializeElements();
   await bootstrapState();
+  await initializeCampaignsSection();
   await renderLandingView();
 }
 
