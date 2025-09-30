@@ -80,12 +80,30 @@ function renderProgress() {
 
 // Maneja el evento del botón "Siguiente" validando y avanzando el flujo.
 async function handleNextStep() {
-  const isValid = runStepValidation(STEPS[currentStepIndex].id);
+  const currentStepId = STEPS[currentStepIndex].id;
+  const isValid = runStepValidation(currentStepId);
   if (!isValid) {
     return;
   }
 
-  if (currentStepIndex === STEPS.length - 1) {
+  const isLastStep = currentStepIndex === STEPS.length - 1;
+
+  if (!isLastStep) {
+    try {
+      await saveStrategyToSupabase();
+      if (statusBanner) {
+        statusBanner.textContent = "Progreso guardado correctamente.";
+      }
+    } catch (error) {
+      if (statusBanner) {
+        statusBanner.textContent = "No se pudo guardar el progreso. Revisa tu conexión e inténtalo nuevamente.";
+      }
+      console.error("Error al guardar avance de estrategia", error);
+      return;
+    }
+  }
+
+  if (isLastStep) {
     await finalizeStrategy();
     return;
   }
