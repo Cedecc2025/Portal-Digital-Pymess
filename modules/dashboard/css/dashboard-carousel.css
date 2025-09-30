@@ -242,6 +242,12 @@
   z-index: 2;
 }
 
+.tasks-card--status-visible .carousel-indicators {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .carousel-indicators .counter {
   display: inline-flex;
   align-items: center;

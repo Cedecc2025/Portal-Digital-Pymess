@@ -483,6 +483,7 @@ export function initTasksCarousel({ containerSelector } = {}) {
 
       if (root) {
         root.classList.remove("tasks-card--empty");
+        root.classList.add("tasks-card--status-visible");
       }
 
       if (counterEl) {
@@ -540,6 +541,7 @@ export function initTasksCarousel({ containerSelector } = {}) {
 
       if (root) {
         root.classList.toggle("tasks-card--empty", tone === "empty");
+        root.classList.add("tasks-card--status-visible");
       }
 
       positionArrows();
@@ -575,6 +577,7 @@ export function initTasksCarousel({ containerSelector } = {}) {
 
       if (root) {
         root.classList.remove("tasks-card--empty");
+        root.classList.remove("tasks-card--status-visible");
       }
 
       if (totalEl) {
