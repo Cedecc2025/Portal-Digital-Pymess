@@ -194,16 +194,25 @@ function sanitizeCampaigns(campaigns) {
   }
 
   return campaigns
-    .map((campaign) => ({
-      name: toNullableText(campaign?.name),
-      channel: toNullableText(campaign?.channel),
-      budget: toNullableNumber(campaign?.budget),
-      startDate: toNullableText(campaign?.startDate),
-      endDate: toNullableText(campaign?.endDate),
-      goal: toNullableText(campaign?.goal),
-      status: toNullableText(campaign?.status),
-      details: sanitizeCampaignDetails(campaign?.details)
-    }))
+    .map((campaign) => {
+      const planSummary = toNullableText(campaign?.details?.plan ?? campaign?.plan);
+      const details = sanitizeCampaignDetails(campaign?.details);
+
+      if (planSummary) {
+        details.plan = planSummary;
+      }
+
+      return {
+        name: toNullableText(campaign?.name),
+        channel: toNullableText(campaign?.channel),
+        budget: toNullableNumber(campaign?.budget),
+        startDate: toNullableText(campaign?.startDate),
+        endDate: toNullableText(campaign?.endDate),
+        goal: toNullableText(campaign?.goal),
+        status: toNullableText(campaign?.status),
+        details
+      };
+    })
     .filter((campaign) =>
       Boolean(
         campaign.name ||

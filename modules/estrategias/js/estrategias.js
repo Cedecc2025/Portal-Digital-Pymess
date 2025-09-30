@@ -537,15 +537,20 @@ function runStepValidation(stepId) {
       const campaignRows = Array.from(container.querySelectorAll(".campaign-row"));
       const automationRows = Array.from(container.querySelectorAll(".automation-row"));
       state.campaigns.active = campaignRows
-        .map((row) => ({
-          name: row.querySelector(".campaign-name").value.trim(),
-          channel: row.querySelector(".campaign-channel").value.trim(),
-          budget: Number(row.querySelector(".campaign-budget").value) || 0,
-          startDate: row.querySelector(".campaign-start").value,
-          endDate: row.querySelector(".campaign-end").value,
-          goal: row.querySelector(".campaign-goal").value.trim(),
-          status: row.querySelector(".campaign-status").value
-        }))
+        .map((row) => {
+          const planSummary = row.querySelector(".campaign-plan").value.trim();
+
+          return {
+            name: row.querySelector(".campaign-name").value.trim(),
+            channel: row.querySelector(".campaign-channel").value.trim(),
+            budget: Number(row.querySelector(".campaign-budget").value) || 0,
+            startDate: row.querySelector(".campaign-start").value,
+            endDate: row.querySelector(".campaign-end").value,
+            goal: row.querySelector(".campaign-goal").value.trim(),
+            status: row.querySelector(".campaign-status").value,
+            details: planSummary.length > 0 ? { plan: planSummary } : {}
+          };
+        })
         .filter(
           (campaign) =>
             campaign.name.length > 0 ||
@@ -553,7 +558,8 @@ function runStepValidation(stepId) {
             campaign.goal.length > 0 ||
             campaign.budget > 0 ||
             campaign.startDate ||
-            campaign.endDate
+            campaign.endDate ||
+            (campaign.details && campaign.details.plan && campaign.details.plan.length > 0)
         );
       state.campaigns.automations = automationRows
         .map((row) => ({
@@ -1011,7 +1017,30 @@ function renderCampaignsStep(state) {
   `;
   const campaignList = contentArea.querySelector(".campaign-list");
   const automationList = contentArea.querySelector(".automation-list");
-  const renderCampaignRow = (campaign = { name: "", channel: "", budget: 0, startDate: "", endDate: "", goal: "", status: "Planificada" }) => `
+  const encodeHtml = (value) => {
+    if (value === undefined || value === null) {
+      return "";
+    }
+
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  };
+  const renderCampaignRow = (campaign = {
+    name: "",
+    channel: "",
+    budget: 0,
+    startDate: "",
+    endDate: "",
+    goal: "",
+    status: "Planificada",
+    details: {}
+  }) => {
+    const planSummary = encodeHtml(campaign.details?.plan ?? campaign.plan ?? "");
+
+    return `
     <div class="campaign-row">
       <input class="form-control campaign-name" placeholder="Nombre" value="${campaign.name}" />
       <input class="form-control campaign-channel" placeholder="Canal" value="${campaign.channel}" />
@@ -1022,8 +1051,10 @@ function renderCampaignsStep(state) {
       <select class="form-control campaign-status">
         ${["Planificada", "En ejecución", "Pausada", "Finalizada"].map((status) => `<option value="${status}" ${status === campaign.status ? "selected" : ""}>${status}</option>`).join("")}
       </select>
+      <textarea class="form-control campaign-plan" rows="3" placeholder="Resumen de la planificación, mensajes clave o brief">${planSummary}</textarea>
     </div>
   `;
+  };
   const renderAutomationRow = (automation = { name: "", trigger: "", cadence: "", tool: "" }) => `
     <div class="automation-row">
       <input class="form-control automation-name" placeholder="Nombre" value="${automation.name}" />
