@@ -6,6 +6,7 @@
     <title>Dashboard - Sistema Modular</title>
     <link rel="stylesheet" href="../../public/css/global.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
+    <link rel="stylesheet" href="./css/dashboard-carousel.css" />
   </head>
   <body>
     <main class="dashboard-container">
@@ -15,36 +16,53 @@
           <h1 id="usernameDisplay">Usuario</h1>
         </div>
         <div class="header-actions">
-          <a class="tasks-link" id="tasksButton" href="../tareas/index.html">Ver tareas</a>
           <button id="logoutButton" class="logout-button">Cerrar sesión</button>
         </div>
       </header>
 
       <section class="dashboard-kpis">
-        <article class="kpi-card kpi-card--tasks">
-          <header class="kpi-card__header">
-            <p class="kpi-label">Tareas asignadas</p>
-            <p class="kpi-subtitle">Se actualizan automáticamente</p>
+        <article class="kpi-card tasks-panel">
+          <header class="tasks-panel__header">
+            <div class="tasks-panel__intro">
+              <p class="kpi-label">Tareas asignadas</p>
+              <h2 class="tasks-panel__title">Planifica tu siguiente movimiento</h2>
+              <p class="tasks-panel__subtitle">
+                Monitorea responsables, prioridades y fechas límite sin salir del dashboard.
+              </p>
+            </div>
+            <a class="tasks-panel__cta" id="tasksCarouselAllButton" href="../tareas/index.html">
+              Ver todas las tareas
+            </a>
           </header>
-          <div class="tasks-carousel" aria-live="polite">
+          <div
+            class="tasks-carousel"
+            id="tasksCarousel"
+            data-carousel
+            aria-label="Carrusel de tareas asignadas"
+          >
             <button
               class="tasks-carousel__control tasks-carousel__control--prev"
               id="tasksCarouselPrev"
               type="button"
-              aria-label="Ver tarea anterior"
+              aria-label="Ver tareas anteriores"
             >
-              ◀
+              <span aria-hidden="true">&#10094;</span>
             </button>
-            <p class="tasks-carousel__status" id="tasksCarouselStatus">Cargando tus tareas...</p>
-            <ul class="tasks-carousel__track" id="tasksCarouselTrack"></ul>
+            <div class="tasks-carousel__viewport" id="tasksCarouselViewport">
+              <ul class="tasks-carousel__track" id="tasksCarouselTrack" role="list"></ul>
+              <p class="tasks-carousel__status" id="tasksCarouselStatus" aria-live="polite">
+                Cargando tus tareas...
+              </p>
+            </div>
             <button
               class="tasks-carousel__control tasks-carousel__control--next"
               id="tasksCarouselNext"
               type="button"
-              aria-label="Ver siguiente tarea"
+              aria-label="Ver tareas siguientes"
             >
-              ▶
+              <span aria-hidden="true">&#10095;</span>
             </button>
+            <div class="tasks-carousel__indicators" id="tasksCarouselIndicators" role="tablist"></div>
           </div>
         </article>
       </section>
