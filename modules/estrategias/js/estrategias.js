@@ -235,9 +235,35 @@ function attachLandingEvents() {
   }
 }
 
-// Renderiza la vista de resumen con las campañas guardadas.
-function renderLandingView() {
+// Recupera campañas desde el estado o fuerza una sincronización contra Supabase.
+async function ensureCampaignDataset(forceRefresh = false) {
   const state = getState();
+  const existingCampaigns = Array.isArray(state.campaigns?.active) ? state.campaigns.active : [];
+
+  if (!forceRefresh && existingCampaigns.length > 0) {
+    return existingCampaigns;
+  }
+
+  try {
+    const remoteState = await loadStrategyFromSupabase();
+    if (remoteState) {
+      setState(remoteState);
+      return Array.isArray(remoteState.campaigns?.active) ? remoteState.campaigns.active : [];
+    }
+  } catch (error) {
+    console.error("No se pudo cargar la información remota de campañas", error);
+    if (statusBanner) {
+      statusBanner.textContent = "No se pudieron cargar las campañas guardadas desde Supabase.";
+    }
+  }
+
+  const refreshedState = getState();
+  return Array.isArray(refreshedState.campaigns?.active) ? refreshedState.campaigns.active : [];
+}
+
+// Renderiza la vista de resumen con las campañas guardadas.
+async function renderLandingView(options = {}) {
+  const { forceRefresh = false } = options;
   if (!campaignOverviewCard || !campaignOverviewContainer) {
     return;
   }
@@ -245,12 +271,26 @@ function renderLandingView() {
   toggleWizardVisibility(false);
   campaignOverviewCard.classList.remove("hidden");
 
-  const campaigns = state.campaigns?.active ?? [];
-  const hasCampaigns = campaigns.length > 0;
+  campaignOverviewContainer.innerHTML = `
+    <div class="campaign-overview">
+      <header>
+        <h2>Campañas guardadas</h2>
+        <p>Cargando campañas sincronizadas...</p>
+      </header>
+    </div>
+  `;
 
+  const campaigns = await ensureCampaignDataset(forceRefresh);
+  const hasCampaigns = campaigns.length > 0;
   const campaignMarkup = hasCampaigns
     ? `<div class="campaign-grid">${campaigns.map((campaign, index) => renderCampaignCard(campaign, index)).join("")}</div>`
     : '<div class="empty-campaigns">Aún no has registrado campañas. Inicia el asistente para crear tu primera estrategia.</div>';
+
+  if (statusBanner) {
+    statusBanner.textContent = hasCampaigns
+      ? "Campañas sincronizadas correctamente."
+      : "No encontramos campañas guardadas. Comienza el asistente para crear tu estrategia.";
+  }
 
   campaignOverviewContainer.innerHTML = `
     <div class="campaign-overview">
@@ -283,12 +323,12 @@ function startWizard(stepIndex = 0) {
 }
 
 // Regresa al resumen guardando los datos del paso actual.
-function handleReturnToOverview() {
+async function handleReturnToOverview() {
   if (contentArea && STEPS[currentStepIndex]) {
     runStepValidation(STEPS[currentStepIndex].id);
   }
   saveState();
-  renderLandingView();
+  await renderLandingView();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -298,7 +338,6 @@ async function syncFromSupabase() {
     const remoteState = await loadStrategyFromSupabase();
     if (remoteState) {
       setState(remoteState);
-      statusBanner.textContent = "Campañas sincronizadas correctamente.";
     } else {
       statusBanner.textContent = "No encontramos campañas guardadas en Supabase.";
     }
@@ -306,7 +345,7 @@ async function syncFromSupabase() {
     statusBanner.textContent = "No se pudo sincronizar con Supabase.";
     console.error(error);
   }
-  renderLandingView();
+  await renderLandingView({ forceRefresh: true });
 }
 
 // Ejecuta la validación específica del paso actual.
@@ -1169,7 +1208,7 @@ async function initializeModule() {
   requireAuth();
   initializeElements();
   await bootstrapState();
-  renderLandingView();
+  await renderLandingView();
 }
 
 if (typeof document !== "undefined") {
