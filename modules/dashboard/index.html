@@ -35,66 +35,67 @@
             </a>
           </header>
           <section
-            class="tasks-carousel"
+            class="tasks-card"
             id="tasksCarousel"
             role="region"
             aria-label="Tareas asignadas"
             data-ready="false"
           >
-            <button
-              class="tasks-carousel__control tasks-carousel__control--prev"
-              id="tasksCarouselPrev"
-              type="button"
-              aria-label="Anterior"
-              data-carousel-prev
-              disabled
-            >
-              <span aria-hidden="true">&#10094;</span>
-            </button>
-            <div
-              class="tasks-carousel__viewport"
-              id="tasksCarouselViewport"
-              data-carousel-viewport
-              tabindex="0"
-              role="group"
-              aria-roledescription="carrusel"
-              aria-live="polite"
-            >
-              <ul
-                class="tasks-carousel__track"
-                id="tasksCarouselTrack"
-                data-carousel-track
-                role="list"
-              ></ul>
-              <p
-                class="tasks-carousel__status"
-                id="tasksCarouselStatus"
-                data-carousel-status
+            <div class="tasks-card__inner">
+              <button
+                class="carousel-btn prev"
+                id="tasksCarouselPrev"
+                type="button"
+                aria-label="Anterior"
+                data-carousel-prev
+                disabled
               >
-                Cargando tus tareas...
-              </p>
-            </div>
-            <button
-              class="tasks-carousel__control tasks-carousel__control--next"
-              id="tasksCarouselNext"
-              type="button"
-              aria-label="Siguiente"
-              data-carousel-next
-              disabled
-            >
-              <span aria-hidden="true">&#10095;</span>
-            </button>
-            <div class="tasks-carousel__indicators">
+                <span aria-hidden="true">&#10094;</span>
+              </button>
               <div
-                class="tasks-carousel__dots"
+                class="carousel-viewport"
+                id="tasksCarouselViewport"
+                data-carousel-viewport
+                tabindex="0"
+                role="group"
+                aria-roledescription="carrusel"
+                aria-live="polite"
+              >
+                <ul
+                  class="carousel-track"
+                  id="tasksCarouselTrack"
+                  data-carousel-track
+                  role="list"
+                ></ul>
+                <p
+                  class="carousel-status"
+                  id="tasksCarouselStatus"
+                  data-carousel-status
+                >
+                  Cargando tus tareas...
+                </p>
+              </div>
+              <button
+                class="carousel-btn next"
+                id="tasksCarouselNext"
+                type="button"
+                aria-label="Siguiente"
+                data-carousel-next
+                disabled
+              >
+                <span aria-hidden="true">&#10095;</span>
+              </button>
+              <div
+                class="carousel-indicators"
                 id="tasksCarouselIndicators"
                 data-carousel-dots
                 role="tablist"
+                aria-hidden="true"
               ></div>
-              <div class="tasks-carousel__counter" aria-hidden="true">
-                <span class="tasks-carousel__counter-current" data-carousel-current>0</span>
-                <span class="tasks-carousel__counter-separator">/</span>
-                <span class="tasks-carousel__counter-total" data-carousel-total>0</span>
+              <div class="carousel-counter" aria-hidden="true">
+                <span class="carousel-counter__current" data-carousel-current>0</span>
+                <span class="carousel-counter__separator">/</span>
+                <span class="carousel-counter__total" data-carousel-total>0</span>
               </div>
             </div>
           </section>

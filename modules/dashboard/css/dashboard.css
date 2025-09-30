@@ -9,6 +9,7 @@ body {
   align-items: center;
   padding: 40px 20px;
   color: #0f172a;
+  overflow-x: hidden;
 }
 
 .dashboard-container {

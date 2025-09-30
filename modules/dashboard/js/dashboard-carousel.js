@@ -72,7 +72,7 @@ function resolveStatusClass(status) {
 // Construye el contenido visual de una tarjeta de tarea.
 function createTaskSlide(task, index) {
   const item = document.createElement("li");
-  item.className = "tasks-carousel__slide";
+  item.className = "carousel-slide";
   item.setAttribute("role", "listitem");
   item.dataset.index = String(index);
 
@@ -163,6 +163,14 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
     dragDeltaX: 0
   };
 
+  function getViewportWidth() {
+    if (!viewport) {
+      return 0;
+    }
+
+    return Math.round(viewport.getBoundingClientRect().width);
+  }
+
   // Actualiza el mensaje visible o del lector de pantalla según el estado del carrusel.
   function showStatusMessage(message, mode = "message") {
     if (!status) {
@@ -251,7 +259,8 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
       return;
     }
 
-    const baseOffset = -state.currentIndex * viewport.clientWidth;
+    const width = getViewportWidth();
+    const baseOffset = -state.currentIndex * width;
 
     if (animate) {
       track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
@@ -345,7 +354,7 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
     state.slides.forEach((slide, index) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "tasks-carousel__dot";
+      button.className = "dot";
       button.setAttribute("role", "tab");
       button.setAttribute("aria-label", `Ir a la tarea ${index + 1}`);
       button.addEventListener("click", () => {
@@ -411,7 +420,7 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
     }
 
     state.dragDeltaX = event.clientX - state.dragStartX;
-    const baseOffset = -state.currentIndex * viewport.clientWidth;
+    const baseOffset = -state.currentIndex * getViewportWidth();
     track.style.transform = `translateX(${baseOffset + state.dragDeltaX}px)`;
   }
 
@@ -482,7 +491,7 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
 
   // Recalcula el offset cuando cambian las dimensiones del viewport.
   function handleResize() {
-    updateSlides(false);
+    goTo(state.currentIndex, { animate: false });
   }
 
   if (prevButton) {
