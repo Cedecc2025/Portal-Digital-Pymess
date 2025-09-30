@@ -22,7 +22,11 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="campaignOverviewCard">
+        <div id="campaignOverview"></div>
+      </div>
+
+      <div class="card" data-wizard-section="progress">
         <div class="progress-container">
           <div class="progress-steps" id="progressSteps"></div>
           <div class="progress-info">
@@ -32,18 +36,23 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" data-wizard-section="content">
         <div class="content" id="contentArea"></div>
       </div>
 
-      <div class="card">
+      <div class="card" data-wizard-section="navigation">
         <div class="navigation">
-          <button class="btn btn-secondary" id="prevBtn" type="button">
-            ← Anterior
+          <button class="btn btn-secondary hidden" id="overviewBtn" type="button">
+            🏠 Resumen
           </button>
-          <button class="btn btn-primary" id="nextBtn" type="button">
-            Siguiente →
-          </button>
+          <div class="nav-actions">
+            <button class="btn btn-secondary" id="prevBtn" type="button">
+              ← Anterior
+            </button>
+            <button class="btn btn-primary" id="nextBtn" type="button">
+              Siguiente →
+            </button>
+          </div>
         </div>
       </div>
     </div>

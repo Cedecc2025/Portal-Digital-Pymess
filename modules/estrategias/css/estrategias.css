@@ -373,7 +373,15 @@ textarea.form-control {
 .navigation {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 30px;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 12px;
 }
 
 .btn {
@@ -699,4 +707,89 @@ textarea.form-control {
 
 .hidden {
   display: none;
+}
+
+#campaignOverviewCard {
+  overflow: hidden;
+}
+
+.campaign-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.campaign-overview header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campaign-overview header h2 {
+  font-size: 24px;
+  color: #1f2937;
+}
+
+.campaign-overview header p {
+  color: #6b7280;
+  max-width: 720px;
+}
+
+.campaign-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.campaign-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f9fafb 0%, #eef2ff 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campaign-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+.campaign-card h3 {
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.campaign-meta {
+  font-size: 14px;
+  color: #4b5563;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campaign-status {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  background: #dbeafe;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.empty-campaigns {
+  padding: 24px;
+  text-align: center;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  color: #6b7280;
 }

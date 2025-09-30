@@ -15,6 +15,8 @@ import { saveStrategyToSupabase, loadStrategyFromSupabase } from "./persistence.
 import { renderTrackingChart } from "./charts.js";
 import { generateStrategyPdf } from "./pdf.js";
 
+const CAMPAIGN_STEP_INDEX = STEPS.findIndex((step) => step.id === "campaigns");
+
 let currentStepIndex = 0;
 let contentArea = null;
 let progressSteps = null;
@@ -23,6 +25,10 @@ let stepName = null;
 let nextButton = null;
 let prevButton = null;
 let statusBanner = null;
+let campaignOverviewCard = null;
+let campaignOverviewContainer = null;
+let overviewButton = null;
+let wizardSections = [];
 
 // Inicializa la UI seleccionando elementos y registrando eventos principales.
 function initializeElements() {
@@ -33,9 +39,16 @@ function initializeElements() {
   nextButton = document.querySelector("#nextBtn");
   prevButton = document.querySelector("#prevBtn");
   statusBanner = document.querySelector("#statusBanner");
+  campaignOverviewCard = document.querySelector("#campaignOverviewCard");
+  campaignOverviewContainer = document.querySelector("#campaignOverview");
+  overviewButton = document.querySelector("#overviewBtn");
+  wizardSections = Array.from(document.querySelectorAll("[data-wizard-section]"));
 
   prevButton.addEventListener("click", handlePreviousStep);
   nextButton.addEventListener("click", handleNextStep);
+  if (overviewButton) {
+    overviewButton.addEventListener("click", handleReturnToOverview);
+  }
 }
 
 // Renderiza los indicadores de progreso con base en el paso actual.
@@ -113,6 +126,169 @@ function computeTrackingInsights() {
     });
   });
   state.monthlyTracking.insights = insights;
+}
+
+// Alterna la visibilidad de las tarjetas del asistente.
+function toggleWizardVisibility(isVisible) {
+  wizardSections.forEach((section) => {
+    section.classList.toggle("hidden", !isVisible);
+  });
+  if (overviewButton) {
+    overviewButton.classList.toggle("hidden", !isVisible);
+  }
+}
+
+// Formatea un valor de fecha para mostrarse en tarjetas.
+function formatDateValue(value) {
+  if (!value) {
+    return null;
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+  return parsed.toLocaleDateString("es-CR", { year: "numeric", month: "short", day: "numeric" });
+}
+
+// Construye un rango legible entre fechas de inicio y fin.
+function formatDateRange(start, end) {
+  const startLabel = formatDateValue(start);
+  const endLabel = formatDateValue(end);
+  if (!startLabel && !endLabel) {
+    return "Sin fecha definida";
+  }
+  if (startLabel && endLabel) {
+    return `${startLabel} – ${endLabel}`;
+  }
+  return startLabel ?? endLabel;
+}
+
+// Formatea el presupuesto numérico mostrado en el resumen.
+function formatBudget(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) {
+    return "No asignado";
+  }
+  return new Intl.NumberFormat("es-CR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(number);
+}
+
+// Construye la tarjeta de campaña dentro del resumen inicial.
+function renderCampaignCard(campaign, index) {
+  const displayName = campaign.name?.trim() || `Campaña ${index + 1}`;
+  const status = campaign.status?.trim() || "Planificada";
+  const channel = campaign.channel?.trim() || "Canal no especificado";
+  const goal = campaign.goal?.trim() || "Sin objetivo definido";
+  const budget = formatBudget(campaign.budget);
+  const dateRange = formatDateRange(campaign.startDate, campaign.endDate);
+
+  return `
+    <article class="campaign-card">
+      <h3>${displayName}</h3>
+      <span class="campaign-status">${status}</span>
+      <div class="campaign-meta">
+        <span>Canal: ${channel}</span>
+        <span>Objetivo: ${goal}</span>
+        <span>Periodo: ${dateRange}</span>
+        <span>Presupuesto estimado: ${budget}</span>
+      </div>
+    </article>
+  `;
+}
+
+// Registra los eventos de la vista inicial.
+function attachLandingEvents() {
+  if (!campaignOverviewContainer) {
+    return;
+  }
+  const startWizardButton = campaignOverviewContainer.querySelector("#landingStartWizard");
+  if (startWizardButton) {
+    startWizardButton.addEventListener("click", () => startWizard(0));
+  }
+  const newCampaignButton = campaignOverviewContainer.querySelector("#landingNewCampaign");
+  if (newCampaignButton) {
+    newCampaignButton.addEventListener("click", () => {
+      const stepIndex = CAMPAIGN_STEP_INDEX >= 0 ? CAMPAIGN_STEP_INDEX : 0;
+      startWizard(stepIndex);
+    });
+  }
+  const syncButton = campaignOverviewContainer.querySelector("#landingSync");
+  if (syncButton) {
+    syncButton.addEventListener("click", syncFromSupabase);
+  }
+}
+
+// Renderiza la vista de resumen con las campañas guardadas.
+function renderLandingView() {
+  const state = getState();
+  if (!campaignOverviewCard || !campaignOverviewContainer) {
+    return;
+  }
+
+  toggleWizardVisibility(false);
+  campaignOverviewCard.classList.remove("hidden");
+
+  const campaigns = state.campaigns?.active ?? [];
+  const hasCampaigns = campaigns.length > 0;
+
+  const campaignMarkup = hasCampaigns
+    ? `<div class="campaign-grid">${campaigns.map((campaign, index) => renderCampaignCard(campaign, index)).join("")}</div>`
+    : '<div class="empty-campaigns">Aún no has registrado campañas. Inicia el asistente para crear tu primera estrategia.</div>';
+
+  campaignOverviewContainer.innerHTML = `
+    <div class="campaign-overview">
+      <header>
+        <h2>Campañas guardadas</h2>
+        <p>Consulta tus campañas sincronizadas y reanuda la planeación cuando lo necesites.</p>
+      </header>
+      ${campaignMarkup}
+      <div class="landing-actions">
+        <button type="button" class="btn btn-primary" id="landingStartWizard">📋 Planificar estrategia completa</button>
+        <button type="button" class="btn btn-secondary" id="landingNewCampaign">🚀 Agregar campaña</button>
+        <button type="button" class="btn btn-secondary" id="landingSync">🔄 Sincronizar con Supabase</button>
+      </div>
+    </div>
+  `;
+
+  attachLandingEvents();
+}
+
+// Abre el asistente en el paso indicado.
+function startWizard(stepIndex = 0) {
+  currentStepIndex = Math.max(0, Math.min(stepIndex, STEPS.length - 1));
+  if (campaignOverviewCard) {
+    campaignOverviewCard.classList.add("hidden");
+  }
+  toggleWizardVisibility(true);
+  renderProgress();
+  renderStepContent();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// Regresa al resumen guardando los datos del paso actual.
+function handleReturnToOverview() {
+  if (contentArea && STEPS[currentStepIndex]) {
+    runStepValidation(STEPS[currentStepIndex].id);
+  }
+  saveState();
+  renderLandingView();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// Sincroniza la estrategia desde Supabase y refresca el resumen.
+async function syncFromSupabase() {
+  try {
+    const remoteState = await loadStrategyFromSupabase();
+    if (remoteState) {
+      setState(remoteState);
+      statusBanner.textContent = "Campañas sincronizadas correctamente.";
+    } else {
+      statusBanner.textContent = "No encontramos campañas guardadas en Supabase.";
+    }
+  } catch (error) {
+    statusBanner.textContent = "No se pudo sincronizar con Supabase.";
+    console.error(error);
+  }
+  renderLandingView();
 }
 
 // Ejecuta la validación específica del paso actual.
@@ -296,21 +472,39 @@ function runStepValidation(stepId) {
     case "campaigns": {
       const campaignRows = Array.from(container.querySelectorAll(".campaign-row"));
       const automationRows = Array.from(container.querySelectorAll(".automation-row"));
-      state.campaigns.active = campaignRows.map((row) => ({
-        name: row.querySelector(".campaign-name").value.trim(),
-        channel: row.querySelector(".campaign-channel").value.trim(),
-        budget: Number(row.querySelector(".campaign-budget").value) || 0,
-        startDate: row.querySelector(".campaign-start").value,
-        endDate: row.querySelector(".campaign-end").value,
-        goal: row.querySelector(".campaign-goal").value.trim(),
-        status: row.querySelector(".campaign-status").value
-      }));
-      state.campaigns.automations = automationRows.map((row) => ({
-        name: row.querySelector(".automation-name").value.trim(),
-        trigger: row.querySelector(".automation-trigger").value.trim(),
-        cadence: row.querySelector(".automation-cadence").value.trim(),
-        tool: row.querySelector(".automation-tool").value.trim()
-      }));
+      state.campaigns.active = campaignRows
+        .map((row) => ({
+          name: row.querySelector(".campaign-name").value.trim(),
+          channel: row.querySelector(".campaign-channel").value.trim(),
+          budget: Number(row.querySelector(".campaign-budget").value) || 0,
+          startDate: row.querySelector(".campaign-start").value,
+          endDate: row.querySelector(".campaign-end").value,
+          goal: row.querySelector(".campaign-goal").value.trim(),
+          status: row.querySelector(".campaign-status").value
+        }))
+        .filter(
+          (campaign) =>
+            campaign.name.length > 0 ||
+            campaign.channel.length > 0 ||
+            campaign.goal.length > 0 ||
+            campaign.budget > 0 ||
+            campaign.startDate ||
+            campaign.endDate
+        );
+      state.campaigns.automations = automationRows
+        .map((row) => ({
+          name: row.querySelector(".automation-name").value.trim(),
+          trigger: row.querySelector(".automation-trigger").value.trim(),
+          cadence: row.querySelector(".automation-cadence").value.trim(),
+          tool: row.querySelector(".automation-tool").value.trim()
+        }))
+        .filter(
+          (automation) =>
+            automation.name.length > 0 ||
+            automation.trigger.length > 0 ||
+            automation.cadence.length > 0 ||
+            automation.tool.length > 0
+        );
       saveState();
       return true;
     }
@@ -953,14 +1147,13 @@ async function bootstrapState() {
 }
 
 // Punto de entrada principal del módulo.
-async function initializeWizard() {
+async function initializeModule() {
   requireAuth();
   initializeElements();
   await bootstrapState();
-  renderProgress();
-  renderStepContent();
+  renderLandingView();
 }
 
 if (typeof document !== "undefined") {
-  initializeWizard();
+  initializeModule();
 }
