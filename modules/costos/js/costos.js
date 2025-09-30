@@ -44,7 +44,6 @@ const elements = {
   currencySelect: null,
   exchangeInput: null,
   exchangeUsdLabel: null,
-  logoutButton: null,
   headerSubtitle: null,
   monthInput: null,
   ingresosLabel: null,
@@ -2264,7 +2263,6 @@ function cacheElements() {
   elements.currencySelect = document.querySelector("#selectMoneda");
   elements.exchangeInput = document.querySelector("#tasaCambio");
   elements.exchangeUsdLabel = document.querySelector("#tasaDolar");
-  elements.logoutButton = document.querySelector("#logoutButton");
   elements.headerSubtitle = document.querySelector(".subtitle");
   elements.monthInput = document.querySelector("#mes-seleccionado");
   elements.ingresosLabel = document.querySelector("#flujo-ingresos");

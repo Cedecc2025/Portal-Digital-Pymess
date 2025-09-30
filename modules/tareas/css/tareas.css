@@ -32,6 +32,14 @@ body {
   gap: 20px;
 }
 
+.tasks-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .tasks-eyebrow {
   margin: 0 0 8px;
   text-transform: uppercase;
@@ -50,6 +58,25 @@ body {
   max-width: 560px;
   line-height: 1.7;
   color: #475467;
+}
+
+.tasks-back-button {
+  border: 1px solid rgba(30, 64, 175, 0.24);
+  background: rgba(226, 232, 255, 0.65);
+  color: #1e3a8a;
+  padding: 12px 24px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), background var(--transition-base);
+}
+
+.tasks-back-button:hover,
+.tasks-back-button:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(191, 219, 254, 0.95);
+  box-shadow: 0 14px 32px rgba(30, 64, 175, 0.18);
+  outline: none;
 }
 
 .logout-button {
@@ -203,18 +230,6 @@ select.form-control,
   padding-left: 20px;
   display: grid;
   gap: 10px;
-}
-
-.task-dashboard-link {
-  color: #1e90ff;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.task-dashboard-link:hover,
-.task-dashboard-link:focus-visible {
-  text-decoration: underline;
-  outline: none;
 }
 
 .tasks-listing {
