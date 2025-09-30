@@ -126,6 +126,47 @@ body {
   min-height: 120px;
 }
 
+.tasks-carousel__control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(79, 70, 229, 0.4);
+  background: rgba(255, 255, 255, 0.85);
+  color: #4338ca;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tasks-carousel__control:hover:not([disabled]) {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 15px 30px rgba(67, 56, 202, 0.25);
+}
+
+.tasks-carousel__control:focus {
+  outline: 3px solid rgba(79, 70, 229, 0.4);
+  outline-offset: 2px;
+}
+
+.tasks-carousel__control[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tasks-carousel__control--prev {
+  left: 8px;
+}
+
+.tasks-carousel__control--next {
+  right: 8px;
+}
+
 .tasks-carousel__status {
   margin: 0;
   font-size: 0.95rem;
@@ -146,7 +187,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 8px;
+  padding: 8px 48px;
 }
 
 .tasks-carousel__title {

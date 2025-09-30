@@ -27,8 +27,24 @@
             <p class="kpi-subtitle">Se actualizan automáticamente</p>
           </header>
           <div class="tasks-carousel" aria-live="polite">
+            <button
+              class="tasks-carousel__control tasks-carousel__control--prev"
+              id="tasksCarouselPrev"
+              type="button"
+              aria-label="Ver tarea anterior"
+            >
+              ◀
+            </button>
             <p class="tasks-carousel__status" id="tasksCarouselStatus">Cargando tus tareas...</p>
             <ul class="tasks-carousel__track" id="tasksCarouselTrack"></ul>
+            <button
+              class="tasks-carousel__control tasks-carousel__control--next"
+              id="tasksCarouselNext"
+              type="button"
+              aria-label="Ver siguiente tarea"
+            >
+              ▶
+            </button>
           </div>
         </article>
       </section>
@@ -43,11 +59,6 @@
           <h2>Estrategias de Ventas</h2>
           <p>Diseña campañas y planes de marketing para impulsar tu crecimiento.</p>
           <span class="module-button">Ir a Estrategias</span>
-        </a>
-        <a class="module-card" href="../tareas/index.html" data-module="tareas">
-          <h2>Gestión de Tareas</h2>
-          <p>Asigna responsables, controla prioridades y sigue tus pendientes.</p>
-          <span class="module-button">Ir a Tareas</span>
         </a>
       </section>
     </main>

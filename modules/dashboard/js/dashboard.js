@@ -15,9 +15,15 @@ const tasksButton = document.querySelector("#tasksButton");
 const moduleCards = document.querySelectorAll(".module-card");
 const tasksCarouselTrackElement = document.querySelector("#tasksCarouselTrack");
 const tasksCarouselStatusElement = document.querySelector("#tasksCarouselStatus");
+const tasksCarouselPrevButton = document.querySelector("#tasksCarouselPrev");
+const tasksCarouselNextButton = document.querySelector("#tasksCarouselNext");
 
 const TASKS_CAROUSEL_INTERVAL = 2200;
 let tasksCarouselTimer = null;
+const tasksCarouselState = {
+  tasks: [],
+  activeIndex: 0
+};
 
 // Carga la información del usuario autenticado en el encabezado.
 function loadUsername() {
@@ -53,15 +59,33 @@ function registerEventListeners() {
         card.setAttribute("href", "../estrategias/index.html");
         break;
       }
-      case "tareas": {
-        card.setAttribute("href", "../tareas/index.html");
-        break;
-      }
       default: {
         break;
       }
     }
   });
+
+  if (tasksCarouselPrevButton) {
+    tasksCarouselPrevButton.addEventListener("click", () => {
+      if (!tasksCarouselState.tasks.length) {
+        return;
+      }
+
+      goToTasksSlide(tasksCarouselState.activeIndex - 1);
+      scheduleTasksCarousel();
+    });
+  }
+
+  if (tasksCarouselNextButton) {
+    tasksCarouselNextButton.addEventListener("click", () => {
+      if (!tasksCarouselState.tasks.length) {
+        return;
+      }
+
+      goToTasksSlide(tasksCarouselState.activeIndex + 1);
+      scheduleTasksCarousel();
+    });
+  }
 }
 
 function formatDate(dateString) {
@@ -93,6 +117,9 @@ function renderTasksCarousel(tasks) {
   if (!tasks || tasks.length === 0) {
     tasksCarouselStatusElement.textContent = "Aún no tienes tareas registradas.";
     stopTasksCarousel();
+    tasksCarouselState.tasks = [];
+    tasksCarouselState.activeIndex = 0;
+    updateTasksCarouselControls();
     return;
   }
 
@@ -139,21 +166,44 @@ function stopTasksCarousel() {
   }
 }
 
-function startTasksCarousel(tasks, elements = {}, interval = TASKS_CAROUSEL_INTERVAL) {
-  const trackElement = elements.track ?? tasksCarouselTrackElement;
+function updateTasksCarouselControls() {
+  const shouldDisable = !Array.isArray(tasksCarouselState.tasks) || tasksCarouselState.tasks.length <= 1;
 
-  if (!trackElement || !Array.isArray(tasks) || tasks.length <= 1) {
-    stopTasksCarousel();
+  [tasksCarouselPrevButton, tasksCarouselNextButton].forEach((button) => {
+    if (!button) {
+      return;
+    }
+
+    button.disabled = shouldDisable;
+    button.setAttribute("aria-disabled", shouldDisable ? "true" : "false");
+  });
+}
+
+function goToTasksSlide(targetIndex) {
+  if (
+    !tasksCarouselTrackElement ||
+    !Array.isArray(tasksCarouselState.tasks) ||
+    tasksCarouselState.tasks.length === 0
+  ) {
     return;
   }
 
+  const tasksCount = tasksCarouselState.tasks.length;
+  const normalizedIndex = ((targetIndex % tasksCount) + tasksCount) % tasksCount;
+
+  tasksCarouselState.activeIndex = normalizedIndex;
+  tasksCarouselTrackElement.style.transform = `translateX(-${normalizedIndex * 100}%)`;
+}
+
+function scheduleTasksCarousel(interval = TASKS_CAROUSEL_INTERVAL) {
   stopTasksCarousel();
 
-  let activeIndex = 0;
+  if (!Array.isArray(tasksCarouselState.tasks) || tasksCarouselState.tasks.length <= 1) {
+    return;
+  }
 
   tasksCarouselTimer = setInterval(() => {
-    activeIndex = (activeIndex + 1) % tasks.length;
-    trackElement.style.transform = `translateX(-${activeIndex * 100}%)`;
+    goToTasksSlide(tasksCarouselState.activeIndex + 1);
   }, interval);
 }
 
@@ -184,15 +234,29 @@ async function loadTasksCarousel() {
     }
 
     const tasks = data ?? [];
+    tasksCarouselState.tasks = tasks;
+    tasksCarouselState.activeIndex = 0;
+
     renderTasksCarousel(tasks);
-    startTasksCarousel(tasks);
+    updateTasksCarouselControls();
+
+    if (tasks.length > 0) {
+      goToTasksSlide(0);
+      scheduleTasksCarousel();
+    } else {
+      stopTasksCarousel();
+    }
   } catch (error) {
     console.error("Error al cargar las tareas del dashboard", error);
     tasksCarouselStatusElement.textContent = "No fue posible cargar tus tareas.";
+    tasksCarouselState.tasks = [];
+    tasksCarouselState.activeIndex = 0;
+    updateTasksCarouselControls();
   }
 }
 
 requireAuth();
 loadUsername();
 registerEventListeners();
+updateTasksCarouselControls();
 loadTasksCarousel();

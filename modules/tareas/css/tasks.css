@@ -32,6 +32,14 @@ body {
   gap: 16px;
 }
 
+.tasks-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .tasks-breadcrumb {
   margin: 0;
   text-transform: uppercase;
@@ -44,6 +52,25 @@ body {
   margin-top: 8px;
   color: #475569;
   font-size: 0.95rem;
+}
+
+.tasks-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #cbd5f5;
+  text-decoration: none;
+  color: #4338ca;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(165, 180, 252, 0.22), rgba(224, 231, 255, 0.6));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tasks-back:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.25);
 }
 
 .tasks-logout {
