@@ -6,6 +6,8 @@ import { requireAuth, getCurrentUsername, logout } from "../../../lib/authGuard.
 const usernameDisplay = document.querySelector("#usernameDisplay");
 const logoutButton = document.querySelector("#logoutButton");
 const moduleCards = document.querySelectorAll(".module-card");
+const activeModulesCountElement = document.querySelector("#activeModulesCount");
+const activeModulesListElement = document.querySelector("#activeModulesList");
 
 // Carga la información del usuario autenticado en el encabezado.
 function loadUsername() {
@@ -44,6 +46,27 @@ function registerEventListeners() {
   });
 }
 
+// Actualiza el KPI con el estado de los módulos activos.
+function updateActiveModulesKpi() {
+  if (!activeModulesCountElement || !activeModulesListElement) {
+    return;
+  }
+
+  const activeModules = Array.from(moduleCards).map((card) => {
+    const title = card.querySelector("h2");
+    return title ? title.textContent.trim() : "";
+  }).filter(Boolean);
+
+  activeModulesCountElement.textContent = String(activeModules.length);
+
+  if (activeModules.length > 0) {
+    activeModulesListElement.textContent = activeModules.join(", ");
+  } else {
+    activeModulesListElement.textContent = "No hay módulos activos disponibles en este momento.";
+  }
+}
+
 requireAuth();
 loadUsername();
 registerEventListeners();
+updateActiveModulesKpi();

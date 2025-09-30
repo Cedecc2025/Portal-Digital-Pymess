@@ -1,91 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Modular - Inicio</title>
-    <link rel="stylesheet" href="./public/css/global.css">
-    <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #0f172a, #1e293b);
-        color: #f8fafc;
-      }
-
-      .home-card {
-        background-color: rgba(15, 23, 42, 0.85);
-        border-radius: 16px;
-        padding: 40px;
-        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.6);
-        text-align: center;
-        max-width: 720px;
-      }
-
-      .home-card ul {
-        text-align: left;
-        margin: 0 0 24px;
-        padding-left: 20px;
-        line-height: 1.6;
-      }
-
-      .home-card li {
-        margin-bottom: 8px;
-      }
-
-      .home-card h1 {
-        margin-bottom: 18px;
-        font-size: 34px;
-      }
-
-      .home-card p {
-        margin-bottom: 24px;
-        line-height: 1.6;
-      }
-
-      .home-card a {
-        display: inline-block;
-        background: #38bdf8;
-        color: #0f172a;
-        padding: 12px 28px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .home-card a:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px rgba(56, 189, 248, 0.4);
-      }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Sistema Modular</title>
+    <link rel="stylesheet" href="./public/css/global.css" />
+    <link rel="stylesheet" href="./modules/auth/css/login.css" />
   </head>
   <body>
-    <main class="home-card">
-      <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
-      <p>
-        Este portal reúne en un solo lugar las principales aplicaciones que necesitas para gestionar
-        y hacer crecer tu negocio de manera ágil y profesional.
-      </p>
-      <p>
-        Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave de tu organización:
-      </p>
-      <ul>
-        <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
-        <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios.</li>
-        <li><strong>Chatbot Web:</strong> brinda atención automática y disponible 24/7.</li>
-        <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas.</li>
-        <li><strong>Herramientas Extra:</strong> utilidades complementarias que facilitan la gestión diaria.</li>
-      </ul>
-      <p>
-        Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo suficientemente robusto
-        para ayudarte a tomar decisiones basadas en datos y optimizar tus procesos.
-      </p>
-      <a href="./modules/auth/login.html">Iniciar sesión</a>
+    <main class="login-container">
+      <section class="login-overview">
+        <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
+        <p>
+          Este portal reúne en un solo lugar las principales aplicaciones que necesitas
+          para gestionar y hacer crecer tu negocio de manera ágil y profesional.
+        </p>
+        <p>
+          Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave
+          de tu organización:
+        </p>
+        <ul>
+          <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
+          <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios.</li>
+          <li><strong>Chatbot Web:</strong> brinda atención automática y disponible 24/7.</li>
+          <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas.</li>
+          <li><strong>Herramientas Extra:</strong> utilidades complementarias para la gestión diaria.</li>
+        </ul>
+        <p>
+          Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo
+          suficientemente robusto para ayudarte a tomar decisiones basadas en datos y optimizar
+          tus procesos.
+        </p>
+      </section>
+      <section class="login-card">
+        <header>
+          <h2>Acceso al Sistema</h2>
+          <p>Ingresa tus credenciales para continuar</p>
+        </header>
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="username">Usuario</label>
+            <input type="text" id="username" name="username" placeholder="usuario_profesional" autocomplete="username" required />
+            <span class="feedback" id="usernameFeedback"></span>
+          </div>
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" placeholder="********" autocomplete="current-password" required />
+            <span class="feedback" id="passwordFeedback"></span>
+          </div>
+          <div class="form-options">
+            <label class="checkbox">
+              <input type="checkbox" id="rememberMe" name="rememberMe" />
+              <span>Recordarme</span>
+            </label>
+            <a class="link" href="./modules/auth/register.html">Crear cuenta</a>
+          </div>
+          <button type="submit" class="primary-button">Ingresar</button>
+          <span class="feedback" id="generalFeedback"></span>
+        </form>
+      </section>
     </main>
+    <script type="module" src="./lib/supabaseClient.js"></script>
+    <script type="module" src="./lib/authGuard.js"></script>
+    <script type="module" src="./modules/auth/js/login.js"></script>
   </body>
 </html>

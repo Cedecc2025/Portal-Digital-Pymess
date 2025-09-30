@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Sistema Modular</title>
-    <link rel="stylesheet" href="../../public/css/global.css">
-    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="../../public/css/global.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
   </head>
   <body>
     <main class="dashboard-container">
@@ -16,6 +16,15 @@
         </div>
         <button id="logoutButton" class="logout-button">Cerrar sesión</button>
       </header>
+
+      <section class="dashboard-kpis">
+        <article class="kpi-card">
+          <p class="kpi-label">Módulos activos</p>
+          <p class="kpi-value" id="activeModulesCount">0</p>
+          <p class="kpi-description" id="activeModulesList">No hay módulos activos disponibles en este momento.</p>
+        </article>
+      </section>
+
       <section class="modules-grid">
         <a class="module-card" href="../costos/index.html" data-module="costos">
           <h2>Costos</h2>
