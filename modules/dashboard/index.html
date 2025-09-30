@@ -94,6 +94,28 @@
         </div>
       </section>
     </main>
+    <section class="task-modal" id="taskModal" hidden>
+      <div class="task-modal__backdrop" id="taskModalBackdrop"></div>
+      <article
+        class="task-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="taskModalTitle"
+      >
+        <button class="task-modal__close" id="taskModalClose" type="button" aria-label="Cerrar detalle de tarea">
+          ×
+        </button>
+        <header class="task-modal__header">
+          <span class="task-modal__badge" id="taskModalPriority">Prioridad</span>
+          <h3 id="taskModalTitle">Título de la tarea</h3>
+          <p id="taskModalMeta" class="task-modal__meta"></p>
+        </header>
+        <section class="task-modal__body">
+          <h4>Descripción</h4>
+          <p id="taskModalDescription"></p>
+        </section>
+      </article>
+    </section>
     <script type="module" src="../../lib/supabaseClient.js"></script>
     <script type="module" src="../../lib/authGuard.js"></script>
     <script type="module" src="./js/dashboard.js"></script>

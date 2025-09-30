@@ -32,6 +32,13 @@ function cacheElements() {
   if (taskListEmptyMessage && !defaultEmptyMessageText) {
     defaultEmptyMessageText = taskListEmptyMessage.textContent ?? "";
   }
+
+  if (taskForm) {
+    const prioritySelect = taskForm.querySelector("#taskPriority");
+    if (prioritySelect && !prioritySelect.value) {
+      prioritySelect.value = "media";
+    }
+  }
 }
 
 // Muestra un mensaje al usuario indicando el resultado de la operación.
@@ -48,6 +55,11 @@ function showFeedback(message, type = "success") {
 function resetForm() {
   if (taskForm) {
     taskForm.reset();
+
+    const prioritySelect = taskForm.querySelector("#taskPriority");
+    if (prioritySelect) {
+      prioritySelect.value = "media";
+    }
   }
 
   exitEditMode();
@@ -78,7 +90,9 @@ function enterEditMode(task) {
   }
 
   if (prioritySelect) {
-    prioritySelect.value = (task.priority ?? "").toLowerCase();
+    const normalizedPriority = (task.priority ?? "media").toLowerCase();
+    const hasOption = Array.from(prioritySelect.options).some((option) => option.value === normalizedPriority);
+    prioritySelect.value = hasOption ? normalizedPriority : "media";
   }
 
   if (dueDateInput) {
@@ -103,6 +117,13 @@ function exitEditMode() {
 
   if (taskSubmitButton) {
     taskSubmitButton.textContent = "Guardar tarea";
+  }
+
+  if (taskForm) {
+    const prioritySelect = taskForm.querySelector("#taskPriority");
+    if (prioritySelect) {
+      prioritySelect.value = "media";
+    }
   }
 }
 
@@ -235,7 +256,7 @@ function renderTaskCollections(tasks) {
         const dueLabel = task.due_date ? new Date(task.due_date).toLocaleDateString() : "Sin fecha";
 
         return `
-          <article class="task-card" role="listitem" data-id="${task.id}">
+          <article class="task-card" role="listitem" tabindex="0" data-id="${task.id}">
             <header>
               <span class="badge badge--${priorityClass || "media"}">${priorityLabel || "Media"}</span>
               <h4>${task.title}</h4>
@@ -299,7 +320,7 @@ async function handleTaskSubmit(event) {
     user_id: currentUser.userId,
     title: String(formData.get("taskTitle" ?? "")).trim(),
     owner: String(formData.get("taskOwner" ?? "")).trim(),
-    priority: String(formData.get("taskPriority" ?? "")).trim(),
+    priority: String(formData.get("taskPriority" ?? "")).trim() || "media",
     due_date: normalizedDueDate,
     description: String(formData.get("taskDescription" ?? "")).trim()
   };

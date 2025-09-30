@@ -201,6 +201,10 @@ body {
   font-size: 0.9rem;
 }
 
+.task-card:focus {
+  outline: none;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -457,4 +461,106 @@ body {
   .task-card {
     scroll-snap-align: start;
   }
+}
+
+.task-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.task-modal[hidden] {
+  display: none;
+}
+
+.task-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+}
+
+.task-modal__dialog {
+  position: relative;
+  width: min(520px, 100%);
+  background: #ffffff;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 38px 70px rgba(15, 30, 60, 0.3);
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.task-modal__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #475467;
+  transition: transform var(--transition-base), color var(--transition-base);
+}
+
+.task-modal__close:hover,
+.task-modal__close:focus-visible {
+  transform: scale(1.08);
+  color: #1e90ff;
+  outline: none;
+}
+
+.task-modal__header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-modal__badge {
+  align-self: flex-start;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(30, 144, 255, 0.12);
+  color: #0f172a;
+  border: 1px solid rgba(30, 144, 255, 0.24);
+}
+
+.task-modal__badge[data-priority="alta"] {
+  background: rgba(231, 76, 60, 0.15);
+  border-color: rgba(231, 76, 60, 0.35);
+  color: #b42318;
+}
+
+.task-modal__badge[data-priority="baja"] {
+  background: rgba(46, 204, 113, 0.18);
+  border-color: rgba(46, 204, 113, 0.35);
+  color: #166534;
+}
+
+.task-modal__meta {
+  margin: 0;
+  color: #475467;
+  font-size: 0.95rem;
+}
+
+.task-modal__body h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.task-modal__body p {
+  margin: 0;
+  color: #475467;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }

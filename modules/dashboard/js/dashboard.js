@@ -13,8 +13,17 @@ const sliderEmptyState = document.querySelector("#taskSliderEmpty");
 const sliderStatus = document.querySelector("#taskSliderStatus");
 const sliderPrevButton = document.querySelector("#taskSliderPrev");
 const sliderNextButton = document.querySelector("#taskSliderNext");
+const taskModal = document.querySelector("#taskModal");
+const taskModalBackdrop = document.querySelector("#taskModalBackdrop");
+const taskModalTitle = document.querySelector("#taskModalTitle");
+const taskModalMeta = document.querySelector("#taskModalMeta");
+const taskModalPriority = document.querySelector("#taskModalPriority");
+const taskModalDescription = document.querySelector("#taskModalDescription");
+const taskModalClose = document.querySelector("#taskModalClose");
 
 const TASKS_LIMIT = 20;
+let cachedTasks = [];
+let modalPreviousFocus = null;
 
 // Formatea una fecha en formato local legible para la tarjeta.
 function formatDueDate(value) {
@@ -44,7 +53,7 @@ function loadUsername() {
 async function fetchUserTasks(userId) {
   const { data, error } = await supabaseClient
     .from("tareas")
-    .select("id, title, priority, status, due_date")
+    .select("id, title, priority, status, due_date, owner, description")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(TASKS_LIMIT);
@@ -58,18 +67,20 @@ async function fetchUserTasks(userId) {
 
 // Actualiza el estado visual del slider con los datos proporcionados.
 function renderTaskSlider(tasks) {
+  cachedTasks = Array.isArray(tasks) ? tasks : [];
+
   if (!sliderTrack || !sliderEmptyState || !sliderStatus) {
     return;
   }
 
-  if (!tasks.length) {
+  if (!cachedTasks.length) {
     sliderTrack.innerHTML = "";
     sliderEmptyState.hidden = false;
     sliderStatus.textContent = "Registra nuevas tareas para visualizar su avance desde el dashboard.";
     return;
   }
 
-  const taskCards = tasks
+  const taskCards = cachedTasks
     .map((task) => {
       const priority = (task.priority ?? "media").toLowerCase();
       const priorityClass = priority.replace(/[^a-z]/gi, "");
@@ -91,7 +102,7 @@ function renderTaskSlider(tasks) {
 
   sliderTrack.innerHTML = taskCards;
   sliderEmptyState.hidden = true;
-  sliderStatus.textContent = `Mostrando ${Math.min(tasks.length, TASKS_LIMIT)} tareas recientes.`;
+  sliderStatus.textContent = `Mostrando ${Math.min(cachedTasks.length, TASKS_LIMIT)} tareas recientes.`;
 
   if (sliderViewport) {
     sliderViewport.scrollLeft = 0;
@@ -147,6 +158,23 @@ function registerEventListeners() {
       scrollSlider(1);
     });
   }
+
+  if (sliderTrack) {
+    sliderTrack.addEventListener("click", handleTaskCardClick);
+    sliderTrack.addEventListener("keydown", handleTaskCardKeydown);
+  }
+
+  if (taskModalBackdrop) {
+    taskModalBackdrop.addEventListener("click", () => {
+      closeTaskModal();
+    });
+  }
+
+  if (taskModalClose) {
+    taskModalClose.addEventListener("click", () => {
+      closeTaskModal();
+    });
+  }
 }
 
 // Consulta Supabase y actualiza el slider de tareas del usuario.
@@ -173,7 +201,123 @@ async function loadTaskSlider() {
   }
 }
 
+// Busca una tarea en caché a partir del elemento clicado.
+function findTaskFromEventTarget(target) {
+  if (!target) {
+    return null;
+  }
+
+  const card = target.closest(".task-card[data-id]");
+
+  if (!card) {
+    return null;
+  }
+
+  const taskId = Number(card.dataset.id);
+
+  if (Number.isNaN(taskId)) {
+    return null;
+  }
+
+  return cachedTasks.find((task) => Number(task.id) === taskId) ?? null;
+}
+
+// Cierra la ventana modal y devuelve el foco al elemento previo.
+function closeTaskModal() {
+  if (!taskModal) {
+    return;
+  }
+
+  taskModal.hidden = true;
+
+  if (taskModalPriority) {
+    taskModalPriority.dataset.priority = "";
+  }
+
+  document.removeEventListener("keydown", handleModalKeydown);
+  document.body.style.overflow = "";
+
+  if (modalPreviousFocus && typeof modalPreviousFocus.focus === "function") {
+    modalPreviousFocus.focus();
+  }
+
+  modalPreviousFocus = null;
+}
+
+// Gestiona las pulsaciones de teclado cuando la modal está abierta.
+function handleModalKeydown(event) {
+  if (event.key === "Escape") {
+    closeTaskModal();
+  }
+}
+
+// Abre la ventana modal con la información detallada de la tarea.
+function openTaskModal(task) {
+  if (!taskModal || !task) {
+    return;
+  }
+
+  const priority = (task.priority ?? "media").toLowerCase();
+  const priorityLabel = priority.charAt(0).toUpperCase() + priority.slice(1);
+  const status = task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : "Pendiente";
+  const dueLabel = formatDueDate(task.due_date);
+  const ownerLabel = task.owner ? ` • Responsable: ${task.owner}` : "";
+
+  if (taskModalTitle) {
+    taskModalTitle.textContent = task.title ?? "Tarea";
+  }
+
+  if (taskModalPriority) {
+    taskModalPriority.textContent = priorityLabel || "Media";
+    taskModalPriority.dataset.priority = priority;
+  }
+
+  if (taskModalMeta) {
+    taskModalMeta.textContent = `${status} • ${dueLabel}${ownerLabel}`;
+  }
+
+  if (taskModalDescription) {
+    const description = typeof task.description === "string" && task.description.trim().length > 0
+      ? task.description.trim()
+      : "Esta tarea no cuenta con una descripción registrada.";
+    taskModalDescription.textContent = description;
+  }
+
+  taskModal.hidden = false;
+  modalPreviousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  document.body.style.overflow = "hidden";
+  document.addEventListener("keydown", handleModalKeydown);
+
+  if (taskModalClose) {
+    taskModalClose.focus();
+  }
+}
+
+// Maneja la interacción por clic sobre una tarjeta.
+function handleTaskCardClick(event) {
+  const task = findTaskFromEventTarget(event.target);
+
+  if (task) {
+    openTaskModal(task);
+  }
+}
+
+// Permite abrir la tarjeta con teclado.
+function handleTaskCardKeydown(event) {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  const task = findTaskFromEventTarget(event.target);
+
+  if (task) {
+    event.preventDefault();
+    openTaskModal(task);
+  }
+}
+
 requireAuth();
 loadUsername();
 registerEventListeners();
 loadTaskSlider();
+

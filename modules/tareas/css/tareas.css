@@ -130,7 +130,7 @@ body {
 .input-shell select {
   flex: 1;
   border: none;
-  background: transparent;
+  background-color: #ffffff;
   color: #0f172a;
   font-size: 0.95rem;
   padding: 14px 0;
