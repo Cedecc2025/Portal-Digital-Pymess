@@ -1,5 +1,5 @@
 // dashboard-carousel.js
-// Gestiona el carrusel de tareas del dashboard con interacciones accesibles.
+// Gestiona el carrusel de tareas del dashboard con un layout de tarjeta centrada.
 
 const TRANSITION_DURATION = 360;
 const SWIPE_THRESHOLD_PX = 40;
@@ -133,268 +133,165 @@ function createTaskSlide(task, index) {
 }
 
 // Inicializa y devuelve la API pública del carrusel de tareas.
-export function initTasksCarousel({ containerSelector, loop = false } = {}) {
-  const container =
+export function initTasksCarousel({ containerSelector } = {}) {
+  const root =
     typeof containerSelector === "string"
       ? document.querySelector(containerSelector)
       : containerSelector;
 
-  if (!container) {
+  if (!root) {
     return null;
   }
 
-  const viewport = container.querySelector("[data-carousel-viewport]");
-  const track = container.querySelector("[data-carousel-track]");
-  const status = container.querySelector("[data-carousel-status]");
-  const prevButton = container.querySelector("[data-carousel-prev]");
-  const nextButton = container.querySelector("[data-carousel-next]");
-  const indicatorsContainer = container.querySelector(".carousel-indicators");
-  const counter = indicatorsContainer?.querySelector(".counter") ?? null;
-  const counterCurrent = indicatorsContainer?.querySelector(".current") ?? null;
-  const counterTotal = indicatorsContainer?.querySelector(".total") ?? null;
+  const viewport = root.querySelector(".carousel-viewport");
+  const track = root.querySelector(".carousel-track");
+  const prevBtn = root.querySelector(".carousel-btn.prev");
+  const nextBtn = root.querySelector(".carousel-btn.next");
+  const indicators = root.querySelector(".carousel-indicators");
+  const counterEl = indicators?.querySelector(".counter .current") ?? null;
+  const totalEl = indicators?.querySelector(".counter .total") ?? null;
+  const status = root.querySelector(".carousel-status");
 
-  const state = {
-    currentIndex: 0,
-    total: 0,
-    loop,
-    isAnimating: false,
-    slides: [],
-    pointerId: null,
-    dragStartX: 0,
-    dragDeltaX: 0,
-    dots: []
-  };
+  let slides = [];
+  let index = 0;
+  let slideWidth = 0;
+  let activePointerId = null;
+  let startX = 0;
+  let isDragging = false;
 
-  function getViewportWidth() {
-    if (!viewport) {
-      return 0;
-    }
-
-    return Math.round(viewport.clientWidth);
+  function varPx(name) {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return Number.parseInt(value, 10) || 0;
   }
 
-  // Actualiza el mensaje visible o del lector de pantalla según el estado del carrusel.
-  function showStatusMessage(message, mode = "message") {
-    if (!status) {
+  // 1) Layout: fija width exacto por slide y ancho del track.
+  function layout() {
+    if (!viewport || !track) {
       return;
     }
 
-    status.textContent = message;
-    status.dataset.mode = mode;
-    status.hidden = false;
-  }
+    slideWidth = Math.round(viewport.clientWidth);
 
-  // Oculta el mensaje de estado cuando hay tarjetas para mostrar.
-  function hideStatusMessage() {
-    if (!status) {
-      return;
-    }
-
-    status.hidden = true;
-    status.dataset.mode = "announce";
-  }
-
-  // Actualiza los contadores visibles.
-  function updateCounters() {
-    if (counterCurrent) {
-      counterCurrent.textContent = state.total ? String(state.currentIndex + 1) : "0";
-    }
-
-    if (counterTotal) {
-      counterTotal.textContent = String(state.total);
-    }
-  }
-
-  // Marca los indicadores activos y actualiza aria-current.
-  function updateIndicators() {
-    if (!state.dots.length) {
-      return;
-    }
-
-    state.dots.forEach((dot, index) => {
-      if (index === state.currentIndex) {
-        dot.setAttribute("aria-current", "true");
-      } else {
-        dot.removeAttribute("aria-current");
-      }
+    slides.forEach((li) => {
+      li.style.width = `${slideWidth}px`;
     });
-  }
 
-  // Habilita o deshabilita los botones según el índice actual.
-  function updateControls() {
-    const disablePrev = !state.loop && state.currentIndex === 0;
-    const disableNext = !state.loop && state.currentIndex === state.total - 1;
-
-    if (prevButton) {
-      prevButton.disabled = state.total <= 1 || disablePrev;
-      prevButton.setAttribute("aria-disabled", prevButton.disabled ? "true" : "false");
-    }
-
-    if (nextButton) {
-      nextButton.disabled = state.total <= 1 || disableNext;
-      nextButton.setAttribute("aria-disabled", nextButton.disabled ? "true" : "false");
-    }
-  }
-
-  // Anuncia el slide actual en el área en vivo para lectores de pantalla.
-  function announceCurrentSlide() {
-    if (!status) {
-      return;
-    }
-
-    const activeSlide = state.slides[state.currentIndex];
-    const title = activeSlide?.querySelector(".task-card__title")?.textContent ?? "";
-    status.dataset.mode = "announce";
-    status.hidden = false;
-    status.textContent = `Tarea ${state.currentIndex + 1} de ${state.total}${
-      title ? `: ${title}` : ""
-    }`;
-  }
-
-  // Aplica transformaciones y clases a las tarjetas según el índice activo.
-  function updateSlides(animate = true) {
-    if (!track || !viewport) {
-      return;
-    }
-
-    const width = getViewportWidth();
-    const baseOffset = -state.currentIndex * width;
-
-    if (animate) {
-      track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
+    if (slides.length) {
+      track.style.width = `${slideWidth * slides.length}px`;
     } else {
+      track.style.width = "0px";
+    }
+
+    applyTransform(false);
+    positionArrows();
+  }
+
+  // 2) Posiciona flechas pegadas al borde interno del viewport (no del card).
+  function positionArrows() {
+    if (!viewport || !prevBtn || !nextBtn) {
+      return;
+    }
+
+    const vpRect = viewport.getBoundingClientRect();
+    const rootRect = root.getBoundingClientRect();
+    const edge = varPx("--edge");
+    const leftInset = Math.max(edge, vpRect.left - rootRect.left + edge);
+    const rightInset = Math.max(edge, rootRect.right - vpRect.right + edge);
+
+    prevBtn.style.left = `${leftInset}px`;
+    nextBtn.style.right = `${rightInset}px`;
+  }
+
+  // 3) Movimiento.
+  function applyTransform(animate = true) {
+    if (!track) {
+      return;
+    }
+
+    if (!slides.length) {
+      if (!animate) {
+        track.style.transition = "none";
+        track.style.transform = "translateX(0px)";
+        void track.offsetHeight;
+        track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
+      } else {
+        track.style.transform = "translateX(0px)";
+      }
+
+      updateUI();
+      return;
+    }
+
+    const offset = -Math.round(index * slideWidth);
+
+    if (!animate) {
       track.style.transition = "none";
     }
 
-    track.style.transform = `translateX(${baseOffset}px)`;
+    track.style.transform = `translateX(${offset}px)`;
 
     if (!animate) {
-      // Restablece la transición después de aplicar el desplazamiento instantáneo.
-      requestAnimationFrame(() => {
-        track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
-      });
+      void track.offsetHeight;
+      track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
     }
 
-    state.slides.forEach((slide, index) => {
-      const isActive = index === state.currentIndex;
+    updateUI();
+  }
+
+  function goTo(targetIndex, animate = true) {
+    if (!slides.length) {
+      updateUI();
+      return;
+    }
+
+    const clamped = Math.max(0, Math.min(targetIndex, slides.length - 1));
+
+    if (clamped === index && animate) {
+      updateUI();
+      return;
+    }
+
+    index = clamped;
+    applyTransform(animate);
+  }
+
+  function next() {
+    goTo(index + 1, true);
+  }
+
+  function prev() {
+    goTo(index - 1, true);
+  }
+
+  // 4) UI.
+  function updateUI() {
+    const total = slides.length;
+
+    if (prevBtn) {
+      prevBtn.disabled = total <= 1 || index === 0;
+    }
+
+    if (nextBtn) {
+      nextBtn.disabled = total <= 1 || index === total - 1;
+    }
+
+    if (counterEl) {
+      counterEl.textContent = total ? String(index + 1) : "0";
+    }
+
+    if (totalEl) {
+      totalEl.textContent = String(total);
+    }
+
+    slides.forEach((slide, slideIndex) => {
+      const isActive = slideIndex === index;
       slide.classList.toggle("is-active", isActive);
       slide.setAttribute("aria-hidden", isActive ? "false" : "true");
     });
   }
 
-  // Sincroniza todos los elementos visuales tras un cambio de índice.
-  function updateUI({ animate = true } = {}) {
-    updateSlides(animate);
-    updateCounters();
-    updateIndicators();
-    updateControls();
-    announceCurrentSlide();
-  }
-
-  // Calcula el índice objetivo respetando los límites o el loop.
-  function normalizeIndex(index) {
-    if (state.total === 0) {
-      return 0;
-    }
-
-    if (state.loop) {
-      return (index + state.total) % state.total;
-    }
-
-    return Math.min(Math.max(index, 0), state.total - 1);
-  }
-
-  // Mueve el carrusel al slide indicado.
-  function goTo(index, { animate = true } = {}) {
-    if (state.isAnimating || state.total === 0) {
-      updateUI({ animate: false });
-      return;
-    }
-
-    const targetIndex = normalizeIndex(index);
-
-    if (targetIndex === state.currentIndex) {
-      updateUI({ animate: false });
-      return;
-    }
-
-    state.currentIndex = targetIndex;
-    state.isAnimating = true;
-    updateUI({ animate });
-
-    window.setTimeout(() => {
-      state.isAnimating = false;
-    }, TRANSITION_DURATION);
-  }
-
-  // Avanza al slide siguiente.
-  function next() {
-    goTo(state.currentIndex + 1, { animate: true });
-  }
-
-  // Retrocede al slide anterior.
-  function prev() {
-    goTo(state.currentIndex - 1, { animate: true });
-  }
-
-  // Construye los indicadores interactivos.
-  function buildIndicators() {
-    if (!indicatorsContainer) {
-      return;
-    }
-
-    const dots = [];
-
-    indicatorsContainer.querySelectorAll(".dot").forEach((dot) => dot.remove());
-
-    if (state.total <= 1) {
-      state.dots = dots;
-      return;
-    }
-
-    const insertBeforeNode = counter ?? null;
-
-    state.slides.forEach((slide, index) => {
-      const dot = document.createElement("span");
-      dot.className = "dot";
-      dot.setAttribute("aria-label", `Ir a la tarea ${index + 1}`);
-      dot.addEventListener("click", () => {
-        goTo(index, { animate: true });
-      });
-
-      indicatorsContainer.insertBefore(dot, insertBeforeNode);
-      dots.push(dot);
-    });
-
-    state.dots = dots;
-  }
-
-  // Termina el gesto táctil devolviendo la pista a su posición final.
-  function finishDrag(shouldNavigate) {
-    if (!track || !viewport) {
-      return;
-    }
-
-    track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
-
-    if (shouldNavigate) {
-      if (state.dragDeltaX < 0) {
-        next();
-      } else {
-        prev();
-      }
-    } else {
-      updateSlides(true);
-    }
-
-    state.pointerId = null;
-    state.dragStartX = 0;
-    state.dragDeltaX = 0;
-  }
-
-  // Inicia el seguimiento del gesto táctil o de mouse.
   function handlePointerDown(event) {
-    if (!viewport || !track) {
+    if (!viewport || !slides.length) {
       return;
     }
 
@@ -402,176 +299,220 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
       return;
     }
 
-    if (state.total <= 1) {
+    if (slides.length <= 1) {
       return;
     }
 
-    state.pointerId = event.pointerId;
-    state.dragStartX = event.clientX;
-    state.dragDeltaX = 0;
-    track.style.transition = "none";
+    activePointerId = event.pointerId;
+    startX = event.clientX;
+    isDragging = true;
+
+    if (track) {
+      track.style.transition = "none";
+    }
+
     viewport.setPointerCapture(event.pointerId);
   }
 
-  // Actualiza la posición de la pista mientras se arrastra.
   function handlePointerMove(event) {
-    if (!viewport || !track) {
+    if (!isDragging || activePointerId !== event.pointerId || !track) {
       return;
     }
 
-    if (state.pointerId !== event.pointerId) {
-      return;
-    }
-
-    state.dragDeltaX = event.clientX - state.dragStartX;
-    const baseOffset = -state.currentIndex * getViewportWidth();
-    track.style.transform = `translateX(${baseOffset + state.dragDeltaX}px)`;
+    const deltaX = event.clientX - startX;
+    const base = -Math.round(index * slideWidth);
+    track.style.transform = `translateX(${base + deltaX}px)`;
   }
 
-  // Finaliza el gesto y decide si se navega a otra tarjeta.
-  function handlePointerUp(event) {
-    if (!viewport) {
+  function handlePointerEnd(event) {
+    if (!viewport || activePointerId !== event.pointerId) {
       return;
     }
 
-    if (state.pointerId !== event.pointerId) {
-      return;
-    }
-
-    const shouldNavigate = Math.abs(state.dragDeltaX) >= SWIPE_THRESHOLD_PX;
+    const deltaX = event.clientX - startX;
+    const movedEnough = Math.abs(deltaX) >= SWIPE_THRESHOLD_PX;
 
     if (viewport.hasPointerCapture(event.pointerId)) {
       viewport.releasePointerCapture(event.pointerId);
     }
 
-    finishDrag(shouldNavigate);
-  }
-
-  // Cancela el gesto ante cualquier interrupción externa.
-  function handlePointerCancel(event) {
-    if (!viewport) {
-      return;
+    if (track) {
+      track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
     }
 
-    if (state.pointerId !== event.pointerId) {
-      return;
-    }
+    isDragging = false;
+    activePointerId = null;
 
-    if (viewport.hasPointerCapture(event.pointerId)) {
-      viewport.releasePointerCapture(event.pointerId);
-    }
-
-    finishDrag(false);
-  }
-
-  // Gestiona los atajos de teclado para navegar el carrusel.
-  function handleKeyDown(event) {
-    switch (event.key) {
-      case "ArrowRight": {
-        event.preventDefault();
+    if (movedEnough) {
+      if (deltaX < 0) {
         next();
-        break;
-      }
-      case "ArrowLeft": {
-        event.preventDefault();
+      } else {
         prev();
-        break;
       }
-      case "Home": {
-        event.preventDefault();
-        goTo(0, { animate: true });
-        break;
-      }
-      case "End": {
-        event.preventDefault();
-        goTo(state.total - 1, { animate: true });
-        break;
-      }
-      default: {
-        break;
-      }
+    } else {
+      applyTransform(true);
     }
   }
 
-  // Recalcula el offset cuando cambian las dimensiones del viewport.
-  function handleResize() {
-    goTo(state.currentIndex, { animate: false });
+  function handlePointerCancel(event) {
+    if (!viewport || activePointerId !== event.pointerId) {
+      return;
+    }
+
+    if (viewport.hasPointerCapture(event.pointerId)) {
+      viewport.releasePointerCapture(event.pointerId);
+    }
+
+    if (track) {
+      track.style.transition = `transform ${TRANSITION_DURATION}ms ease`;
+    }
+
+    isDragging = false;
+    activePointerId = null;
+    applyTransform(true);
   }
 
-  if (prevButton) {
-    prevButton.addEventListener("click", () => {
+  function handleKeyDown(event) {
+    if (!slides.length) {
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      next();
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      prev();
+    }
+  }
+
+  window.addEventListener(
+    "resize",
+    () => {
+      layout();
+    },
+    { passive: true }
+  );
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
       prev();
     });
   }
 
-  if (nextButton) {
-    nextButton.addEventListener("click", () => {
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
       next();
     });
   }
 
   if (viewport) {
-    viewport.addEventListener("keydown", handleKeyDown);
+    viewport.addEventListener("keydown", handleKeyDown, { passive: true });
     viewport.addEventListener("pointerdown", handlePointerDown);
     viewport.addEventListener("pointermove", handlePointerMove);
-    viewport.addEventListener("pointerup", handlePointerUp);
+    viewport.addEventListener("pointerup", handlePointerEnd);
     viewport.addEventListener("pointercancel", handlePointerCancel);
-    viewport.addEventListener("lostpointercapture", handlePointerCancel);
   }
 
-  window.addEventListener("resize", handleResize);
-
   requestAnimationFrame(() => {
-    container.dataset.ready = "true";
+    root.dataset.ready = "true";
   });
 
   // Expone la API necesaria para que dashboard.js gestione los datos.
   return {
-    // Muestra el mensaje de carga inicial.
     showLoading(message = "Cargando tus tareas...") {
-      showStatusMessage(message, "message");
-    },
-    // Muestra un mensaje de error o vacío.
-    showMessage(message) {
-      showStatusMessage(message, "message");
-      state.slides = [];
-      state.total = 0;
-      state.currentIndex = 0;
-      updateCounters();
-      updateControls();
-      state.dots = [];
-      if (indicatorsContainer) {
-        indicatorsContainer.querySelectorAll(".dot").forEach((dot) => dot.remove());
+      if (status) {
+        status.textContent = message;
+        status.dataset.mode = "message";
+        status.hidden = false;
       }
+
+      if (counterEl) {
+        counterEl.textContent = "0";
+      }
+
+      if (totalEl) {
+        totalEl.textContent = "0";
+      }
+
+      if (prevBtn) {
+        prevBtn.disabled = true;
+      }
+
+      if (nextBtn) {
+        nextBtn.disabled = true;
+      }
+
+      positionArrows();
     },
-    // Renderiza las tareas dentro del carrusel.
+    showMessage(message) {
+      if (status) {
+        status.textContent = message;
+        status.dataset.mode = "message";
+        status.hidden = false;
+      }
+
+      slides = [];
+      index = 0;
+
+      if (track) {
+        track.innerHTML = "";
+        track.style.width = "0px";
+        track.style.transform = "translateX(0px)";
+      }
+
+      if (counterEl) {
+        counterEl.textContent = "0";
+      }
+
+      if (totalEl) {
+        totalEl.textContent = "0";
+      }
+
+      if (prevBtn) {
+        prevBtn.disabled = true;
+      }
+
+      if (nextBtn) {
+        nextBtn.disabled = true;
+      }
+
+      positionArrows();
+    },
     setSlides(tasks) {
       if (!track) {
         return;
       }
 
       track.innerHTML = "";
-      state.slides = [];
-      state.total = Array.isArray(tasks) ? tasks.length : 0;
-      state.currentIndex = 0;
+      slides = [];
+      index = 0;
 
-      if (!state.total) {
+      if (!Array.isArray(tasks) || !tasks.length) {
         this.showMessage("Aún no tienes tareas registradas.");
         return;
       }
 
       const fragment = document.createDocumentFragment();
 
-      tasks.forEach((task, index) => {
-        fragment.appendChild(createTaskSlide(task, index));
+      tasks.forEach((task, taskIndex) => {
+        fragment.appendChild(createTaskSlide(task, taskIndex));
       });
 
       track.appendChild(fragment);
-      state.slides = Array.from(track.children);
+      slides = Array.from(track.children);
 
-      hideStatusMessage();
-      buildIndicators();
-      updateUI({ animate: false });
+      if (status) {
+        status.dataset.mode = "announce";
+        status.hidden = true;
+      }
+
+      if (totalEl) {
+        totalEl.textContent = String(slides.length);
+      }
+
+      layout();
+      goTo(0, false);
     }
   };
 }

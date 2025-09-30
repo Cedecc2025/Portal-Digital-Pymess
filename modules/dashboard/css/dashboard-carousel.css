@@ -1,15 +1,12 @@
 :root {
   --card-max: 1080px;
   --viewport-max: 920px;
-  --gutter: 64px;
-  --edge: 16px;
+  --gutter: 56px;
+  --edge: 14px;
 }
 
 .tasks-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
   max-width: var(--card-max);
   margin: 0 auto;
   padding: 20px 20px 56px;
@@ -99,7 +96,6 @@
 
 .carousel-track {
   display: flex;
-  align-items: stretch;
   transition: transform 360ms ease;
   will-change: transform;
   list-style: none;
@@ -108,12 +104,16 @@
 }
 
 .carousel-slide {
-  flex: 0 0 100%;
-  max-width: 100%;
+  flex: 0 0 auto;
+  margin: 0;
   padding: 16px;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
+}
+
+.carousel-slide > * {
+  margin: 0;
 }
 
 .carousel-slide[aria-hidden="true"] {
@@ -167,36 +167,14 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
-  z-index: 2;
+  z-index: 3;
 }
-
-.carousel-btn span {
-  font-size: 1.6rem;
-  line-height: 1;
-}
-
 .carousel-btn.prev {
-  left: calc(50% - (var(--viewport-max) / 2) + var(--edge));
+  left: var(--edge);
 }
 
 .carousel-btn.next {
-  right: calc(50% - (var(--viewport-max) / 2) + var(--edge));
-}
-
-@supports (inset: auto) {
-  .carousel-btn.prev {
-    left: max(
-      var(--edge),
-      calc(50% - (min(100%, var(--viewport-max)) / 2) + var(--edge))
-    );
-  }
-
-  .carousel-btn.next {
-    right: max(
-      var(--edge),
-      calc(50% - (min(100%, var(--viewport-max)) / 2) + var(--edge))
-    );
-  }
+  right: var(--edge);
 }
 
 .carousel-btn:hover,
@@ -225,34 +203,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  pointer-events: none;
-}
-
-.carousel-indicators .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #c7c8f7;
-  opacity: 0.8;
-  pointer-events: auto;
-  cursor: pointer;
-  transition: transform 0.25s ease, opacity 0.25s ease, background 0.25s ease;
-}
-
-.carousel-indicators .dot:hover,
-.carousel-indicators .dot:focus-visible {
-  transform: scale(1.1);
-  opacity: 1;
-  outline: none;
-}
-
-.carousel-indicators .dot[aria-current="true"] {
-  background: #4f46e5;
-  opacity: 1;
+  z-index: 2;
 }
 
 .carousel-indicators .counter {
-  pointer-events: none;
   font: 600 12px/1 system-ui, -apple-system, "Segoe UI", Roboto;
   color: #5b5f99;
 }
@@ -379,7 +333,7 @@
 @media (max-width: 1024px) {
   :root {
     --viewport-max: 780px;
-    --gutter: 56px;
+    --gutter: 52px;
   }
 }
 
@@ -417,10 +371,6 @@
   .carousel-btn {
     width: 38px;
     height: 38px;
-  }
-
-  .carousel-btn span {
-    font-size: 1.4rem;
   }
 
   .carousel-slide {

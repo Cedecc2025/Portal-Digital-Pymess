@@ -15,7 +15,7 @@ const logoutButton = document.querySelector("#logoutButton");
 const moduleCards = document.querySelectorAll(".module-card");
 const tasksCarouselAllButton = document.querySelector("#tasksCarouselAllButton");
 
-const tasksCarousel = initTasksCarousel({ containerSelector: "#tasksCarousel", loop: false });
+const tasksCarousel = initTasksCarousel({ containerSelector: "#tasksCarousel" });
 
 // Obtiene y coloca el nombre del usuario autenticado en la cabecera.
 function loadUsername() {
