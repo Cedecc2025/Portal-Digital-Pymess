@@ -477,7 +477,12 @@ export function initTasksCarousel({ containerSelector } = {}) {
       if (status) {
         status.textContent = message;
         status.dataset.mode = "message";
+        status.dataset.tone = "loading";
         status.hidden = false;
+      }
+
+      if (root) {
+        root.classList.remove("tasks-card--empty");
       }
 
       if (counterEl) {
@@ -498,10 +503,13 @@ export function initTasksCarousel({ containerSelector } = {}) {
 
       positionArrows();
     },
-    showMessage(message) {
+    showMessage(message, options = {}) {
+      const { tone = "info" } = options;
+
       if (status) {
         status.textContent = message;
         status.dataset.mode = "message";
+        status.dataset.tone = tone;
         status.hidden = false;
       }
 
@@ -530,6 +538,10 @@ export function initTasksCarousel({ containerSelector } = {}) {
         nextBtn.disabled = true;
       }
 
+      if (root) {
+        root.classList.toggle("tasks-card--empty", tone === "empty");
+      }
+
       positionArrows();
     },
     setSlides(tasks) {
@@ -542,7 +554,7 @@ export function initTasksCarousel({ containerSelector } = {}) {
       index = 0;
 
       if (!Array.isArray(tasks) || !tasks.length) {
-        this.showMessage("Aún no tienes tareas registradas.");
+        this.showMessage("¡No olvides agendar tus tareas para estar al día!", { tone: "empty" });
         return;
       }
 
@@ -557,7 +569,12 @@ export function initTasksCarousel({ containerSelector } = {}) {
 
       if (status) {
         status.dataset.mode = "announce";
+        status.dataset.tone = "info";
         status.hidden = true;
+      }
+
+      if (root) {
+        root.classList.remove("tasks-card--empty");
       }
 
       if (totalEl) {

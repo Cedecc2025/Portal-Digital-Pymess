@@ -62,7 +62,7 @@ async function loadTasksCarousel() {
   const userId = await resolveCurrentUserId();
 
   if (!userId) {
-    tasksCarousel.showMessage("No se pudo obtener tu información de usuario.");
+    tasksCarousel.showMessage("No se pudo obtener tu información de usuario.", { tone: "error" });
     return;
   }
 
@@ -80,7 +80,7 @@ async function loadTasksCarousel() {
     tasksCarousel.setSlides(Array.isArray(data) ? data : []);
   } catch (error) {
     console.error("Error al cargar las tareas del dashboard", error);
-    tasksCarousel.showMessage("No fue posible cargar tus tareas.");
+    tasksCarousel.showMessage("No fue posible cargar tus tareas.", { tone: "error" });
   }
 }
 

@@ -142,6 +142,34 @@
   z-index: 2;
 }
 
+.tasks-card--empty .carousel-viewport {
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.carousel-status[data-tone="empty"] {
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  color: #312e81;
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.12), rgba(129, 140, 248, 0.08));
+}
+
+.carousel-status[data-tone="empty"]::before {
+  content: "\2728";
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.carousel-status[data-tone="error"] {
+  color: #b91c1c;
+  background: rgba(248, 113, 113, 0.18);
+}
+
+.carousel-status[data-tone="loading"] {
+  color: #4338ca;
+}
+
 .carousel-status[hidden] {
   display: none;
 }
