@@ -6,21 +6,25 @@
     <title>Dashboard - Sistema Modular</title>
     <link rel="stylesheet" href="../../public/css/global.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
+    <link rel="stylesheet" href="./css/dashboard-carousel.css" />
   </head>
   <body>
-    <main class="dashboard">
-      <header class="dashboard__header">
-        <div class="dashboard__welcome">
-          <p class="dashboard__greeting">Bienvenido de nuevo</p>
-          <h1 id="usernameDisplay" class="dashboard__title">Usuario</h1>
-          <p class="dashboard__subtitle">
+    <main class="dashboard-container">
+      <header class="dashboard-header">
+        <div class="welcome">
+          <span class="welcome-label">Bienvenido de nuevo</span>
+          <h1 id="usernameDisplay" class="welcome-title">Usuario</h1>
+          <p class="welcome-subtitle">
             Visualiza rápidamente tus tareas pendientes y accede a los módulos clave del sistema.
           </p>
         </div>
-        <button id="logoutButton" class="button button--ghost">Cerrar sesión</button>
+        <button id="logoutButton" class="button button--ghost" aria-label="Cerrar sesión">
+          <span class="button__icon" aria-hidden="true">⎋</span>
+          <span class="button__text">Cerrar sesión</span>
+        </button>
       </header>
 
-      <div class="dashboard__main">
+      <div class="dashboard-grid">
         <section class="panel tasks-panel" aria-labelledby="tasksHeading">
           <header class="panel__header">
             <div>
@@ -35,13 +39,15 @@
           <p class="tasks-empty" id="tasksEmptyMessage" hidden>
             No tienes tareas asignadas por ahora.
           </p>
-          <a
-            class="button button--link"
-            id="tasksAllButton"
-            href="../tareas/index.html"
-          >
-            Ver todas las tareas
-          </a>
+          <div class="tasks-footer">
+            <a
+              class="button button--primary button--compact"
+              id="tasksCarouselAllButton"
+              href="../tareas/index.html"
+            >
+              Ver todas las tareas
+            </a>
+          </div>
         </section>
 
         <section class="panel modules-panel" aria-labelledby="modulesHeading">
@@ -57,19 +63,19 @@
           <div class="modules-grid">
             <a class="module-card" href="../costos/index.html" data-module="costos">
               <div class="module-card__icon" aria-hidden="true">💰</div>
-              <h3 class="module-card__title">Costos</h3>
-              <p class="module-card__description">
-                Administra presupuestos, gastos e inversiones para mantener tus finanzas en orden.
-              </p>
-              <span class="button button--secondary">Ir a Costos</span>
+              <div class="module-card__content">
+                <h3 class="module-card__title">Costos</h3>
+                <p class="module-card__description">Administra y monitorea tus gastos.</p>
+              </div>
+              <span class="button button--primary button--compact module-button">Ir a Costos</span>
             </a>
             <a class="module-card" href="../estrategias/index.html" data-module="estrategias">
               <div class="module-card__icon" aria-hidden="true">📊</div>
-              <h3 class="module-card__title">Estrategias de Ventas</h3>
-              <p class="module-card__description">
-                Diseña campañas y gestiona acciones comerciales para impulsar tus resultados.
-              </p>
-              <span class="button button--secondary">Ir a Estrategias</span>
+              <div class="module-card__content">
+                <h3 class="module-card__title">Estrategias de Ventas</h3>
+                <p class="module-card__description">Diseña campañas y planes de crecimiento.</p>
+              </div>
+              <span class="button button--primary button--compact module-button">Ir a Estrategias</span>
             </a>
           </div>
         </section>

@@ -1,0 +1,146 @@
+/* dashboard-carousel.css
+ * Estilos específicos para la lista de tareas del dashboard.
+ */
+
+.tasks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tasks-empty {
+  margin: 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.tasks-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.task-card {
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--surface-color);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+}
+
+.task-card--loading {
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.task-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.task-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.task-card__priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.task-card__priority-indicator {
+  display: inline-flex;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.task-card__priority-indicator--alta {
+  opacity: 1;
+}
+
+.task-card__priority-indicator--media {
+  opacity: 0.6;
+}
+
+.task-card__priority-indicator--baja {
+  opacity: 0.3;
+}
+
+.task-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.task-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-card__status {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.task-card__status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.task-card__status--completado {
+  opacity: 0.85;
+}
+
+.task-card__status--pendiente {
+  opacity: 1;
+}
+
+.task-card__status--en-progreso {
+  opacity: 0.9;
+}
+
+.task-card__status--cancelado {
+  opacity: 0.55;
+}
+
+@media (max-width: 640px) {
+  .tasks-footer {
+    justify-content: center;
+  }
+
+  .button--compact {
+    width: 100%;
+  }
+}
