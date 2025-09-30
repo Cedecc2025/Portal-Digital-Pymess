@@ -159,9 +159,21 @@ export function initTasksCarousel({ containerSelector } = {}) {
   let startX = 0;
   let isDragging = false;
 
+  function parsePxValue(raw) {
+    return Number.parseFloat(raw) || 0;
+  }
+
   function varPx(name) {
     const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return Number.parseInt(value, 10) || 0;
+  }
+
+  function clamp(value, min, max) {
+    if (max < min) {
+      return min;
+    }
+
+    return Math.min(Math.max(value, min), max);
   }
 
   // 1) Layout: fija width exacto por slide y ancho del track.
@@ -170,7 +182,12 @@ export function initTasksCarousel({ containerSelector } = {}) {
       return;
     }
 
-    slideWidth = Math.round(viewport.clientWidth);
+    const computed = getComputedStyle(viewport);
+    const paddingLeft = parsePxValue(computed.paddingLeft);
+    const paddingRight = parsePxValue(computed.paddingRight);
+    const availableWidth = Math.max(0, viewport.clientWidth - paddingLeft - paddingRight);
+
+    slideWidth = Math.max(1, Math.round(availableWidth));
 
     slides.forEach((li) => {
       li.style.width = `${slideWidth}px`;
@@ -183,23 +200,59 @@ export function initTasksCarousel({ containerSelector } = {}) {
     }
 
     applyTransform(false);
-    positionArrows();
+    positionArrows(paddingLeft, paddingRight);
   }
 
   // 2) Posiciona flechas pegadas al borde interno del viewport (no del card).
-  function positionArrows() {
+  function positionArrows(paddingLeftOverride, paddingRightOverride) {
     if (!viewport || !prevBtn || !nextBtn) {
       return;
     }
 
     const vpRect = viewport.getBoundingClientRect();
     const rootRect = root.getBoundingClientRect();
+    const paddingLeft =
+      typeof paddingLeftOverride === "number"
+        ? paddingLeftOverride
+        : parsePxValue(getComputedStyle(viewport).paddingLeft);
+    const paddingRight =
+      typeof paddingRightOverride === "number"
+        ? paddingRightOverride
+        : parsePxValue(getComputedStyle(viewport).paddingRight);
     const edge = varPx("--edge");
-    const leftInset = Math.max(edge, vpRect.left - rootRect.left + edge);
-    const rightInset = Math.max(edge, rootRect.right - vpRect.right + edge);
+    const minGap = 12;
 
-    prevBtn.style.left = `${leftInset}px`;
-    nextBtn.style.right = `${rightInset}px`;
+    if (prevBtn) {
+      const buttonWidth = prevBtn.offsetWidth || 0;
+      const marginStart = vpRect.left - rootRect.left;
+      const contentStart = marginStart + paddingLeft;
+      const maxLeft = contentStart - buttonWidth - minGap;
+      const minLeftBase = Math.max(0, marginStart);
+      const minLeft = maxLeft > edge ? Math.max(minLeftBase, edge) : minLeftBase;
+      const available = Math.max(0, paddingLeft - buttonWidth);
+      const natural = marginStart + available / 2;
+      const safeMax = Math.max(minLeft, maxLeft);
+      const finalLeft = clamp(natural, minLeft, safeMax);
+
+      prevBtn.style.left = `${Math.max(0, finalLeft)}px`;
+      prevBtn.style.right = "auto";
+    }
+
+    if (nextBtn) {
+      const buttonWidth = nextBtn.offsetWidth || 0;
+      const marginEnd = rootRect.right - vpRect.right;
+      const contentEndFromRight = marginEnd + paddingRight;
+      const maxRight = contentEndFromRight - buttonWidth - minGap;
+      const minRightBase = Math.max(0, marginEnd);
+      const minRight = maxRight > edge ? Math.max(minRightBase, edge) : minRightBase;
+      const available = Math.max(0, paddingRight - buttonWidth);
+      const natural = marginEnd + available / 2;
+      const safeMax = Math.max(minRight, maxRight);
+      const finalRight = clamp(natural, minRight, safeMax);
+
+      nextBtn.style.right = `${Math.max(0, finalRight)}px`;
+      nextBtn.style.left = "auto";
+    }
   }
 
   // 3) Movimiento.
