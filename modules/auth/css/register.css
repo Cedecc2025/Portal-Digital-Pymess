@@ -54,30 +54,33 @@ body {
   color: var(--color-text-primary);
 }
 
-.input-shell {
+.register-card .input-shell {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 16px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+  padding: 0 18px;
+  min-height: 56px;
+  border-radius: 14px;
+  border: 1px solid #d0d5dd;
+  background: #f8fafc;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.05);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base), background var(--transition-base);
 }
 
-.input-shell:focus-within {
+.register-card .input-shell:focus-within {
   border-color: #1e90ff;
-  box-shadow: 0 0 0 4px rgba(30, 144, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
+  background: #ffffff;
   transform: translateY(-1px);
 }
 
-.input-shell input {
-  color: #111827;
+.register-card .input-shell input {
+  color: #0f172a;
   background: transparent;
 }
 
-.input-shell .input-icon {
-  color: var(--color-primary);
+.register-card .input-shell .input-icon {
+  color: #1e3a8a;
 }
 
 .feedback {
