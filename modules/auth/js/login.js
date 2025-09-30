@@ -13,10 +13,15 @@ let rememberMeInput = null;
 let usernameFeedback = null;
 let passwordFeedback = null;
 let generalFeedback = null;
+let activeModuleElement = null;
+let kpiRotationTimer = null;
 let navigationHandler = (relativeTarget) => {
   // Navega utilizando rutas relativas calculadas desde este módulo.
   gotoFromModule(import.meta.url, relativeTarget);
 };
+
+const ACTIVE_MODULES = ["Costos", "Estrategias de Ventas"];
+const KPI_ROTATION_INTERVAL = 1400;
 
 if (typeof document !== "undefined") {
   loginForm = document.querySelector("#loginForm");
@@ -26,6 +31,7 @@ if (typeof document !== "undefined") {
   usernameFeedback = document.querySelector("#usernameFeedback");
   passwordFeedback = document.querySelector("#passwordFeedback");
   generalFeedback = document.querySelector("#generalFeedback");
+  activeModuleElement = document.querySelector("#activeModule");
 }
 
 // Inicializa la pantalla limpiando cualquier mensaje previo.
@@ -46,6 +52,8 @@ export function initializeForm(feedbackElements = {}) {
   if (generalElement) {
     generalElement.textContent = "";
   }
+
+  startModuleRotation();
 }
 
 // Valida si el username cumple los criterios.
@@ -171,6 +179,31 @@ if (typeof document !== "undefined") {
   }
 }
 
+export function startModuleRotation(
+  modules = ACTIVE_MODULES,
+  targetElement = activeModuleElement,
+  interval = KPI_ROTATION_INTERVAL
+) {
+  if (!targetElement || modules.length === 0) {
+    return;
+  }
+
+  let moduleIndex = 0;
+
+  const updateModule = () => {
+    targetElement.textContent = modules[moduleIndex];
+    moduleIndex = (moduleIndex + 1) % modules.length;
+  };
+
+  updateModule();
+
+  if (kpiRotationTimer) {
+    clearInterval(kpiRotationTimer);
+  }
+
+  kpiRotationTimer = setInterval(updateModule, interval);
+}
+
 export default {
   initializeForm,
   validateUsername,
@@ -178,5 +211,6 @@ export default {
   fetchUserByUsername,
   handleLoginSubmit,
   setNavigationHandler,
-  redirectToDashboard
+  redirectToDashboard,
+  startModuleRotation
 };

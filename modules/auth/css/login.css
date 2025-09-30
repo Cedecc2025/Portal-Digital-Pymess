@@ -2,7 +2,7 @@
  * Estilos dedicados para la pantalla de inicio de sesión. */
 
 body {
-  background: #f1f5f9;
+  background: #f8fafc;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -12,48 +12,9 @@ body {
 
 .login-container {
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 32px;
-  align-items: stretch;
-  padding: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.login-overview {
-  background-color: #ffffff;
-  padding: 36px;
-  border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-  border: 1px solid #e2e8f0;
-}
-
-.login-overview h1 {
-  margin-top: 0;
-  font-size: 32px;
-  margin-bottom: 16px;
-  color: #0f172a;
-}
-
-.login-overview p {
-  line-height: 1.7;
-  margin-bottom: 16px;
-  color: #334155;
-}
-
-.login-overview ul {
-  padding-left: 20px;
-  margin-bottom: 16px;
-  color: #334155;
-}
-
-.login-overview li {
-  margin-bottom: 10px;
-}
-
-.login-overview strong {
-  color: var(--color-primary);
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
 }
 
 .login-card {
@@ -64,6 +25,9 @@ body {
   margin: 0 auto;
   box-shadow: 0 24px 50px rgba(15, 23, 42, 0.08);
   border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .login-card header {
@@ -160,22 +124,51 @@ body {
   color: #dc2626;
 }
 
+.module-kpi {
+  background-color: #f1f5f9;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.module-kpi h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.module-kpi p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1f2937;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.module-label {
+  font-weight: 600;
+  color: #475569;
+}
+
+.module-value {
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 120px;
+  display: inline-block;
+}
+
 @media (max-width: 960px) {
   .login-container {
-    padding: 24px;
+    padding: 24px 16px;
   }
 
   .login-card {
     padding: 36px 28px;
-  }
-}
-
-@media (max-width: 600px) {
-  .login-overview {
-    padding: 24px;
-  }
-
-  .login-overview h1 {
-    font-size: 26px;
   }
 }

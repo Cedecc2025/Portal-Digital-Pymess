@@ -9,29 +9,6 @@
   </head>
   <body>
     <main class="login-container">
-      <section class="login-overview">
-        <h1>Bienvenido a tu Portal de Herramientas Empresariales</h1>
-        <p>
-          Este portal reúne en un solo lugar las principales aplicaciones que necesitas
-          para gestionar y hacer crecer tu negocio de manera ágil y profesional.
-        </p>
-        <p>
-          Desde aquí podrás acceder a diferentes módulos diseñados para cubrir áreas clave
-          de tu organización:
-        </p>
-        <ul>
-          <li><strong>CRM:</strong> administra clientes, contactos y oportunidades de venta.</li>
-          <li><strong>Catálogo:</strong> organiza y presenta tu oferta de productos y servicios.</li>
-          <li><strong>Chatbot Web:</strong> brinda atención automática y disponible 24/7.</li>
-          <li><strong>Estrategias de Marketing:</strong> planifica y ejecuta campañas efectivas.</li>
-          <li><strong>Herramientas Extra:</strong> utilidades complementarias para la gestión diaria.</li>
-        </ul>
-        <p>
-          Cada módulo está pensado para integrarse en un sistema sencillo de usar, pero lo
-          suficientemente robusto para ayudarte a tomar decisiones basadas en datos y optimizar
-          tus procesos.
-        </p>
-      </section>
       <section class="login-card">
         <header>
           <h2>Acceso al Sistema</h2>
@@ -58,6 +35,13 @@
           <button type="submit" class="primary-button">Ingresar</button>
           <span class="feedback" id="generalFeedback"></span>
         </form>
+        <section class="module-kpi" aria-live="polite">
+          <h3>Módulos activos</h3>
+          <p>
+            <span class="module-label">Mostrando:</span>
+            <span class="module-value" id="activeModule"></span>
+          </p>
+        </section>
       </section>
     </main>
     <script type="module" src="../../lib/supabaseClient.js"></script>
