@@ -6,103 +6,77 @@
     <title>Dashboard - Sistema Modular</title>
     <link rel="stylesheet" href="../../public/css/global.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
-    <link rel="stylesheet" href="./css/dashboard-carousel.css" />
   </head>
   <body>
-    <main class="dashboard-container">
-      <header class="dashboard-header">
-        <div>
-          <p class="welcome-label">Bienvenido de nuevo</p>
-          <h1 id="usernameDisplay">Usuario</h1>
+    <main class="dashboard">
+      <header class="dashboard__header">
+        <div class="dashboard__welcome">
+          <p class="dashboard__greeting">Bienvenido de nuevo</p>
+          <h1 id="usernameDisplay" class="dashboard__title">Usuario</h1>
+          <p class="dashboard__subtitle">
+            Visualiza rápidamente tus tareas pendientes y accede a los módulos clave del sistema.
+          </p>
         </div>
-        <div class="header-actions">
-          <button id="logoutButton" class="logout-button">Cerrar sesión</button>
-        </div>
+        <button id="logoutButton" class="button button--ghost">Cerrar sesión</button>
       </header>
 
-      <section class="dashboard-kpis">
-        <section
-          class="tasks-card"
-          id="tasksCarousel"
-          role="region"
-          aria-label="Tareas asignadas"
-          data-ready="false"
-        >
-          <header class="tasks-card__header">
-            <div class="tasks-card__intro">
-              <p class="kpi-label">Tareas asignadas</p>
-              <h2 class="tasks-card__title">Planifica tu siguiente movimiento</h2>
-              <p class="tasks-card__subtitle">
-                Monitorea responsables, prioridades y fechas límite sin salir del dashboard.
+      <div class="dashboard__main">
+        <section class="panel tasks-panel" aria-labelledby="tasksHeading">
+          <header class="panel__header">
+            <div>
+              <p class="panel__eyebrow">Tareas asignadas</p>
+              <h2 id="tasksHeading" class="panel__title">Planifica tu siguiente movimiento</h2>
+              <p class="panel__description">
+                Prioriza tus pendientes con fechas claras y estados visibles.
               </p>
             </div>
-            <a class="tasks-card__cta" id="tasksCarouselAllButton" href="../tareas/index.html">
-              Ver todas las tareas
-            </a>
           </header>
-          <div class="tasks-card__inner">
-            <button
-              class="carousel-btn prev"
-              id="tasksCarouselPrev"
-              type="button"
-              aria-label="Anterior"
-              data-carousel-prev
-              disabled
-            >
-              &#10094;
-            </button>
-            <div
-              class="carousel-viewport"
-              id="tasksCarouselViewport"
-              data-carousel-viewport
-              tabindex="0"
-              role="group"
-              aria-roledescription="carrusel"
-              aria-live="polite"
-            >
-              <ul
-                class="carousel-track"
-                id="tasksCarouselTrack"
-                data-carousel-track
-                role="list"
-              ></ul>
-              <p class="carousel-status" id="tasksCarouselStatus" data-carousel-status>
-                Cargando tus tareas...
+          <ul class="tasks-list" id="tasksList" aria-live="polite"></ul>
+          <p class="tasks-empty" id="tasksEmptyMessage" hidden>
+            No tienes tareas asignadas por ahora.
+          </p>
+          <a
+            class="button button--link"
+            id="tasksAllButton"
+            href="../tareas/index.html"
+          >
+            Ver todas las tareas
+          </a>
+        </section>
+
+        <section class="panel modules-panel" aria-labelledby="modulesHeading">
+          <header class="panel__header">
+            <div>
+              <p class="panel__eyebrow">Módulos disponibles</p>
+              <h2 id="modulesHeading" class="panel__title">Accesos directos</h2>
+              <p class="panel__description">
+                Ingresa a las herramientas más utilizadas en tu día a día.
               </p>
             </div>
-            <button
-              class="carousel-btn next"
-              id="tasksCarouselNext"
-              type="button"
-              aria-label="Siguiente"
-              data-carousel-next
-              disabled
-            >
-              &#10095;
-            </button>
-            <div class="carousel-indicators" id="tasksCarouselIndicators" aria-hidden="true">
-              <span class="counter"><span class="current">1</span> / <span class="total">0</span></span>
-            </div>
+          </header>
+          <div class="modules-grid">
+            <a class="module-card" href="../costos/index.html" data-module="costos">
+              <div class="module-card__icon" aria-hidden="true">💰</div>
+              <h3 class="module-card__title">Costos</h3>
+              <p class="module-card__description">
+                Administra presupuestos, gastos e inversiones para mantener tus finanzas en orden.
+              </p>
+              <span class="button button--secondary">Ir a Costos</span>
+            </a>
+            <a class="module-card" href="../estrategias/index.html" data-module="estrategias">
+              <div class="module-card__icon" aria-hidden="true">📊</div>
+              <h3 class="module-card__title">Estrategias de Ventas</h3>
+              <p class="module-card__description">
+                Diseña campañas y gestiona acciones comerciales para impulsar tus resultados.
+              </p>
+              <span class="button button--secondary">Ir a Estrategias</span>
+            </a>
           </div>
         </section>
-      </section>
-
-      <section class="modules-grid">
-        <a class="module-card" href="../costos/index.html" data-module="costos">
-          <h2>Costos</h2>
-          <p>Administra y monitorea la estructura de costos de tu operación.</p>
-          <span class="module-button">Ir a Costos</span>
-        </a>
-        <a class="module-card" href="../estrategias/index.html" data-module="estrategias">
-          <h2>Estrategias de Ventas</h2>
-          <p>Diseña campañas y planes de marketing para impulsar tu crecimiento.</p>
-          <span class="module-button">Ir a Estrategias</span>
-        </a>
-      </section>
+      </div>
     </main>
     <script type="module" src="../../lib/supabaseClient.js"></script>
     <script type="module" src="../../lib/authGuard.js"></script>
-    <script type="module" src="./js/dashboard-carousel.js"></script>
     <script type="module" src="./js/dashboard.js"></script>
   </body>
 </html>
