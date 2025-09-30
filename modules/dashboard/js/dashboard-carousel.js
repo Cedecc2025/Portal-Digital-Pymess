@@ -148,9 +148,10 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
   const status = container.querySelector("[data-carousel-status]");
   const prevButton = container.querySelector("[data-carousel-prev]");
   const nextButton = container.querySelector("[data-carousel-next]");
-  const dotsContainer = container.querySelector("[data-carousel-dots]");
-  const currentCounter = container.querySelector("[data-carousel-current]");
-  const totalCounter = container.querySelector("[data-carousel-total]");
+  const indicatorsContainer = container.querySelector(".carousel-indicators");
+  const counter = indicatorsContainer?.querySelector(".counter") ?? null;
+  const counterCurrent = indicatorsContainer?.querySelector(".current") ?? null;
+  const counterTotal = indicatorsContainer?.querySelector(".total") ?? null;
 
   const state = {
     currentIndex: 0,
@@ -160,7 +161,8 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
     slides: [],
     pointerId: null,
     dragStartX: 0,
-    dragDeltaX: 0
+    dragDeltaX: 0,
+    dots: []
   };
 
   function getViewportWidth() {
@@ -168,7 +170,7 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
       return 0;
     }
 
-    return Math.round(viewport.getBoundingClientRect().width);
+    return Math.round(viewport.clientWidth);
   }
 
   // Actualiza el mensaje visible o del lector de pantalla según el estado del carrusel.
@@ -194,30 +196,26 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
 
   // Actualiza los contadores visibles.
   function updateCounters() {
-    if (currentCounter) {
-      currentCounter.textContent = state.total ? String(state.currentIndex + 1) : "0";
+    if (counterCurrent) {
+      counterCurrent.textContent = state.total ? String(state.currentIndex + 1) : "0";
     }
 
-    if (totalCounter) {
-      totalCounter.textContent = String(state.total);
+    if (counterTotal) {
+      counterTotal.textContent = String(state.total);
     }
   }
 
   // Marca los indicadores activos y actualiza aria-current.
   function updateIndicators() {
-    if (!dotsContainer) {
+    if (!state.dots.length) {
       return;
     }
 
-    Array.from(dotsContainer.children).forEach((dot, index) => {
-      const button = dot;
-
+    state.dots.forEach((dot, index) => {
       if (index === state.currentIndex) {
-        button.setAttribute("aria-current", "true");
-        button.classList.add("is-active");
+        dot.setAttribute("aria-current", "true");
       } else {
-        button.removeAttribute("aria-current");
-        button.classList.remove("is-active");
+        dot.removeAttribute("aria-current");
       }
     });
   }
@@ -341,28 +339,34 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
 
   // Construye los indicadores interactivos.
   function buildIndicators() {
-    if (!dotsContainer) {
+    if (!indicatorsContainer) {
       return;
     }
 
-    dotsContainer.innerHTML = "";
+    const dots = [];
+
+    indicatorsContainer.querySelectorAll(".dot").forEach((dot) => dot.remove());
 
     if (state.total <= 1) {
+      state.dots = dots;
       return;
     }
 
+    const insertBeforeNode = counter ?? null;
+
     state.slides.forEach((slide, index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "dot";
-      button.setAttribute("role", "tab");
-      button.setAttribute("aria-label", `Ir a la tarea ${index + 1}`);
-      button.addEventListener("click", () => {
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.setAttribute("aria-label", `Ir a la tarea ${index + 1}`);
+      dot.addEventListener("click", () => {
         goTo(index, { animate: true });
       });
 
-      dotsContainer.appendChild(button);
+      indicatorsContainer.insertBefore(dot, insertBeforeNode);
+      dots.push(dot);
     });
+
+    state.dots = dots;
   }
 
   // Termina el gesto táctil devolviendo la pista a su posición final.
@@ -535,8 +539,9 @@ export function initTasksCarousel({ containerSelector, loop = false } = {}) {
       state.currentIndex = 0;
       updateCounters();
       updateControls();
-      if (dotsContainer) {
-        dotsContainer.innerHTML = "";
+      state.dots = [];
+      if (indicatorsContainer) {
+        indicatorsContainer.querySelectorAll(".dot").forEach((dot) => dot.remove());
       }
     },
     // Renderiza las tareas dentro del carrusel.
