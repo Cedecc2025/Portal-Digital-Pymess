@@ -1,5 +1,5 @@
 /* dashboard-carousel.css
- * Estilos dedicados al carrusel de tareas del dashboard.
+ * Estilos dedicados al carrusel de tareas del dashboard en formato de una tarjeta centrada.
  */
 
 .tasks-panel {
@@ -63,37 +63,57 @@
 
 .tasks-carousel {
   position: relative;
+  padding: 0 108px 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 0 88px 12px;
+  align-items: center;
+  gap: 28px;
+  transition: opacity 220ms ease;
+}
+
+.tasks-carousel[data-ready="false"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.tasks-carousel[data-ready="true"] {
+  opacity: 1;
+  visibility: visible;
 }
 
 .tasks-carousel__viewport {
   position: relative;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
   overflow: hidden;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.65);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.76);
   backdrop-filter: blur(6px);
-  padding: 28px 12px;
   touch-action: pan-y;
 }
 
 .tasks-carousel__track {
-  --tasks-gap: 24px;
-  --tasks-visible: 1;
   display: flex;
-  gap: var(--tasks-gap);
   margin: 0;
-  padding: 0;
+  padding: 32px 24px;
   list-style: none;
   transform: translateX(0);
-  transition: transform 640ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 360ms ease;
   will-change: transform;
 }
 
-.tasks-carousel__track--no-transition {
-  transition: none !important;
+.tasks-carousel__slide {
+  flex: 0 0 100%;
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  opacity: 0;
+  transition: opacity 360ms ease;
+}
+
+.tasks-carousel__slide.is-active {
+  opacity: 1;
 }
 
 .tasks-carousel__status {
@@ -102,18 +122,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
   padding: 0 32px;
   margin: 0;
   font-size: 1rem;
-  color: #1e1b4b;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.82);
+  color: #1e1b4b;
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(4px);
+  z-index: 2;
 }
 
 .tasks-carousel__status[hidden] {
   display: none;
+}
+
+.tasks-carousel__status[data-mode="announce"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
 }
 
 .tasks-carousel__control {
@@ -126,303 +157,322 @@
   border: none;
   background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(37, 99, 235, 0.95));
   color: #ffffff;
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
   transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
-  z-index: 5;
+  z-index: 3;
 }
 
 .tasks-carousel__control:hover,
 .tasks-carousel__control:focus-visible {
-  transform: translateY(-50%) scale(1.06);
+  transform: translateY(-50%) translateY(-2px);
   box-shadow: 0 28px 60px rgba(37, 99, 235, 0.28);
   outline: none;
 }
 
+.tasks-carousel__control:focus-visible {
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4), 0 20px 40px rgba(37, 99, 235, 0.28);
+}
+
 .tasks-carousel__control[disabled] {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
   transform: translateY(-50%);
 }
 
 .tasks-carousel__control--prev {
-  left: 12px;
+  left: 24px;
 }
 
 .tasks-carousel__control--next {
-  right: 12px;
+  right: 24px;
 }
 
 .tasks-carousel__indicators {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 0 28px;
+  gap: 16px;
+  color: rgba(30, 27, 75, 0.72);
+  font-weight: 600;
 }
 
-.tasks-carousel__indicator {
+.tasks-carousel__dots {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.tasks-carousel__dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   border: 2px solid rgba(67, 56, 202, 0.4);
   background: transparent;
+  padding: 0;
   cursor: pointer;
   transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
-  padding: 0;
 }
 
-.tasks-carousel__indicator:hover,
-.tasks-carousel__indicator:focus-visible {
+.tasks-carousel__dot:hover,
+.tasks-carousel__dot:focus-visible {
   transform: scale(1.1);
   border-color: rgba(67, 56, 202, 0.8);
   outline: none;
 }
 
-.tasks-carousel__indicator[aria-current="true"] {
+.tasks-carousel__dot.is-active {
   background: #4338ca;
   border-color: #312e81;
   transform: scale(1.2);
 }
 
-.tasks-carousel__item {
-  flex: 0 0 calc((100% - (var(--tasks-gap) * (var(--tasks-visible) - 1))) / var(--tasks-visible));
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 28px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-height: 220px;
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 460ms ease, transform 460ms ease;
-}
-
-.tasks-carousel__item.is-active {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.tasks-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.tasks-card__title {
-  margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.25;
-  color: #0f172a;
-}
-
-.tasks-card__deadline {
-  margin: 0;
-  padding: 8px 14px;
-  border-radius: 12px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  color: #1d4ed8;
-  font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.tasks-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.tasks-card__badge {
+.tasks-carousel__counter {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
 }
 
-.tasks-card__badge-icon {
-  font-size: 1rem;
+.tasks-carousel__counter-separator {
+  opacity: 0.6;
 }
 
-.tasks-card__badge--owner {
-  background: rgba(14, 165, 233, 0.12);
-  color: #0369a1;
-  border: 1px solid rgba(14, 165, 233, 0.3);
-}
-
-.tasks-card__badge--priority-baja {
-  background: rgba(22, 163, 74, 0.12);
-  color: #15803d;
-  border: 1px solid rgba(22, 163, 74, 0.26);
-}
-
-.tasks-card__badge--priority-media {
-  background: rgba(251, 191, 36, 0.18);
-  color: #b45309;
-  border: 1px solid rgba(217, 119, 6, 0.35);
-}
-
-.tasks-card__badge--priority-alta {
-  background: rgba(248, 113, 113, 0.2);
-  color: #b91c1c;
-  border: 1px solid rgba(220, 38, 38, 0.35);
-}
-
-.tasks-card__description {
-  margin: 0;
-  color: #475569;
-  font-size: 0.98rem;
-  line-height: 1.55;
-}
-
-.tasks-card__footer {
+.task-card {
+  width: min(92vw, 760px);
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.12);
+  padding: 36px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: auto;
+  flex-direction: column;
+  gap: 20px;
+  color: #1e1b4b;
 }
 
-.tasks-card__status {
+.task-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-card__title {
+  margin: 0;
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
+
+.task-card__deadline {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(67, 56, 202, 0.88);
+}
+
+.task-card__assignments {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  row-gap: 12px;
+  column-gap: 16px;
+  margin: 0;
+}
+
+.task-card__meta-label {
+  font-size: 0.95rem;
+  color: rgba(30, 27, 75, 0.72);
+}
+
+.task-card__meta-value {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.task-card__badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  justify-content: center;
+  padding: 6px 18px;
   border-radius: 999px;
-  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  text-transform: capitalize;
+  color: #ffffff;
+  background: #4c1d95;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-.tasks-card__status--pendiente {
-  background: rgba(251, 191, 36, 0.2);
-  color: #92400e;
-  border: 1px solid rgba(217, 119, 6, 0.38);
+.task-card__badge--priority-baja {
+  background: linear-gradient(135deg, #047857, #22c55e);
 }
 
-.tasks-card__status--completado {
-  background: rgba(34, 197, 94, 0.2);
-  color: #166534;
-  border: 1px solid rgba(22, 163, 74, 0.4);
+.task-card__badge--priority-media {
+  background: linear-gradient(135deg, #b45309, #f59e0b);
 }
 
-.tasks-card__status--en-progreso,
-.tasks-card__status--progreso {
-  background: rgba(96, 165, 250, 0.2);
-  color: #1d4ed8;
-  border: 1px solid rgba(37, 99, 235, 0.4);
+.task-card__badge--priority-alta {
+  background: linear-gradient(135deg, #b91c1c, #ef4444);
 }
 
-.tasks-card__status--cancelado {
-  background: rgba(148, 163, 184, 0.2);
-  color: #475569;
-  border: 1px solid rgba(148, 163, 184, 0.4);
+.task-card__description {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(30, 27, 75, 0.78);
 }
 
-@media (max-width: 1200px) {
+.task-card__footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.task-card__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.task-card__status--pendiente {
+  background: rgba(67, 56, 202, 0.12);
+  color: #4338ca;
+}
+
+.task-card__status--completado {
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+}
+
+.task-card__status--en-progreso {
+  background: rgba(14, 165, 233, 0.16);
+  color: #0369a1;
+}
+
+.task-card__status--cancelado {
+  background: rgba(239, 68, 68, 0.16);
+  color: #b91c1c;
+}
+
+@media (max-width: 1199px) {
   .tasks-carousel {
-    padding-inline: 72px;
-  }
-
-  .tasks-carousel__control {
-    width: 56px;
-    height: 56px;
-  }
-}
-
-@media (max-width: 992px) {
-  .tasks-panel__title {
-    font-size: 1.45rem;
-  }
-
-  .tasks-carousel {
-    padding-inline: 60px;
+    padding: 0 88px 28px;
   }
 
   .tasks-carousel__viewport {
-    padding: 20px 10px;
+    max-width: 760px;
   }
 
-  .tasks-carousel__track {
-    --tasks-gap: 20px;
-  }
-
-  .tasks-carousel__control {
-    width: 52px;
-    height: 52px;
+  .task-card {
+    padding: 32px;
   }
 }
 
-@media (max-width: 768px) {
-  .tasks-panel__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .tasks-panel__cta {
-    align-self: flex-start;
-  }
-
+@media (max-width: 991px) {
   .tasks-carousel {
-    padding-inline: 52px;
-    gap: 16px;
+    padding: 0 72px 28px;
+  }
+
+  .tasks-carousel__viewport {
+    max-width: 680px;
+  }
+
+  .task-card {
+    padding: 28px;
+  }
+}
+
+@media (max-width: 767px) {
+  .tasks-carousel {
+    padding: 0 52px 24px;
+  }
+
+  .tasks-carousel__viewport {
+    border-radius: 22px;
+  }
+
+  .tasks-carousel__track {
+    padding: 28px 16px;
+  }
+
+  .tasks-carousel__control {
+    width: 54px;
+    height: 54px;
+  }
+
+  .tasks-carousel__control--prev {
+    left: 12px;
+  }
+
+  .tasks-carousel__control--next {
+    right: 12px;
+  }
+
+  .task-card {
+    width: calc(100vw - 128px);
+    padding: 26px;
+  }
+}
+
+@media (max-width: 599px) {
+  .tasks-carousel {
+    padding: 0 24px 20px;
   }
 
   .tasks-carousel__viewport {
     border-radius: 18px;
-    padding-inline: 10px;
   }
 
   .tasks-carousel__track {
-    --tasks-gap: 16px;
-  }
-
-  .tasks-carousel__item {
-    padding: 24px;
-    min-height: 240px;
-  }
-
-  .tasks-card__footer {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-@media (max-width: 576px) {
-  .tasks-carousel {
-    padding: 0 16px 8px;
-  }
-
-  .tasks-carousel__viewport {
-    padding: 16px 8px;
+    padding: 24px 12px;
   }
 
   .tasks-carousel__control {
-    display: none;
+    width: 48px;
+    height: 48px;
+    font-size: 1.6rem;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+  }
+
+  .tasks-carousel__control--prev {
+    left: 4px;
+  }
+
+  .tasks-carousel__control--next {
+    right: 4px;
   }
 
   .tasks-carousel__indicators {
-    gap: 8px;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .tasks-panel__cta {
+  .task-card {
     width: 100%;
-    justify-content: center;
+    padding: 24px;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 420px) {
+  .task-card {
+    padding: 20px;
+  }
+
+  .task-card__assignments {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-carousel__dots {
+    gap: 8px;
   }
 }

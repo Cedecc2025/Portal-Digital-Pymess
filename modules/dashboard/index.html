@@ -34,23 +34,43 @@
               Ver todas las tareas
             </a>
           </header>
-          <div
+          <section
             class="tasks-carousel"
             id="tasksCarousel"
-            data-carousel
-            aria-label="Carrusel de tareas asignadas"
+            role="region"
+            aria-label="Tareas asignadas"
+            data-ready="false"
           >
             <button
               class="tasks-carousel__control tasks-carousel__control--prev"
               id="tasksCarouselPrev"
               type="button"
-              aria-label="Ver tareas anteriores"
+              aria-label="Anterior"
+              data-carousel-prev
+              disabled
             >
               <span aria-hidden="true">&#10094;</span>
             </button>
-            <div class="tasks-carousel__viewport" id="tasksCarouselViewport">
-              <ul class="tasks-carousel__track" id="tasksCarouselTrack" role="list"></ul>
-              <p class="tasks-carousel__status" id="tasksCarouselStatus" aria-live="polite">
+            <div
+              class="tasks-carousel__viewport"
+              id="tasksCarouselViewport"
+              data-carousel-viewport
+              tabindex="0"
+              role="group"
+              aria-roledescription="carrusel"
+              aria-live="polite"
+            >
+              <ul
+                class="tasks-carousel__track"
+                id="tasksCarouselTrack"
+                data-carousel-track
+                role="list"
+              ></ul>
+              <p
+                class="tasks-carousel__status"
+                id="tasksCarouselStatus"
+                data-carousel-status
+              >
                 Cargando tus tareas...
               </p>
             </div>
@@ -58,12 +78,26 @@
               class="tasks-carousel__control tasks-carousel__control--next"
               id="tasksCarouselNext"
               type="button"
-              aria-label="Ver tareas siguientes"
+              aria-label="Siguiente"
+              data-carousel-next
+              disabled
             >
               <span aria-hidden="true">&#10095;</span>
             </button>
-            <div class="tasks-carousel__indicators" id="tasksCarouselIndicators" role="tablist"></div>
-          </div>
+            <div class="tasks-carousel__indicators">
+              <div
+                class="tasks-carousel__dots"
+                id="tasksCarouselIndicators"
+                data-carousel-dots
+                role="tablist"
+              ></div>
+              <div class="tasks-carousel__counter" aria-hidden="true">
+                <span class="tasks-carousel__counter-current" data-carousel-current>0</span>
+                <span class="tasks-carousel__counter-separator">/</span>
+                <span class="tasks-carousel__counter-total" data-carousel-total>0</span>
+              </div>
+            </div>
+          </section>
         </article>
       </section>
 
@@ -82,6 +116,7 @@
     </main>
     <script type="module" src="../../lib/supabaseClient.js"></script>
     <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/dashboard-carousel.js"></script>
     <script type="module" src="./js/dashboard.js"></script>
   </body>
 </html>
