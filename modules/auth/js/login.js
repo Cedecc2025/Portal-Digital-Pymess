@@ -33,6 +33,11 @@ const ACTIVE_MODULES = [
     name: "Estrategias de Ventas",
     description: "Diseña campañas comerciales con métricas claras y accionables.",
     icon: "🚀"
+  },
+  {
+    name: "Gestión de Tareas",
+    description: "Organiza pendientes, responsables y fechas límite por proyecto.",
+    icon: "🗒️"
   }
 ];
 const KPI_ROTATION_INTERVAL = 1400;
