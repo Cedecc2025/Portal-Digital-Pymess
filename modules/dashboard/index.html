@@ -14,14 +14,22 @@
           <p class="welcome-label">Bienvenido de nuevo</p>
           <h1 id="usernameDisplay">Usuario</h1>
         </div>
-        <button id="logoutButton" class="logout-button">Cerrar sesión</button>
+        <div class="header-actions">
+          <a class="tasks-link" id="tasksButton" href="../tareas/index.html">Ver tareas</a>
+          <button id="logoutButton" class="logout-button">Cerrar sesión</button>
+        </div>
       </header>
 
       <section class="dashboard-kpis">
-        <article class="kpi-card">
-          <p class="kpi-label">Módulos activos</p>
-          <p class="kpi-value" id="activeModulesCount">0</p>
-          <p class="kpi-description" id="activeModulesList">No hay módulos activos disponibles en este momento.</p>
+        <article class="kpi-card kpi-card--tasks">
+          <header class="kpi-card__header">
+            <p class="kpi-label">Tareas asignadas</p>
+            <p class="kpi-subtitle">Se actualizan automáticamente</p>
+          </header>
+          <div class="tasks-carousel" aria-live="polite">
+            <p class="tasks-carousel__status" id="tasksCarouselStatus">Cargando tus tareas...</p>
+            <ul class="tasks-carousel__track" id="tasksCarouselTrack"></ul>
+          </div>
         </article>
       </section>
 
@@ -41,18 +49,6 @@
           <p>Asigna responsables, controla prioridades y sigue tus pendientes.</p>
           <span class="module-button">Ir a Tareas</span>
         </a>
-      </section>
-
-      <section class="tasks-preview" aria-live="polite">
-        <header class="tasks-preview__header">
-          <div>
-            <p class="tasks-preview__label">Resumen rápido</p>
-            <h2 class="tasks-preview__title">Tus próximas tareas</h2>
-          </div>
-          <a class="tasks-preview__link" href="../tareas/index.html">Ver módulo</a>
-        </header>
-        <p class="tasks-preview__status" id="tasksPreviewStatus">Cargando tus tareas...</p>
-        <ul class="tasks-preview__list" id="tasksPreviewList"></ul>
       </section>
     </main>
     <script type="module" src="../../lib/supabaseClient.js"></script>
