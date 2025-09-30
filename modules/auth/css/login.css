@@ -2,7 +2,7 @@
  * Estilos dedicados para la pantalla de inicio de sesión. */
 
 body {
-  background: radial-gradient(circle at top left, #e0ecff, #ffffff 45%);
+  background-color: var(--color-background, #ffffff);
   min-height: 100vh;
   display: flex;
   align-items: center;
