@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo Digital</title>
+    <link rel="stylesheet" href="../../public/css/global.css" />
+    <link rel="stylesheet" href="./css/catalogo.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="admin-banner">🔐 MODO ADMINISTRADOR ACTIVO</div>
+      <header class="header">
+        <div class="logo-section">
+          <span class="logo">
+            <img id="businessLogo" src="" alt="" class="logo-img" style="display: none" />
+            <span id="logoIcon">🏪</span>
+            <span id="businessName">Mi Negocio</span>
+          </span>
+        </div>
+        <div class="header-buttons">
+          <button class="btn-header" onclick="openCart()">
+            🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+          </button>
+          <button
+            class="btn-header whatsapp-btn admin-only"
+            id="whatsappProcessBtn"
+            onclick="showModal('whatsappProcessModal')"
+          >
+            📱 Procesar WhatsApp
+          </button>
+          <button
+            class="btn-header"
+            id="notificationBtn"
+            onclick="toggleNotificationCenter()"
+            style="display: none"
+          >
+            🔔 Notificaciones
+            <span class="notification-count" id="notificationCount" style="display: none">0</span>
+          </button>
+          <button
+            class="btn-header"
+            id="addProductBtn"
+            onclick="showModal('productModal')"
+            style="display: none"
+          >
+            ➕ Producto
+          </button>
+          <button class="btn-header" id="logoutBtn" onclick="logout()" style="display: none">
+            🚪 Salir Admin
+          </button>
+        </div>
+      </header>
+
+      <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showSection('catalog', this)">📦 Catálogo</button>
+        <button class="nav-tab" onclick="showSection('dashboard', this)">📊 Dashboard</button>
+        <button class="nav-tab" onclick="showSection('sales', this)">💰 Ventas</button>
+        <button class="nav-tab" onclick="showSection('clients', this)">👥 Clientes</button>
+        <button class="nav-tab" onclick="showSection('inventory', this)">📋 Inventario</button>
+        <button class="nav-tab" onclick="showSection('chatbot', this)">🤖 Chatbot</button>
+        <button class="nav-tab" onclick="showSection('settings', this)">⚙️ Config</button>
+      </div>
+
+      <section id="catalog" class="section active">
+        <div class="controls">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              class="search-input"
+              id="searchInput"
+              placeholder="Buscar productos..."
+            />
+          </div>
+          <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterCategory('all', this)">Todos</button>
+            <button class="filter-btn" onclick="filterCategory('Alimentos', this)">Alimentos</button>
+            <button class="filter-btn" onclick="filterCategory('Bebidas', this)">Bebidas</button>
+            <button class="filter-btn" onclick="filterCategory('Tecnología', this)">Tecnología</button>
+            <button class="filter-btn" onclick="filterCategory('Hogar', this)">Hogar</button>
+            <button class="filter-btn" onclick="filterCategory('Ropa', this)">Ropa</button>
+            <button class="filter-btn" onclick="filterCategory('Otros', this)">Otros</button>
+          </div>
+        </div>
+        <div class="products-grid" id="productsGrid"></div>
+      </section>
+
+      <section id="dashboard" class="section">
+        <h2 style="margin-bottom: 30px">Panel de Control</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalSales">₡0</div>
+            <div class="stat-label">Ventas Totales</div>
+          </div>
+          <div class="stat-card" style="background: var(--gradient-2)">
+            <div class="stat-value" id="totalClients">0</div>
+            <div class="stat-label">Clientes</div>
+          </div>
+          <div class="stat-card" style="background: var(--gradient-3)">
+            <div class="stat-value" id="totalProducts">0</div>
+            <div class="stat-label">Productos</div>
+          </div>
+          <div class="stat-card" style="background: var(--gradient-4)">
+            <div class="stat-value" id="todayOrders">0</div>
+            <div class="stat-label">Pedidos Hoy</div>
+          </div>
+        </div>
+        <h3 style="margin: 30px 0 20px">Últimas Ventas</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="recentSalesTable">
+              <tr><td colspan="4" style="text-align: center">No hay ventas</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="sales" class="section">
+        <div class="whatsapp-processor">
+          <h3>
+            📱 Procesador de Pedidos WhatsApp
+            <span class="tooltip" style="margin-left: 10px; font-size: 18px">
+              ℹ️
+              <span class="tooltiptext"
+                >Pega aquí los mensajes de pedidos que recibes por WhatsApp para procesarlos
+                automáticamente</span
+              >
+            </span>
+          </h3>
+          <div class="whatsapp-input-area">
+            <textarea
+              class="whatsapp-textarea"
+              id="whatsappMessageInput"
+              placeholder="Pega aquí el mensaje de WhatsApp...
+
+Ejemplo:
+🛍️ NUEVO PEDIDO
+
+Cliente: Yuli
+Teléfono: 50687592588
+
+📦 Productos:
+• Camisa x1 = ₡2000
+
+Subtotal: ₡2000
+IVA (13%): ₡260
+TOTAL: ₡2260"
+            ></textarea>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <button class="btn-process" onclick="parseWhatsAppMessage()">🔍 Analizar Mensaje</button>
+            <button class="btn-process" onclick="clearWhatsAppProcessor()" style="background: var(--danger); color: white">
+              🗑️ Limpiar
+            </button>
+          </div>
+          <div class="parsed-data" id="parsedData"></div>
+          <div class="process-status" id="processStatus"></div>
+        </div>
+
+        <div style="background: var(--light); padding: 25px; border-radius: 15px; margin-bottom: 20px">
+          <h3 style="margin-bottom: 20px">Preguntas Frecuentes (FAQ)</h3>
+          <div id="faqList" style="margin-bottom: 20px"></div>
+          <button class="btn-primary" onclick="addFAQ()">➕ Agregar Pregunta</button>
+        </div>
+
+        <div style="background: var(--light); padding: 25px; border-radius: 15px">
+          <h3 style="margin-bottom: 20px">Respuestas Rápidas</h3>
+          <div class="form-group">
+            <label class="form-label">Horario de Atención</label>
+            <input type="text" class="form-input" id="botHours" placeholder="Lunes a Viernes: 8am - 6pm" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tiempo de Entrega</label>
+            <input type="text" class="form-input" id="botDelivery" placeholder="24-48 horas en el GAM" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Métodos de Pago</label>
+            <input type="text" class="form-input" id="botPayment" placeholder="Efectivo, SINPE, Transferencia" />
+          </div>
+          <button class="btn-primary" onclick="saveQuickResponses()">Guardar Respuestas</button>
+        </div>
+      </section>
+
+      <section id="clients" class="section">
+        <div class="clients-list" id="clientsList"></div>
+      </section>
+
+      <section id="inventory" class="section">
+        <div class="inventory-grid" id="inventoryGrid"></div>
+      </section>
+
+      <section id="chatbot" class="section">
+        <div class="chatbot-settings" style="background: var(--light); padding: 25px; border-radius: 15px">
+          <h3 style="margin-bottom: 20px">Configuración del Chatbot</h3>
+          <div class="form-group">
+            <label class="form-label">Nombre del Chatbot</label>
+            <input type="text" class="form-input" id="botName" placeholder="Asistente Virtual" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mensaje de Bienvenida</label>
+            <textarea
+              class="form-textarea"
+              id="botWelcome"
+              placeholder="¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <input type="checkbox" id="botEnabled" checked /> Chatbot Activado
+            </label>
+          </div>
+          <button class="btn-primary" onclick="saveChatbotSettings()">Guardar Configuración</button>
+        </div>
+      </section>
+
+      <section id="settings" class="section">
+        <h2 style="margin-bottom: 30px">Configuración</h2>
+        <div style="background: var(--light); padding: 25px; border-radius: 15px; margin-bottom: 20px">
+          <h3 style="margin-bottom: 20px">Información del Negocio</h3>
+          <div class="form-group">
+            <label class="form-label">Nombre del Negocio</label>
+            <input type="text" class="form-input" id="settingsBusinessName" placeholder="Mi Negocio" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Logo del Negocio</label>
+            <input type="url" class="form-input" id="settingsLogoUrl" placeholder="https://ejemplo.com/logo.png" style="margin-bottom: 10px" />
+            <input type="file" id="logoFileInput" accept="image/*" style="display: none" onchange="handleLogoUpload(event)" />
+            <button type="button" class="btn-primary" onclick="document.getElementById('logoFileInput').click()">📷 Subir Logo</button>
+            <button
+              type="button"
+              class="btn-primary btn-danger"
+              onclick="removeLogo()"
+              id="removeLogoBtn"
+              style="margin-left: 10px; display: none"
+            >
+              🗑️ Quitar Logo
+            </button>
+            <div id="logoPreview" style="margin-top: 15px"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp (incluir código de país)</label>
+            <input type="text" class="form-input" id="settingsWhatsApp" placeholder="50688888888" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Correo Electrónico</label>
+            <input type="email" class="form-input" id="settingsEmail" placeholder="correo@ejemplo.com" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contraseña Admin</label>
+            <input type="password" class="form-input" id="settingsPassword" placeholder="Nueva contraseña" />
+          </div>
+          <button class="btn-primary" onclick="saveSettings()">Guardar Configuración</button>
+        </div>
+        <div style="background: var(--light); padding: 25px; border-radius: 15px; margin-bottom: 20px">
+          <h3 style="margin-bottom: 20px">Personalización de Colores</h3>
+          <div class="color-picker-group">
+            <label style="width: 150px">Color Principal:</label>
+            <input type="color" id="primaryColor" class="color-input" value="#2563eb" />
+            <input
+              type="text"
+              class="form-input"
+              id="primaryColorHex"
+              value="#2563eb"
+              style="width: 100px"
+              onchange="updateColorFromHex('primary')"
+            />
+          </div>
+          <div class="color-picker-group">
+            <label style="width: 150px">Fondo degradado:</label>
+            <input type="color" id="bgColor1" class="color-input" value="#667eea" />
+            <span>hasta</span>
+            <input type="color" id="bgColor2" class="color-input" value="#764ba2" />
+          </div>
+          <button class="btn-primary" onclick="saveColors()">Aplicar Colores</button>
+          <button class="btn-primary btn-warning" onclick="resetColors()" style="margin-left: 10px">🔄 Restaurar Colores</button>
+        </div>
+        <div style="background: var(--light); padding: 25px; border-radius: 15px">
+          <h3 style="margin-bottom: 20px">Backup y Restauración</h3>
+          <button class="btn-primary" onclick="exportData()">💾 Exportar Datos</button>
+          <button class="btn-primary btn-warning" onclick="importData()" style="margin-left: 10px">📂 Importar</button>
+          <button class="btn-primary btn-danger" onclick="factoryReset()" style="margin-left: 10px">🏭 Reinicio Total</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="admin-lock" id="adminLock" onclick="showAdminLogin()">🔒</div>
+
+    <div class="notification-dropdown" id="notificationDropdown">
+      <div class="notification-dropdown-header">
+        <span class="notification-dropdown-title">📬 Centro de Notificaciones</span>
+        <button class="clear-notifications-btn" onclick="clearAllNotifications()">Limpiar todo</button>
+      </div>
+      <div class="notification-list" id="notificationList">
+        <div class="notification-empty">
+          <div style="font-size: 48px; margin-bottom: 10px">📭</div>
+          <p>No hay notificaciones nuevas</p>
+        </div>
+      </div>
+      <div class="notification-settings">
+        <label class="notification-toggle">
+          <input type="checkbox" id="notificationSound" checked />
+          <span style="font-size: 14px">🔊 Sonido de notificaciones</span>
+        </label>
+        <label class="notification-toggle" style="margin-top: 10px">
+          <input type="checkbox" id="browserNotifications" onclick="toggleBrowserNotifications()" />
+          <span style="font-size: 14px">🌐 Notificaciones del navegador</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="purchase-popup" id="purchasePopup">
+      <button
+        style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer"
+        onclick="closePurchasePopup()"
+      >
+        ×
+      </button>
+      <div class="purchase-popup-header">
+        <div class="purchase-popup-icon">🛍️</div>
+        <div class="purchase-popup-content">
+          <h3>¡Nueva Compra Recibida!</h3>
+          <div class="purchase-popup-details" id="purchaseDetails"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chatbot-widget" id="chatbotWidget" style="display: none">
+      <button class="chatbot-button" onclick="toggleChatbot()">
+        💬
+        <span class="notification-dot"></span>
+      </button>
+      <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+          <h3>
+            <span class="chatbot-status"></span>
+            <span id="chatbotTitle">Asistente Virtual</span>
+          </h3>
+          <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatMessages"></div>
+        <div class="chatbot-typing" id="typingIndicator">
+          <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+        <div class="chatbot-options" id="chatOptions">
+          <button class="chat-option-btn" onclick="sendQuickMessage('horario')">🕐 Horario de atención</button>
+          <button class="chat-option-btn" onclick="sendQuickMessage('entrega')">🚚 Tiempos de entrega</button>
+          <button class="chat-option-btn" onclick="sendQuickMessage('pago')">💳 Métodos de pago</button>
+          <button class="chat-option-btn" onclick="sendQuickMessage('contacto')">📞 Contactar vendedor</button>
+        </div>
+        <div class="chatbot-input">
+          <input
+            type="text"
+            class="chat-input"
+            id="chatInput"
+            placeholder="Escribe tu pregunta..."
+            onkeypress="if(event.key==='Enter') sendChatMessage()"
+          />
+          <button class="chat-send" onclick="sendChatMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="whatsappProcessModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">📱 Procesar Pedido de WhatsApp</h2>
+          <button class="close-modal" onclick="closeModal('whatsappProcessModal')">&times;</button>
+        </div>
+        <div style="background: var(--light); padding: 15px; border-radius: 10px; margin-bottom: 20px">
+          <p style="font-size: 14px; color: #6b7280">
+            💡 <strong>Instrucciones:</strong> Copia y pega el mensaje completo del pedido que recibiste por WhatsApp. El sistema
+            detectará automáticamente el cliente, productos y totales.
+          </p>
+        </div>
+        <textarea
+          class="form-textarea"
+          id="modalWhatsappInput"
+          style="min-height: 200px; font-family: 'Courier New', monospace"
+          placeholder="Pega aquí el mensaje de WhatsApp..."
+        ></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px">
+          <button class="btn-primary" onclick="processWhatsAppFromModal()">🔍 Procesar Pedido</button>
+          <button class="btn-primary btn-danger" onclick="closeModal('whatsappProcessModal')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="cartModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">🛒 Carrito de Compras</h2>
+          <button class="close-modal" onclick="closeModal('cartModal')">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+          <div class="empty-state">
+            <div class="empty-state-icon">🛒</div>
+            <p>Tu carrito está vacío</p>
+          </div>
+        </div>
+        <div id="clientForm" style="display: none">
+          <h3 style="margin: 20px 0 15px">Información de Contacto</h3>
+          <div class="form-group">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-input" id="clientName" placeholder="Nombre del cliente" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input type="text" class="form-input" id="clientWhatsApp" placeholder="50688888888" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Correo Electrónico</label>
+            <input type="email" class="form-input" id="clientEmail" placeholder="correo@ejemplo.com" />
+          </div>
+        </div>
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="cartSubtotal">₡0</span>
+          </div>
+          <div class="summary-row">
+            <span>Impuestos (13%)</span>
+            <span id="cartTaxes">₡0</span>
+          </div>
+          <div class="summary-row summary-total">
+            <span>Total</span>
+            <span id="cartTotal">₡0</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 15px">
+            <button class="btn-primary btn-success" onclick="checkout()">Confirmar Pedido</button>
+            <button class="btn-primary btn-whatsapp" onclick="sendCartWhatsApp()">Enviar por WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="productModal">
+      <div class="modal-content" style="max-width: 500px">
+        <div class="modal-header">
+          <h2 class="modal-title" id="productModalTitle">➕ Agregar Producto</h2>
+          <button class="close-modal" onclick="closeModal('productModal')">&times;</button>
+        </div>
+        <form id="productForm" onsubmit="saveProduct(event)">
+          <div class="image-upload-section">
+            <p style="margin-bottom: 10px">📸 Imagen del producto</p>
+            <input type="url" class="form-input" id="productImage" placeholder="https://ejemplo.com/imagen.jpg" />
+            <input type="file" id="productImageFile" accept="image/*" style="display: none" onchange="handleProductImage(event)" />
+            <div style="margin-top: 10px">
+              <button type="button" class="btn-primary" onclick="document.getElementById('productImageFile').click()">Subir Imagen</button>
+              <button type="button" class="btn-primary btn-danger" onclick="removeProductImage()" style="margin-left: 10px">Eliminar Imagen</button>
+            </div>
+            <img src="" alt="" id="productImagePreview" class="image-preview" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre del Producto *</label>
+            <input type="text" class="form-input" id="productName" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoría *</label>
+            <select class="form-select" id="productCategory" required>
+              <option value="">Selecciona una categoría</option>
+              <option value="Alimentos">Alimentos</option>
+              <option value="Bebidas">Bebidas</option>
+              <option value="Tecnología">Tecnología</option>
+              <option value="Hogar">Hogar</option>
+              <option value="Ropa">Ropa</option>
+              <option value="Salud">Salud</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-textarea" id="productDescription"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Precio *</label>
+            <input type="number" class="form-input" id="productPrice" required min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock *</label>
+            <input type="number" class="form-input" id="productStock" required min="0" />
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%">Guardar Producto</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="adminModal">
+      <div class="modal-content" style="max-width: 400px">
+        <div class="modal-header">
+          <h2 class="modal-title">🔐 Acceso Administrativo</h2>
+          <button class="close-modal" onclick="closeModal('adminModal')">&times;</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input
+            type="password"
+            class="form-input"
+            id="adminPassword"
+            placeholder="Ingresa la contraseña"
+            onkeypress="if(event.key==='Enter') login()"
+          />
+        </div>
+        <button class="btn-primary" onclick="login()" style="width: 100%">Ingresar</button>
+        <p style="margin-top: 15px; text-align: center; color: #6b7280; font-size: 14px">Contraseña por defecto: admin123</p>
+      </div>
+    </div>
+
+    <script src="./js/catalogo.js"></script>
+  </body>
+</html>
