@@ -2,6 +2,7 @@
 // Controla toda la lógica interactiva del módulo de costos.
 
 import { getCurrentUser } from "../../../lib/authGuard.js";
+import { supabaseClient } from "../../../lib/supabaseClient.js";
 
 const STORAGE_KEYS = {
   products: "costosModuleProducts",
@@ -318,8 +319,7 @@ const elements = {
 
 let toastTimeoutId = null;
 
-const SUPABASE_ENABLED = false;
-const supabaseClient = null;
+const SUPABASE_ENABLED = true;
 
 function canUseSupabase() {
   return (
