@@ -2,7 +2,6 @@
 // Controla toda la lógica interactiva del módulo de costos.
 
 import bcrypt from "https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm";
-import { supabaseClient } from "../../../lib/supabaseClient.js";
 import { getCurrentUser } from "../../../lib/authGuard.js";
 
 const STORAGE_KEYS = {
@@ -319,6 +318,9 @@ const elements = {
 };
 
 let toastTimeoutId = null;
+
+const SUPABASE_ENABLED = false;
+const supabaseClient = null;
 
 const SUPABASE_TABLES = {
   products: "productos",
@@ -987,6 +989,10 @@ function handlePageConfigSubmit(event) {
 
 // Determina si se debe intentar sincronizar con Supabase.
 function shouldSyncWithSupabase() {
+  if (!SUPABASE_ENABLED) {
+    return false;
+  }
+
   return Boolean(state.remoteUser && state.remoteUser.id);
 }
 
@@ -1140,6 +1146,11 @@ async function bootstrapRemoteUser() {
     const numericId = Number(currentUser.userId);
     const resolvedId = Number.isNaN(numericId) ? currentUser.userId : numericId;
     state.remoteUser = { id: resolvedId, username: currentUser.username };
+    return;
+  }
+
+  if (!SUPABASE_ENABLED) {
+    state.remoteUser = null;
     return;
   }
 
