@@ -63,45 +63,6 @@ body {
   color: #ffffff;
 }
 
-.dashboard-kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
-}
-
-.kpi-card {
-  background: linear-gradient(135deg, #ede9fe, #e0f2fe);
-  border: 1px solid #c4b5fd;
-  border-radius: 20px;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  color: #1e1b4b;
-  overflow: hidden;
-}
-
-.kpi-card__header {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.kpi-label {
-  margin: 0;
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(30, 27, 75, 0.72);
-}
-
-.kpi-subtitle {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #312e81;
-  font-weight: 600;
-}
-
 .modules-grid {
   display: grid;
   gap: 24px;
