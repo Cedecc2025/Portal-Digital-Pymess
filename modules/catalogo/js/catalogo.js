@@ -1,4 +1,4 @@
-        // App State
+// App State
         let appData = {
             settings: {
                 businessName: 'Mi Negocio',
@@ -1832,5 +1832,3 @@
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('show');
         }
-    </script>
-</body>
