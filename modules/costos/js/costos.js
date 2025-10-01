@@ -180,6 +180,26 @@ function getCategoryDisplayName(type, categoryId) {
 
 const DEFAULT_EXCHANGE_RATE = 520;
 
+function safeJsonParse(rawValue, fallbackValue, contextLabel) {
+  if (!rawValue) {
+    return fallbackValue;
+  }
+
+  try {
+    const parsedValue = JSON.parse(rawValue);
+
+    if (parsedValue === null || typeof parsedValue === "undefined") {
+      return fallbackValue;
+    }
+
+    return parsedValue;
+  } catch (error) {
+    const label = contextLabel ? ` (${contextLabel})` : "";
+    console.warn(`No fue posible interpretar los datos guardados${label}.`, error);
+    return fallbackValue;
+  }
+}
+
 const state = {
   currentCurrency: "CRC",
   exchangeRate: DEFAULT_EXCHANGE_RATE,
@@ -373,20 +393,23 @@ function loadPersistedData() {
     getScopedStorageKey(STORAGE_KEYS.pageConfig)
   );
 
-  if (products) {
-    state.products = JSON.parse(products);
+  const parsedProducts = safeJsonParse(products, [], "productos");
+  if (Array.isArray(parsedProducts)) {
+    state.products = parsedProducts;
   }
 
-  if (costs) {
-    state.fixedCosts = JSON.parse(costs);
+  const parsedCosts = safeJsonParse(costs, [], "costos fijos");
+  if (Array.isArray(parsedCosts)) {
+    state.fixedCosts = parsedCosts;
   }
 
-  if (transactions) {
-    state.transactions = JSON.parse(transactions);
+  const parsedTransactions = safeJsonParse(transactions, [], "transacciones");
+  if (Array.isArray(parsedTransactions)) {
+    state.transactions = parsedTransactions;
   }
 
-  if (preferences) {
-    const parsedPreferences = JSON.parse(preferences);
+  const parsedPreferences = safeJsonParse(preferences, {}, "preferencias");
+  if (parsedPreferences && typeof parsedPreferences === "object") {
     state.currentCurrency = parsedPreferences.currency ?? state.currentCurrency;
     state.exchangeRate = parsedPreferences.exchangeRate ?? state.exchangeRate;
     state.selectedMonth = parsedPreferences.selectedMonth ?? state.selectedMonth;
