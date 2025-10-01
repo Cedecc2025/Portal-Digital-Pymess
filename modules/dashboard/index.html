@@ -6,7 +6,6 @@
     <title>Dashboard - Sistema Modular</title>
     <link rel="stylesheet" href="../../public/css/global.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
-    <link rel="stylesheet" href="./css/dashboard-carousel.css" />
   </head>
   <body>
     <main class="dashboard-container">
@@ -19,73 +18,6 @@
           <button id="logoutButton" class="logout-button">Cerrar sesión</button>
         </div>
       </header>
-
-      <section class="dashboard-kpis">
-        <section
-          class="tasks-card"
-          id="tasksCarousel"
-          role="region"
-          aria-label="Tareas asignadas"
-          data-ready="false"
-        >
-          <header class="tasks-card__header">
-            <div class="tasks-card__intro">
-              <p class="kpi-label">Tareas asignadas</p>
-              <h2 class="tasks-card__title">Planifica tu siguiente movimiento</h2>
-              <p class="tasks-card__subtitle">
-                Monitorea responsables, prioridades y fechas límite sin salir del dashboard.
-              </p>
-            </div>
-            <a class="tasks-card__cta" id="tasksCarouselAllButton" href="../tareas/index.html">
-              Ver todas las tareas
-            </a>
-          </header>
-          <div class="tasks-card__inner">
-            <button
-              class="carousel-btn prev"
-              id="tasksCarouselPrev"
-              type="button"
-              aria-label="Anterior"
-              data-carousel-prev
-              disabled
-            >
-              &#10094;
-            </button>
-            <div
-              class="carousel-viewport"
-              id="tasksCarouselViewport"
-              data-carousel-viewport
-              tabindex="0"
-              role="group"
-              aria-roledescription="carrusel"
-              aria-live="polite"
-            >
-              <ul
-                class="carousel-track"
-                id="tasksCarouselTrack"
-                data-carousel-track
-                role="list"
-              ></ul>
-              <p class="carousel-status" id="tasksCarouselStatus" data-carousel-status>
-                Cargando tus tareas...
-              </p>
-            </div>
-            <button
-              class="carousel-btn next"
-              id="tasksCarouselNext"
-              type="button"
-              aria-label="Siguiente"
-              data-carousel-next
-              disabled
-            >
-              &#10095;
-            </button>
-            <div class="carousel-indicators" id="tasksCarouselIndicators" aria-hidden="true">
-              <span class="counter"><span class="current">1</span> / <span class="total">0</span></span>
-            </div>
-          </div>
-        </section>
-      </section>
 
       <section class="modules-grid">
         <a class="module-card" href="../costos/index.html" data-module="costos">
@@ -102,7 +34,6 @@
     </main>
     <script type="module" src="../../lib/supabaseClient.js"></script>
     <script type="module" src="../../lib/authGuard.js"></script>
-    <script type="module" src="./js/dashboard-carousel.js"></script>
     <script type="module" src="./js/dashboard.js"></script>
   </body>
 </html>
