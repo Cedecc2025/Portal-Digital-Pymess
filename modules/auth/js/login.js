@@ -38,6 +38,11 @@ const ACTIVE_MODULES = [
     name: "Gestión de Tareas",
     description: "Organiza pendientes, responsables y fechas límite por proyecto.",
     icon: "🗒️"
+  },
+  {
+    name: "Catálogo Digital",
+    description: "Gestiona productos, pedidos y asistencia virtual en un solo lugar.",
+    icon: "🛍️"
   }
 ];
 const KPI_ROTATION_INTERVAL = 1400;
