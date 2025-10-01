@@ -1,7 +1,6 @@
 // costos.js
 // Controla toda la lógica interactiva del módulo de costos.
 
-import bcrypt from "https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm";
 import { getCurrentUser } from "../../../lib/authGuard.js";
 
 const STORAGE_KEYS = {
@@ -322,6 +321,34 @@ let toastTimeoutId = null;
 const SUPABASE_ENABLED = false;
 const supabaseClient = null;
 
+function canUseSupabase() {
+  return (
+    SUPABASE_ENABLED &&
+    supabaseClient &&
+    typeof supabaseClient === "object" &&
+    typeof supabaseClient.from === "function"
+  );
+}
+
+async function compareSupabasePassword(plainPassword, storedHash) {
+  if (typeof storedHash !== "string" || storedHash.length === 0) {
+    return false;
+  }
+
+  // Si en algún momento se habilita la integración con Supabase y se dispone de
+  // bcrypt en el entorno, se podría reemplazar esta implementación por una
+  // verificación completa. Mientras tanto, se admite que la contraseña se
+  // encuentre en texto plano para entornos locales sin dependencias externas.
+  if (storedHash.startsWith("$2")) {
+    console.warn(
+      "Se recibió un hash bcrypt pero no hay soporte disponible sin dependencias externas."
+    );
+    return false;
+  }
+
+  return plainPassword === storedHash;
+}
+
 const SUPABASE_TABLES = {
   products: "productos",
   fixedCosts: "costos_fijos",
@@ -576,7 +603,7 @@ async function validateAdminPassword(password) {
 
   const currentUser = getCurrentUser();
 
-  if (currentUser?.username) {
+  if (canUseSupabase() && currentUser?.username) {
     try {
       const { data, error } = await supabaseClient
         .from(SUPABASE_TABLES.users)
@@ -589,7 +616,7 @@ async function validateAdminPassword(password) {
       }
 
       if (data?.password) {
-        return bcrypt.compare(password, data.password);
+        return compareSupabasePassword(password, data.password);
       }
     } catch (error) {
       console.warn(
@@ -989,7 +1016,7 @@ function handlePageConfigSubmit(event) {
 
 // Determina si se debe intentar sincronizar con Supabase.
 function shouldSyncWithSupabase() {
-  if (!SUPABASE_ENABLED) {
+  if (!canUseSupabase()) {
     return false;
   }
 
@@ -1149,7 +1176,7 @@ async function bootstrapRemoteUser() {
     return;
   }
 
-  if (!SUPABASE_ENABLED) {
+  if (!canUseSupabase()) {
     state.remoteUser = null;
     return;
   }
