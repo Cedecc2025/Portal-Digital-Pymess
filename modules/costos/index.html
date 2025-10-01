@@ -20,9 +20,9 @@
                 <rect x="4" y="2" width="16" height="20" rx="2"></rect>
                 <path d="M8 7h8M8 12h8M8 17h6"></path>
               </svg>
-              Sistema de Gestión Financiera
+              <span id="pageTitle">Sistema de Gestión Financiera</span>
             </h1>
-            <p class="subtitle">
+            <p class="subtitle" id="pageSubtitle">
               Gestiona costos, calcula punto de equilibrio y controla tu flujo de
               caja
             </p>
@@ -69,6 +69,13 @@
                 </div>
               </div>
             </div>
+            <button id="manageCategoriesBtn" class="btn btn-secondary hidden" type="button">
+              🗂️ Categorías
+            </button>
+            <button id="pageConfigBtn" class="btn btn-secondary hidden" type="button">
+              ⚙️ Configuración
+            </button>
+            <button id="adminToggle" class="btn btn-link" type="button">🔒 Admin</button>
             <button id="logoutButton" class="btn btn-logout" type="button">
               🚪 Cerrar sesión
             </button>
@@ -341,6 +348,108 @@
             <div id="recomendaciones"></div>
           </section>
         </div>
+      </div>
+    </div>
+
+    <div class="modal hidden" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2 id="adminModalTitle">Acceso de administrador</h2>
+          <button class="modal-close" type="button" data-close-modal="adminModal" aria-label="Cerrar">✖️</button>
+        </header>
+        <form id="adminForm" class="modal-body">
+          <p class="modal-description">
+            Ingresa la contraseña de tu cuenta para habilitar las herramientas avanzadas del módulo.
+          </p>
+          <label class="form-group" for="adminPassword">
+            <span>Contraseña</span>
+            <input type="password" id="adminPassword" autocomplete="current-password" required />
+          </label>
+          <p id="adminModalFeedback" class="modal-feedback" role="alert"></p>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" type="button" data-close-modal="adminModal">Cancelar</button>
+            <button class="btn" type="submit">Desbloquear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal hidden" id="categoryModal" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+      <div class="modal-content modal-lg">
+        <header class="modal-header">
+          <h2 id="categoryModalTitle">Gestionar categorías</h2>
+          <button class="modal-close" type="button" data-close-modal="categoryModal" aria-label="Cerrar">✖️</button>
+        </header>
+        <div class="modal-body">
+          <p class="modal-description">
+            Personaliza las categorías disponibles para tus registros de ingresos y egresos.
+          </p>
+          <div class="category-manager">
+            <section>
+              <header class="category-manager__header">
+                <h3>Ingresos</h3>
+                <form id="incomeCategoryForm" class="category-form">
+                  <input
+                    type="text"
+                    id="incomeCategoryName"
+                    placeholder="Nombre de la categoría"
+                    autocomplete="off"
+                    required
+                  />
+                  <button class="btn" type="submit">➕ Agregar</button>
+                </form>
+              </header>
+              <div id="incomeCategoryList" class="category-list"></div>
+            </section>
+            <section>
+              <header class="category-manager__header">
+                <h3>Egresos</h3>
+                <form id="expenseCategoryForm" class="category-form">
+                  <input
+                    type="text"
+                    id="expenseCategoryName"
+                    placeholder="Nombre de la categoría"
+                    autocomplete="off"
+                    required
+                  />
+                  <button class="btn" type="submit">➕ Agregar</button>
+                </form>
+              </header>
+              <div id="expenseCategoryList" class="category-list"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal hidden" id="pageConfigModal" role="dialog" aria-modal="true" aria-labelledby="pageConfigModalTitle">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2 id="pageConfigModalTitle">Configuración de la página</h2>
+          <button class="modal-close" type="button" data-close-modal="pageConfigModal" aria-label="Cerrar">✖️</button>
+        </header>
+        <form id="pageConfigForm" class="modal-body">
+          <p class="modal-description">
+            Define los textos principales que se muestran en el encabezado de la plataforma.
+          </p>
+          <label class="form-group" for="pageTitleInput">
+            <span>Título principal</span>
+            <input type="text" id="pageTitleInput" placeholder="Ej: Sistema de Gestión Financiera" required />
+          </label>
+          <label class="form-group" for="pageSubtitleInput">
+            <span>Descripción</span>
+            <input
+              type="text"
+              id="pageSubtitleInput"
+              placeholder="Ej: Gestiona costos y flujo de caja desde un solo lugar"
+              required
+            />
+          </label>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" type="button" data-close-modal="pageConfigModal">Cancelar</button>
+            <button class="btn" type="submit">Guardar cambios</button>
+          </div>
+        </form>
       </div>
     </div>
 

@@ -1,6 +1,7 @@
 // costos.js
 // Controla toda la lógica interactiva del módulo de costos.
 
+import bcrypt from "https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm";
 import { supabaseClient } from "../../../lib/supabaseClient.js";
 import { getCurrentUser } from "../../../lib/authGuard.js";
 
@@ -8,8 +9,174 @@ const STORAGE_KEYS = {
   products: "costosModuleProducts",
   costs: "costosModuleFixedCosts",
   transactions: "costosModuleTransactions",
-  preferences: "costosModulePreferences"
+  preferences: "costosModulePreferences",
+  transactionCategories: "costosModuleTransactionCategories",
+  pageConfig: "costosModulePageConfig"
 };
+
+const DEFAULT_ADMIN_PASSWORD = "admin123";
+
+const DEFAULT_TRANSACTION_CATEGORIES = {
+  ingreso: [
+    { id: "venta", name: "Venta" },
+    { id: "servicio", name: "Servicio" },
+    { id: "otro", name: "Otro" }
+  ],
+  egreso: [
+    { id: "compra", name: "Compra" },
+    { id: "salario", name: "Salario" },
+    { id: "alquiler", name: "Alquiler" },
+    { id: "servicios", name: "Servicios" },
+    { id: "otro", name: "Otro" }
+  ]
+};
+
+const DEFAULT_PAGE_CONFIG = {
+  title: "Sistema de Gestión Financiera",
+  subtitle: "Gestiona tus costos, flujo de caja y análisis financiero desde un único panel."
+};
+
+function cloneTransactionCategories() {
+  return {
+    ingreso: DEFAULT_TRANSACTION_CATEGORIES.ingreso.map((category) => ({ ...category })),
+    egreso: DEFAULT_TRANSACTION_CATEGORIES.egreso.map((category) => ({ ...category }))
+  };
+}
+
+function clonePageConfig() {
+  return { ...DEFAULT_PAGE_CONFIG };
+}
+
+function sanitizeCategoryList(list, fallback) {
+  if (!Array.isArray(list) || list.length === 0) {
+    return fallback.map((category) => ({ ...category }));
+  }
+
+  const seen = new Set();
+  const sanitized = [];
+
+  list.forEach((item) => {
+    if (!item || typeof item !== "object") {
+      return;
+    }
+
+    const rawId = typeof item.id === "string" ? item.id.trim() : "";
+    const rawName = typeof item.name === "string" ? item.name.trim() : "";
+
+    if (!rawId || !rawName || seen.has(rawId)) {
+      return;
+    }
+
+    sanitized.push({ id: rawId, name: rawName });
+    seen.add(rawId);
+  });
+
+  if (sanitized.length === 0) {
+    return fallback.map((category) => ({ ...category }));
+  }
+
+  return sanitized;
+}
+
+function sanitizeTransactionCategories(rawValue) {
+  return {
+    ingreso: sanitizeCategoryList(
+      rawValue?.ingreso ?? [],
+      DEFAULT_TRANSACTION_CATEGORIES.ingreso
+    ),
+    egreso: sanitizeCategoryList(
+      rawValue?.egreso ?? [],
+      DEFAULT_TRANSACTION_CATEGORIES.egreso
+    )
+  };
+}
+
+function sanitizePageConfig(rawValue) {
+  if (!rawValue || typeof rawValue !== "object") {
+    return clonePageConfig();
+  }
+
+  const title = typeof rawValue.title === "string" ? rawValue.title.trim() : "";
+  const subtitle =
+    typeof rawValue.subtitle === "string" ? rawValue.subtitle.trim() : "";
+
+  return {
+    title: title || DEFAULT_PAGE_CONFIG.title,
+    subtitle: subtitle || DEFAULT_PAGE_CONFIG.subtitle
+  };
+}
+
+function getCategoriesForType(type) {
+  const normalizedType = type === "egreso" ? "egreso" : "ingreso";
+  const categories = state.transactionCategories?.[normalizedType];
+
+  if (Array.isArray(categories) && categories.length > 0) {
+    return categories;
+  }
+
+  state.transactionCategories[normalizedType] = cloneTransactionCategories()[normalizedType];
+  return state.transactionCategories[normalizedType];
+}
+
+function slugifyCategoryName(name, type) {
+  const fallbackBase = `${type}-categoria`;
+  const normalized = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const base = normalized || fallbackBase;
+  const categories = getCategoriesForType(type);
+  const existingIds = new Set(categories.map((category) => category.id));
+  let candidate = base;
+  let suffix = 1;
+
+  while (existingIds.has(candidate)) {
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
+
+  return candidate;
+}
+
+function ensureCategoryPresence(type, categoryId) {
+  if (!categoryId) {
+    return;
+  }
+
+  const categories = getCategoriesForType(type);
+
+  if (categories.some((category) => category.id === categoryId)) {
+    return;
+  }
+
+  const formattedName = categoryId
+    .toString()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^./, (char) => char.toUpperCase());
+
+  categories.push({ id: categoryId, name: formattedName || "Personalizada" });
+}
+
+function getCategoryDisplayName(type, categoryId) {
+  if (!categoryId) {
+    return "";
+  }
+
+  const categories = getCategoriesForType(type);
+  const category = categories.find((entry) => entry.id === categoryId);
+
+  if (category) {
+    return category.name;
+  }
+
+  ensureCategoryPresence(type, categoryId);
+  const fallbackCategories = getCategoriesForType(type);
+  const fallback = fallbackCategories.find((entry) => entry.id === categoryId);
+  return fallback ? fallback.name : categoryId;
+}
 
 const DEFAULT_EXCHANGE_RATE = 520;
 
@@ -21,6 +188,9 @@ const state = {
   transactions: [],
   selectedMonth: "",
   remoteUser: null,
+  isAdmin: false,
+  transactionCategories: cloneTransactionCategories(),
+  pageConfig: clonePageConfig(),
   editingProductId: null,
   editingCostId: null,
   editingTransactionId: null,
@@ -45,7 +215,11 @@ const elements = {
   exchangeInput: null,
   exchangeUsdLabel: null,
   logoutButton: null,
+  adminToggle: null,
+  manageCategoriesButton: null,
+  pageConfigButton: null,
   headerSubtitle: null,
+  headerTitle: null,
   monthInput: null,
   ingresosLabel: null,
   egresosLabel: null,
@@ -93,6 +267,29 @@ const elements = {
     moneda: null,
     monto: null,
     categoria: null
+  },
+  adminModal: null,
+  adminForm: null,
+  adminPasswordInput: null,
+  adminFeedback: null,
+  categoryModal: null,
+  categoryLists: {
+    ingreso: null,
+    egreso: null
+  },
+  categoryForms: {
+    ingreso: null,
+    egreso: null
+  },
+  categoryInputs: {
+    ingreso: null,
+    egreso: null
+  },
+  pageConfigModal: null,
+  pageConfigForm: null,
+  pageConfigFields: {
+    title: null,
+    subtitle: null
   },
   charts: {
     flujo: null,
@@ -169,6 +366,12 @@ function loadPersistedData() {
   const costs = window.localStorage.getItem(getScopedStorageKey(STORAGE_KEYS.costs));
   const transactions = window.localStorage.getItem(getScopedStorageKey(STORAGE_KEYS.transactions));
   const preferences = window.localStorage.getItem(getScopedStorageKey(STORAGE_KEYS.preferences));
+  const categories = window.localStorage.getItem(
+    getScopedStorageKey(STORAGE_KEYS.transactionCategories)
+  );
+  const pageConfig = window.localStorage.getItem(
+    getScopedStorageKey(STORAGE_KEYS.pageConfig)
+  );
 
   if (products) {
     state.products = JSON.parse(products);
@@ -188,6 +391,34 @@ function loadPersistedData() {
     state.exchangeRate = parsedPreferences.exchangeRate ?? state.exchangeRate;
     state.selectedMonth = parsedPreferences.selectedMonth ?? state.selectedMonth;
   }
+
+  if (categories) {
+    try {
+      const parsedCategories = JSON.parse(categories);
+      state.transactionCategories = sanitizeTransactionCategories(parsedCategories);
+    } catch (error) {
+      console.warn("No fue posible leer las categorías guardadas.", error);
+      state.transactionCategories = cloneTransactionCategories();
+    }
+  } else {
+    state.transactionCategories = cloneTransactionCategories();
+  }
+
+  if (pageConfig) {
+    try {
+      const parsedPageConfig = JSON.parse(pageConfig);
+      state.pageConfig = sanitizePageConfig(parsedPageConfig);
+    } catch (error) {
+      console.warn("No fue posible leer la configuración de la página.", error);
+      state.pageConfig = clonePageConfig();
+    }
+  } else {
+    state.pageConfig = clonePageConfig();
+  }
+
+  state.transactions.forEach((transaction) => {
+    ensureCategoryPresence(transaction.tipo, transaction.categoria);
+  });
 }
 
 // Persiste los datos actuales en localStorage.
@@ -212,6 +443,14 @@ function persistData() {
       selectedMonth: state.selectedMonth
     })
   );
+  window.localStorage.setItem(
+    getScopedStorageKey(STORAGE_KEYS.transactionCategories),
+    JSON.stringify(state.transactionCategories)
+  );
+  window.localStorage.setItem(
+    getScopedStorageKey(STORAGE_KEYS.pageConfig),
+    JSON.stringify(state.pageConfig)
+  );
 }
 
 // Aplica los valores guardados sobre la interfaz.
@@ -229,6 +468,26 @@ function applyPreferencesToUI() {
 
   if (elements.monthInput) {
     elements.monthInput.value = state.selectedMonth;
+  }
+
+  applyPageConfig();
+}
+
+function applyPageConfig() {
+  const config = state.pageConfig ?? clonePageConfig();
+  const title = config.title || DEFAULT_PAGE_CONFIG.title;
+  const subtitle = config.subtitle || DEFAULT_PAGE_CONFIG.subtitle;
+
+  if (elements.headerTitle) {
+    elements.headerTitle.textContent = title;
+  }
+
+  if (elements.headerSubtitle) {
+    elements.headerSubtitle.textContent = subtitle;
+  }
+
+  if (typeof document !== "undefined") {
+    document.title = title;
   }
 }
 
@@ -257,6 +516,450 @@ function hideToast() {
   }
 
   elements.loadingBanner.classList.add("hidden");
+}
+
+function openModal(modalElement) {
+  if (!modalElement) {
+    return;
+  }
+
+  modalElement.classList.remove("hidden");
+}
+
+function closeModal(modalElement) {
+  if (!modalElement) {
+    return;
+  }
+
+  modalElement.classList.add("hidden");
+}
+
+function resetAdminModal() {
+  if (elements.adminFeedback) {
+    elements.adminFeedback.textContent = "";
+  }
+
+  if (elements.adminPasswordInput) {
+    elements.adminPasswordInput.value = "";
+  }
+}
+
+async function validateAdminPassword(password) {
+  if (!password) {
+    return false;
+  }
+
+  const currentUser = getCurrentUser();
+
+  if (currentUser?.username) {
+    try {
+      const { data, error } = await supabaseClient
+        .from(SUPABASE_TABLES.users)
+        .select("password")
+        .eq("username", currentUser.username)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.password) {
+        return bcrypt.compare(password, data.password);
+      }
+    } catch (error) {
+      console.warn(
+        "No fue posible validar la contraseña con Supabase. Se usará la contraseña predeterminada.",
+        error
+      );
+    }
+  }
+
+  return password === DEFAULT_ADMIN_PASSWORD;
+}
+
+function updateAdminUI() {
+  if (typeof document !== "undefined") {
+    document.body.classList.toggle("admin-mode", state.isAdmin);
+  }
+
+  if (elements.adminToggle) {
+    elements.adminToggle.textContent = state.isAdmin ? "🔓 Admin" : "🔒 Admin";
+    elements.adminToggle.setAttribute("aria-pressed", state.isAdmin ? "true" : "false");
+  }
+
+  const shouldShowAdmin = state.isAdmin;
+
+  if (elements.manageCategoriesButton) {
+    elements.manageCategoriesButton.classList.toggle("hidden", !shouldShowAdmin);
+  }
+
+  if (elements.pageConfigButton) {
+    elements.pageConfigButton.classList.toggle("hidden", !shouldShowAdmin);
+  }
+}
+
+function enterAdminMode() {
+  state.isAdmin = true;
+  updateAdminUI();
+  closeModal(elements.adminModal);
+  showToast("Modo administrador activado");
+}
+
+function exitAdminMode(requireConfirmation = true) {
+  if (!state.isAdmin) {
+    return;
+  }
+
+  if (requireConfirmation) {
+    const confirmed = window.confirm("¿Deseas cerrar la sesión de administrador?");
+
+    if (!confirmed) {
+      return;
+    }
+  }
+
+  state.isAdmin = false;
+  updateAdminUI();
+  closeModal(elements.categoryModal);
+  closeModal(elements.pageConfigModal);
+  showToast("Modo administrador desactivado");
+}
+
+async function attemptAdminLogin(event) {
+  event.preventDefault();
+
+  const password = elements.adminPasswordInput?.value ?? "";
+
+  if (!password) {
+    if (elements.adminFeedback) {
+      elements.adminFeedback.textContent = "Ingresa la contraseña para continuar.";
+    }
+    return;
+  }
+
+  try {
+    const isValid = await validateAdminPassword(password);
+
+    if (!isValid) {
+      if (elements.adminFeedback) {
+        elements.adminFeedback.textContent = "Contraseña incorrecta.";
+      }
+      return;
+    }
+
+    resetAdminModal();
+    enterAdminMode();
+  } catch (error) {
+    console.error("Error al validar el acceso de administrador.", error);
+    if (elements.adminFeedback) {
+      elements.adminFeedback.textContent =
+        "Ocurrió un problema al validar la contraseña. Intenta de nuevo.";
+    }
+  }
+}
+
+function requestAdminAccess() {
+  resetAdminModal();
+  openModal(elements.adminModal);
+
+  window.requestAnimationFrame(() => {
+    elements.adminPasswordInput?.focus();
+  });
+}
+
+function handleAdminToggle(event) {
+  event.preventDefault();
+
+  if (state.isAdmin) {
+    exitAdminMode(true);
+    return;
+  }
+
+  requestAdminAccess();
+}
+
+function renderCategoryManager() {
+  const incomeContainer = elements.categoryLists.ingreso;
+  const expenseContainer = elements.categoryLists.egreso;
+
+  if (!incomeContainer || !expenseContainer) {
+    return;
+  }
+
+  const types = [
+    { type: "ingreso", container: incomeContainer },
+    { type: "egreso", container: expenseContainer }
+  ];
+
+  types.forEach(({ type, container }) => {
+    container.innerHTML = "";
+    const categories = getCategoriesForType(type);
+
+    categories.forEach((category) => {
+      const item = document.createElement("div");
+      item.className = "category-item";
+
+      const badge = document.createElement("span");
+      badge.className = "category-item__badge";
+      badge.textContent = category.id;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = category.name;
+      input.setAttribute("data-category-input", "true");
+      input.dataset.categoryType = type;
+      input.dataset.categoryId = category.id;
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.dataset.categoryAction = "delete";
+      deleteButton.dataset.categoryType = type;
+      deleteButton.dataset.categoryId = category.id;
+      deleteButton.textContent = "Eliminar";
+
+      if (categories.length <= 1) {
+        deleteButton.disabled = true;
+        deleteButton.title = "Debe existir al menos una categoría.";
+      }
+
+      item.appendChild(badge);
+      item.appendChild(input);
+      item.appendChild(deleteButton);
+
+      container.appendChild(item);
+    });
+  });
+}
+
+function addTransactionCategory(type, name) {
+  const trimmedName = name.trim();
+
+  if (!trimmedName) {
+    showToast("Ingresa un nombre válido para la categoría.");
+    return;
+  }
+
+  const categories = getCategoriesForType(type);
+  const duplicate = categories.some(
+    (category) => category.name.toLowerCase() === trimmedName.toLowerCase()
+  );
+
+  if (duplicate) {
+    showToast("Ya existe una categoría con ese nombre.");
+    return;
+  }
+
+  const newId = slugifyCategoryName(trimmedName, type);
+  categories.push({ id: newId, name: trimmedName });
+  ensureCategoryPresence(type, newId);
+  persistData();
+  renderCategoryManager();
+
+  if (elements.transaccionesFields.tipo?.value === type) {
+    updateTransactionCategoryOptions(type, newId);
+  }
+
+  showToast("Categoría agregada correctamente.");
+  refrescarFlujoCaja();
+}
+
+function removeTransactionCategory(type, categoryId) {
+  const categories = getCategoriesForType(type);
+
+  if (categories.length <= 1) {
+    showToast("Debe existir al menos una categoría.");
+    return;
+  }
+
+  const index = categories.findIndex((category) => category.id === categoryId);
+
+  if (index === -1) {
+    return;
+  }
+
+  categories.splice(index, 1);
+  const fallbackId = categories[0]?.id ?? null;
+
+  if (fallbackId) {
+    state.transactions = state.transactions.map((transaction) => {
+      if (transaction.tipo === type && transaction.categoria === categoryId) {
+        return { ...transaction, categoria: fallbackId };
+      }
+
+      return transaction;
+    });
+  }
+
+  persistData();
+  renderCategoryManager();
+
+  if (elements.transaccionesFields.tipo?.value === type) {
+    updateTransactionCategoryOptions(type, fallbackId);
+  }
+
+  refrescarFlujoCaja();
+  showToast("Categoría eliminada.");
+}
+
+function updateCategoryName(type, categoryId, newName) {
+  const trimmedName = newName.trim();
+
+  if (!trimmedName) {
+    showToast("El nombre de la categoría no puede estar vacío.");
+    renderCategoryManager();
+    return;
+  }
+
+  const categories = getCategoriesForType(type);
+  const duplicate = categories.some(
+    (category) => category.id !== categoryId && category.name.toLowerCase() === trimmedName.toLowerCase()
+  );
+
+  if (duplicate) {
+    showToast("Ya existe una categoría con ese nombre.");
+    renderCategoryManager();
+    return;
+  }
+
+  const target = categories.find((category) => category.id === categoryId);
+
+  if (!target) {
+    return;
+  }
+
+  target.name = trimmedName;
+  persistData();
+  renderCategoryManager();
+
+  if (elements.transaccionesFields.tipo?.value === type) {
+    updateTransactionCategoryOptions(type, categoryId);
+  }
+
+  refrescarFlujoCaja();
+  showToast("Categoría actualizada.");
+}
+
+function handleCategoryAdd(event, type) {
+  event.preventDefault();
+
+  if (!state.isAdmin) {
+    showToast("Debes activar el modo administrador para modificar categorías.");
+    return;
+  }
+
+  const input = type === "ingreso" ? elements.categoryInputs.ingreso : elements.categoryInputs.egreso;
+
+  if (!input) {
+    return;
+  }
+
+  addTransactionCategory(type, input.value);
+  input.value = "";
+  input.focus();
+}
+
+function handleCategoryNameChange(event) {
+  const input = event.target.closest("[data-category-input]");
+
+  if (!input) {
+    return;
+  }
+
+  if (!state.isAdmin) {
+    renderCategoryManager();
+    return;
+  }
+
+  const type = input.dataset.categoryType;
+  const categoryId = input.dataset.categoryId;
+
+  updateCategoryName(type, categoryId, input.value);
+}
+
+function handleCategoryListClick(event) {
+  const deleteButton = event.target.closest("[data-category-action="delete"]");
+
+  if (!deleteButton) {
+    return;
+  }
+
+  if (!state.isAdmin) {
+    showToast("Activa el modo administrador para modificar categorías.");
+    return;
+  }
+
+  const type = deleteButton.dataset.categoryType;
+  const categoryId = deleteButton.dataset.categoryId;
+
+  const confirmed = window.confirm("¿Deseas eliminar esta categoría?");
+
+  if (!confirmed) {
+    return;
+  }
+
+  removeTransactionCategory(type, categoryId);
+}
+
+function openCategoryModal() {
+  if (!state.isAdmin) {
+    requestAdminAccess();
+    return;
+  }
+
+  renderCategoryManager();
+  if (elements.categoryInputs.ingreso) {
+    elements.categoryInputs.ingreso.value = "";
+  }
+  if (elements.categoryInputs.egreso) {
+    elements.categoryInputs.egreso.value = "";
+  }
+  openModal(elements.categoryModal);
+  elements.categoryInputs.ingreso?.focus();
+}
+
+function openPageConfigModal() {
+  if (!state.isAdmin) {
+    requestAdminAccess();
+    return;
+  }
+
+  if (elements.pageConfigFields.title) {
+    elements.pageConfigFields.title.value = state.pageConfig.title;
+  }
+
+  if (elements.pageConfigFields.subtitle) {
+    elements.pageConfigFields.subtitle.value = state.pageConfig.subtitle;
+  }
+
+  openModal(elements.pageConfigModal);
+  elements.pageConfigFields.title?.focus();
+}
+
+function handlePageConfigSubmit(event) {
+  event.preventDefault();
+
+  if (!state.isAdmin) {
+    showToast("Debes activar el modo administrador para modificar la configuración.");
+    return;
+  }
+
+  const titleValue = elements.pageConfigFields.title?.value.trim() ?? "";
+  const subtitleValue = elements.pageConfigFields.subtitle?.value.trim() ?? "";
+
+  if (!titleValue || !subtitleValue) {
+    showToast("Completa ambos campos para guardar los cambios.");
+    return;
+  }
+
+  state.pageConfig = sanitizePageConfig({
+    title: titleValue,
+    subtitle: subtitleValue
+  });
+
+  persistData();
+  applyPageConfig();
+  closeModal(elements.pageConfigModal);
+  showToast("Configuración actualizada.");
 }
 
 // Determina si se debe intentar sincronizar con Supabase.
@@ -514,6 +1217,9 @@ async function syncTransactionsFromSupabase() {
       : [];
 
     state.transactions = mergeRemoteRecords(state.transactions, remoteTransactions);
+    state.transactions.forEach((transaction) => {
+      ensureCategoryPresence(transaction.tipo, transaction.categoria);
+    });
     persistData();
   } catch (error) {
     console.error("Error al sincronizar el flujo de caja con Supabase:", error);
@@ -588,33 +1294,25 @@ function updateTransactionCategoryOptions(transactionType, presetValue = null) {
     return;
   }
 
-  const ingresoOptions = [
-    { value: "venta", label: "Venta" },
-    { value: "servicio", label: "Servicio" },
-    { value: "otro", label: "Otro" }
-  ];
-  const egresoOptions = [
-    { value: "compra", label: "Compra" },
-    { value: "salario", label: "Salario" },
-    { value: "alquiler", label: "Alquiler" },
-    { value: "servicios", label: "Servicios" },
-    { value: "otro", label: "Otro" }
-  ];
+  const normalizedType = transactionType === "egreso" ? "egreso" : "ingreso";
+  const categories = getCategoriesForType(normalizedType);
 
-  const options = transactionType === "egreso" ? egresoOptions : ingresoOptions;
   categorySelect.innerHTML = "";
 
-  options.forEach((option) => {
+  categories.forEach((category) => {
     const optionElement = document.createElement("option");
-    optionElement.value = option.value;
-    optionElement.textContent = option.label;
+    optionElement.value = category.id;
+    optionElement.textContent = category.name;
     categorySelect.appendChild(optionElement);
   });
 
-  const desiredValue = presetValue ?? options[0].value;
-  categorySelect.value = options.some((option) => option.value === desiredValue)
-    ? desiredValue
-    : options[0].value;
+  const desiredValue = presetValue ?? categories[0]?.id ?? "";
+
+  if (desiredValue && categories.some((category) => category.id === desiredValue)) {
+    categorySelect.value = desiredValue;
+  } else if (categories[0]) {
+    categorySelect.value = categories[0].id;
+  }
 }
 
 // Obtiene el símbolo correspondiente a la moneda actual.
@@ -628,6 +1326,30 @@ function getCurrencySymbol() {
 // Maneja los clics realizados sobre la aplicación.
 function handleGlobalClick(event) {
   const dropdownButton = event.target.closest("[data-dropdown]");
+
+  const modalCloseButton = event.target.closest("[data-close-modal]");
+
+  if (modalCloseButton) {
+    event.preventDefault();
+    const modalId = modalCloseButton.dataset.closeModal;
+    if (modalId) {
+      const modalElement = document.getElementById(modalId);
+      closeModal(modalElement);
+      if (modalId === "adminModal") {
+        resetAdminModal();
+      }
+    }
+    return;
+  }
+
+  if (event.target.classList.contains("modal")) {
+    const modalElement = event.target;
+    closeModal(modalElement);
+    if (modalElement.id === "adminModal") {
+      resetAdminModal();
+    }
+    return;
+  }
 
   if (dropdownButton) {
     event.preventDefault();
@@ -1435,6 +2157,8 @@ async function guardarTransaccion() {
     return;
   }
 
+  ensureCategoryPresence(tipo, categoria);
+
   const isEditing = Boolean(state.editingTransactionId);
   const provisionalId = state.editingTransactionId ?? generateId();
   const transactionData = {
@@ -1756,10 +2480,11 @@ function refrescarFlujoCaja() {
       totalEgresos += converted;
     }
 
+    const categoryLabel = getCategoryDisplayName(transaction.tipo, transaction.categoria);
     const meta = document.createElement("div");
     meta.innerHTML = `
       <p><strong>Tipo:</strong> ${transaction.tipo}</p>
-      <p><strong>Categoría:</strong> ${transaction.categoria}</p>
+      <p><strong>Categoría:</strong> ${categoryLabel}</p>
       <p><strong>Monto:</strong> ${formatCurrency(converted)}</p>
     `;
 
@@ -2029,7 +2754,9 @@ function exportarDatos() {
       currency: state.currentCurrency,
       exchangeRate: state.exchangeRate,
       selectedMonth: state.selectedMonth
-    }
+    },
+    transactionCategories: state.transactionCategories,
+    pageConfig: state.pageConfig
   };
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -2066,8 +2793,24 @@ function importarDatos(event) {
         state.selectedMonth = content.preferences.selectedMonth ?? state.selectedMonth;
       }
 
+      if (content.transactionCategories) {
+        state.transactionCategories = sanitizeTransactionCategories(
+          content.transactionCategories
+        );
+      }
+
+      if (content.pageConfig) {
+        state.pageConfig = sanitizePageConfig(content.pageConfig);
+      }
+
+      state.transactions.forEach((transaction) => {
+        ensureCategoryPresence(transaction.tipo, transaction.categoria);
+      });
+
       persistData();
       applyPreferencesToUI();
+      const currentType = elements.transaccionesFields.tipo?.value ?? "ingreso";
+      updateTransactionCategoryOptions(currentType);
       refrescarTodosLosPaneles();
       showToast("Datos importados.");
     } catch (error) {
@@ -2086,7 +2829,12 @@ function limpiarDatos() {
     state.products = [];
     state.fixedCosts = [];
     state.transactions = [];
+    state.transactionCategories = cloneTransactionCategories();
+    state.pageConfig = clonePageConfig();
     persistData();
+    applyPageConfig();
+    const currentType = elements.transaccionesFields.tipo?.value ?? "ingreso";
+    updateTransactionCategoryOptions(currentType);
     refrescarTodosLosPaneles();
     showToast("Datos reiniciados.");
   }
@@ -2217,12 +2965,7 @@ function refrescarTodosLosPaneles() {
 
 // Configura el mensaje de contexto en el encabezado.
 function setupGreeting() {
-  if (!elements.headerSubtitle) {
-    return;
-  }
-
-  elements.headerSubtitle.textContent =
-    "Gestiona tus costos, flujo de caja y análisis financiero desde un único panel.";
+  applyPageConfig();
 }
 
 // Registra todos los listeners necesarios para la interfaz.
@@ -2249,6 +2992,35 @@ function registerEventListeners() {
   if (elements.fileInput) {
     elements.fileInput.addEventListener("change", importarDatos);
   }
+  if (elements.adminForm) {
+    elements.adminForm.addEventListener("submit", attemptAdminLogin);
+  }
+  if (elements.adminToggle) {
+    elements.adminToggle.addEventListener("click", handleAdminToggle);
+  }
+  if (elements.manageCategoriesButton) {
+    elements.manageCategoriesButton.addEventListener("click", openCategoryModal);
+  }
+  if (elements.pageConfigButton) {
+    elements.pageConfigButton.addEventListener("click", openPageConfigModal);
+  }
+  if (elements.categoryForms.ingreso) {
+    elements.categoryForms.ingreso.addEventListener("submit", (event) =>
+      handleCategoryAdd(event, "ingreso")
+    );
+  }
+  if (elements.categoryForms.egreso) {
+    elements.categoryForms.egreso.addEventListener("submit", (event) =>
+      handleCategoryAdd(event, "egreso")
+    );
+  }
+  if (elements.categoryModal) {
+    elements.categoryModal.addEventListener("change", handleCategoryNameChange);
+    elements.categoryModal.addEventListener("click", handleCategoryListClick);
+  }
+  if (elements.pageConfigForm) {
+    elements.pageConfigForm.addEventListener("submit", handlePageConfigSubmit);
+  }
 }
 
 // Obtiene y almacena las referencias a los elementos DOM relevantes.
@@ -2265,7 +3037,11 @@ function cacheElements() {
   elements.exchangeInput = document.querySelector("#tasaCambio");
   elements.exchangeUsdLabel = document.querySelector("#tasaDolar");
   elements.logoutButton = document.querySelector("#logoutButton");
-  elements.headerSubtitle = document.querySelector(".subtitle");
+  elements.adminToggle = document.querySelector("#adminToggle");
+  elements.manageCategoriesButton = document.querySelector("#manageCategoriesBtn");
+  elements.pageConfigButton = document.querySelector("#pageConfigBtn");
+  elements.headerTitle = document.querySelector("#pageTitle");
+  elements.headerSubtitle = document.querySelector("#pageSubtitle");
   elements.monthInput = document.querySelector("#mes-seleccionado");
   elements.ingresosLabel = document.querySelector("#flujo-ingresos");
   elements.egresosLabel = document.querySelector("#flujo-egresos");
@@ -2314,6 +3090,29 @@ function cacheElements() {
     monto: document.querySelector("#trans-monto"),
     categoria: document.querySelector("#trans-categoria")
   };
+  elements.adminModal = document.querySelector("#adminModal");
+  elements.adminForm = document.querySelector("#adminForm");
+  elements.adminPasswordInput = document.querySelector("#adminPassword");
+  elements.adminFeedback = document.querySelector("#adminModalFeedback");
+  elements.categoryModal = document.querySelector("#categoryModal");
+  elements.categoryLists = {
+    ingreso: document.querySelector("#incomeCategoryList"),
+    egreso: document.querySelector("#expenseCategoryList")
+  };
+  elements.categoryForms = {
+    ingreso: document.querySelector("#incomeCategoryForm"),
+    egreso: document.querySelector("#expenseCategoryForm")
+  };
+  elements.categoryInputs = {
+    ingreso: document.querySelector("#incomeCategoryName"),
+    egreso: document.querySelector("#expenseCategoryName")
+  };
+  elements.pageConfigModal = document.querySelector("#pageConfigModal");
+  elements.pageConfigForm = document.querySelector("#pageConfigForm");
+  elements.pageConfigFields = {
+    title: document.querySelector("#pageTitleInput"),
+    subtitle: document.querySelector("#pageSubtitleInput")
+  };
 }
 
 // Espera a que Chart.js esté disponible antes de crear gráficos.
@@ -2352,6 +3151,7 @@ async function initializeModule() {
 
   applyPreferencesToUI();
   setupGreeting();
+  updateAdminUI();
   registerEventListeners();
 
   await waitForChartLibrary();
