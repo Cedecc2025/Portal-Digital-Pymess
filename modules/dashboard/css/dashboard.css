@@ -3,12 +3,13 @@
  */
 
 :root {
-  --dashboard-spacing: 32px;
+  --dashboard-spacing: clamp(32px, 5vw, 56px);
   --surface-color: #ffffff;
   --surface-border: #e2e8f0;
   --surface-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
   --text-primary: #0f172a;
   --text-muted: #64748b;
+  --color-primary: #2563eb;
 }
 
 body {
@@ -38,6 +39,10 @@ body {
   background: var(--surface-color);
   border-radius: 24px;
   box-shadow: var(--surface-shadow);
+}
+
+.dashboard-header + .dashboard-grid {
+  margin-top: 16px;
 }
 
 .welcome {
@@ -115,6 +120,7 @@ body {
 
 .button--compact {
   padding: 10px 20px;
+  min-width: 160px;
 }
 
 .button__icon {
@@ -127,7 +133,7 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: var(--dashboard-spacing);
   align-items: start;
 }
@@ -171,20 +177,22 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
+  align-items: stretch;
 }
 
 .module-card {
   border: 1px solid var(--surface-border);
   border-radius: 20px;
   padding: 28px;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
   text-decoration: none;
   color: inherit;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 100%;
 }
 
 .module-card:hover,
@@ -195,7 +203,8 @@ body {
 }
 
 .module-card__icon {
-  font-size: 2rem;
+  font-size: 2.25rem;
+  line-height: 1;
 }
 
 .module-card__content {
@@ -206,7 +215,8 @@ body {
 
 .module-card__title {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
+  word-break: break-word;
 }
 
 .module-card__description {
@@ -216,7 +226,8 @@ body {
 }
 
 .module-button {
-  justify-self: end;
+  margin-top: auto;
+  align-self: flex-start;
 }
 
 @media (max-width: 1024px) {

@@ -16,6 +16,12 @@ const STATUS_CLASS_MAP = {
   cancelado: "task-card__status--cancelado"
 };
 
+const PRIORITY_EMOJI_MAP = {
+  alta: "🔴",
+  media: "🟡",
+  baja: "🟢"
+};
+
 function formatDate(value) {
   if (!value) {
     return "Sin fecha";
@@ -43,20 +49,6 @@ function formatPriority(priority) {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
-function resolvePriorityClass(priority) {
-  const normalized = String(priority || "").trim().toLowerCase();
-
-  if (normalized === "alta") {
-    return "task-card__priority-indicator--alta";
-  }
-
-  if (normalized === "baja") {
-    return "task-card__priority-indicator--baja";
-  }
-
-  return "task-card__priority-indicator--media";
-}
-
 function formatStatus(status) {
   if (!status) {
     return "Pendiente";
@@ -71,35 +63,45 @@ function resolveStatusClass(status) {
   return STATUS_CLASS_MAP[normalized] ?? STATUS_CLASS_MAP.pendiente;
 }
 
-function createPriorityChip(priority) {
-  const priorityWrapper = document.createElement("span");
-  priorityWrapper.className = "task-card__priority";
+function resolveTaskTitleIcon(status) {
+  const normalized = String(status || "").trim().toLowerCase();
+  return normalized === "completado" ? "✅" : "📅";
+}
 
-  const indicator = document.createElement("span");
-  indicator.className = `task-card__priority-indicator ${resolvePriorityClass(priority)}`;
+function createPriorityBadge(priority) {
+  const normalized = String(priority || "").trim().toLowerCase();
+  const badge = document.createElement("span");
+  badge.className = "task-card__priority-badge";
 
-  const label = document.createElement("span");
-  label.className = "task-card__priority-label";
-  label.textContent = formatPriority(priority);
+  const emoji = PRIORITY_EMOJI_MAP[normalized] ?? PRIORITY_EMOJI_MAP.media;
+  badge.textContent = `${emoji} ${formatPriority(priority)}`;
 
-  priorityWrapper.append(indicator, label);
-  return priorityWrapper;
+  return badge;
 }
 
 function createTaskItem(task) {
   const item = document.createElement("li");
   item.className = "task-card";
 
-  const header = document.createElement("div");
-  header.className = "task-card__header";
+  const titleRow = document.createElement("div");
+  titleRow.className = "task-card__title-row";
+
+  const titleGroup = document.createElement("div");
+  titleGroup.className = "task-card__title-group";
+
+  const titleIcon = document.createElement("span");
+  titleIcon.className = "task-card__title-icon";
+  titleIcon.textContent = resolveTaskTitleIcon(task.status);
 
   const title = document.createElement("h3");
   title.className = "task-card__title";
   title.textContent = task.title || "Tarea sin título";
 
-  const priority = createPriorityChip(task.priority);
+  titleGroup.append(titleIcon, title);
 
-  header.append(title, priority);
+  const priority = createPriorityBadge(task.priority);
+
+  titleRow.append(titleGroup, priority);
 
   const meta = document.createElement("div");
   meta.className = "task-card__meta";
@@ -114,7 +116,7 @@ function createTaskItem(task) {
   status.className = `task-card__status ${resolveStatusClass(task.status)}`;
   status.textContent = formatStatus(task.status);
 
-  item.append(header, meta, status);
+  item.append(titleRow, meta, status);
 
   return item;
 }
