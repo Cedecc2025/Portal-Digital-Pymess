@@ -2,7 +2,15 @@
 // Controla toda la lógica interactiva del módulo de costos.
 
 import { getCurrentUser } from "../../../lib/authGuard.js";
-import { supabaseClient } from "../../../lib/supabaseClient.js";
+import { supabaseClient, isSupabaseClientReady } from "../../../lib/supabaseClient.js";
+import {
+  upsertProduct,
+  removeProduct,
+  upsertFixedCost,
+  removeFixedCost,
+  upsertTransaction,
+  removeTransaction
+} from "./costosData.js";
 
 const STORAGE_KEYS = {
   products: "costosModuleProducts",
@@ -319,11 +327,12 @@ const elements = {
 
 let toastTimeoutId = null;
 
-const SUPABASE_ENABLED = true;
+const SUPABASE_ENABLED = Boolean(globalThis?.COSTOS_SUPABASE_ENABLED);
 
 function canUseSupabase() {
   return (
     SUPABASE_ENABLED &&
+    isSupabaseClientReady() &&
     supabaseClient &&
     typeof supabaseClient === "object" &&
     typeof supabaseClient.from === "function"
@@ -568,6 +577,27 @@ function hideToast() {
   }
 
   elements.loadingBanner.classList.add("hidden");
+}
+
+function ensureAppVisibleWithError(message) {
+  if (!elements.appContainer) {
+    elements.appContainer = document.querySelector("#costosApp");
+  }
+
+  if (elements.appContainer) {
+    elements.appContainer.classList.remove("hidden");
+  }
+
+  if (!elements.loadingBanner) {
+    elements.loadingBanner = document.querySelector("#loading");
+  }
+
+  if (elements.loadingBanner) {
+    const fallbackMessage =
+      message || "⚠️ No se pudo iniciar el módulo de costos. Revisa la consola.";
+    elements.loadingBanner.textContent = fallbackMessage;
+    elements.loadingBanner.classList.remove("hidden");
+  }
 }
 
 function openModal(modalElement) {
@@ -1602,15 +1632,17 @@ async function guardarProducto() {
   };
 
   if (isEditing) {
-    const index = state.products.findIndex((product) => `${product.id}` === `${state.editingProductId}`);
+    const existingIndex = state.products.findIndex(
+      (product) => `${product.id}` === `${state.editingProductId}`
+    );
 
-    if (index === -1) {
+    if (existingIndex === -1) {
       showToast("No se encontró el producto a actualizar.");
       return;
     }
 
-    const previousProduct = { ...state.products[index] };
-    state.products[index] = { ...productData };
+    const previousProducts = state.products.map((product) => ({ ...product }));
+    state.products = upsertProduct(state.products, productData);
 
     if (shouldSyncWithSupabase()) {
       try {
@@ -1640,11 +1672,17 @@ async function guardarProducto() {
 
         const mappedProduct = mapSupabaseProduct(response.data);
         if (mappedProduct) {
-          state.products[index] = mappedProduct;
+          const mappedIndex = state.products.findIndex(
+            (product) => `${product.id}` === `${mappedProduct.id}`
+          );
+
+          if (mappedIndex >= 0) {
+            state.products[mappedIndex] = mappedProduct;
+          }
         }
       } catch (error) {
         console.error("Error al sincronizar el producto con Supabase:", error);
-        state.products[index] = previousProduct;
+        state.products = previousProducts;
         persistData();
         showToast("No se pudo actualizar el producto en Supabase.");
         return;
@@ -1659,7 +1697,7 @@ async function guardarProducto() {
     return;
   }
 
-  state.products.push({ ...productData });
+  state.products = upsertProduct(state.products, productData);
 
   if (shouldSyncWithSupabase()) {
     try {
@@ -1676,7 +1714,13 @@ async function guardarProducto() {
 
       const mappedProduct = mapSupabaseProduct(data);
       if (mappedProduct) {
-        state.products[state.products.length - 1] = mappedProduct;
+        const mappedIndex = state.products.findIndex(
+          (product) => `${product.id}` === `${mappedProduct.id}`
+        );
+
+        if (mappedIndex >= 0) {
+          state.products[mappedIndex] = mappedProduct;
+        }
       }
     } catch (error) {
       console.error("Error al guardar el producto en Supabase:", error);
@@ -1783,14 +1827,15 @@ async function eliminarProducto(productId) {
     return;
   }
 
-  const index = state.products.findIndex((product) => `${product.id}` === `${productId}`);
+  const productToRemove = state.products.find((product) => `${product.id}` === `${productId}`);
 
-  if (index === -1) {
+  if (!productToRemove) {
     showToast("No se encontró el producto a eliminar.");
     return;
   }
 
-  const [removedProduct] = state.products.splice(index, 1);
+  const previousProducts = state.products.map((product) => ({ ...product }));
+  state.products = removeProduct(state.products, productId);
 
   if (state.editingProductId && `${state.editingProductId}` === `${productId}`) {
     cancelarEdicionProducto();
@@ -1809,7 +1854,7 @@ async function eliminarProducto(productId) {
       }
     } catch (error) {
       console.error("Error al eliminar el producto en Supabase:", error);
-      state.products.splice(index, 0, removedProduct);
+      state.products = previousProducts;
       persistData();
       refrescarProductos();
       refrescarAnalisis();
@@ -1915,15 +1960,17 @@ async function guardarCostoFijo() {
   };
 
   if (isEditing) {
-    const index = state.fixedCosts.findIndex((cost) => `${cost.id}` === `${state.editingCostId}`);
+    const existingIndex = state.fixedCosts.findIndex(
+      (cost) => `${cost.id}` === `${state.editingCostId}`
+    );
 
-    if (index === -1) {
+    if (existingIndex === -1) {
       showToast("No se encontró el costo fijo a actualizar.");
       return;
     }
 
-    const previousCost = { ...state.fixedCosts[index] };
-    state.fixedCosts[index] = { ...costData };
+    const previousCosts = state.fixedCosts.map((cost) => ({ ...cost }));
+    state.fixedCosts = upsertFixedCost(state.fixedCosts, costData);
 
     if (shouldSyncWithSupabase()) {
       try {
@@ -1953,11 +2000,17 @@ async function guardarCostoFijo() {
 
         const mappedCost = mapSupabaseFixedCost(response.data);
         if (mappedCost) {
-          state.fixedCosts[index] = mappedCost;
+          const mappedIndex = state.fixedCosts.findIndex(
+            (cost) => `${cost.id}` === `${mappedCost.id}`
+          );
+
+          if (mappedIndex >= 0) {
+            state.fixedCosts[mappedIndex] = mappedCost;
+          }
         }
       } catch (error) {
         console.error("Error al sincronizar el costo fijo con Supabase:", error);
-        state.fixedCosts[index] = previousCost;
+        state.fixedCosts = previousCosts;
         persistData();
         showToast("No se pudo actualizar el costo fijo en Supabase.");
         return;
@@ -1972,7 +2025,7 @@ async function guardarCostoFijo() {
     return;
   }
 
-  state.fixedCosts.push({ ...costData });
+  state.fixedCosts = upsertFixedCost(state.fixedCosts, costData);
 
   if (shouldSyncWithSupabase()) {
     try {
@@ -1989,7 +2042,13 @@ async function guardarCostoFijo() {
 
       const mappedCost = mapSupabaseFixedCost(data);
       if (mappedCost) {
-        state.fixedCosts[state.fixedCosts.length - 1] = mappedCost;
+        const mappedIndex = state.fixedCosts.findIndex(
+          (cost) => `${cost.id}` === `${mappedCost.id}`
+        );
+
+        if (mappedIndex >= 0) {
+          state.fixedCosts[mappedIndex] = mappedCost;
+        }
       }
     } catch (error) {
       console.error("Error al guardar el costo fijo en Supabase:", error);
@@ -2084,14 +2143,15 @@ async function eliminarCostoFijo(costId) {
     return;
   }
 
-  const index = state.fixedCosts.findIndex((cost) => `${cost.id}` === `${costId}`);
+  const costToRemove = state.fixedCosts.find((cost) => `${cost.id}` === `${costId}`);
 
-  if (index === -1) {
+  if (!costToRemove) {
     showToast("No se encontró el costo a eliminar.");
     return;
   }
 
-  const [removedCost] = state.fixedCosts.splice(index, 1);
+  const previousCosts = state.fixedCosts.map((cost) => ({ ...cost }));
+  state.fixedCosts = removeFixedCost(state.fixedCosts, costId);
 
   if (shouldSyncWithSupabase() && isRemoteIdentifier(costId)) {
     try {
@@ -2106,7 +2166,7 @@ async function eliminarCostoFijo(costId) {
       }
     } catch (error) {
       console.error("Error al eliminar el costo fijo en Supabase:", error);
-      state.fixedCosts.splice(index, 0, removedCost);
+      state.fixedCosts = previousCosts;
       persistData();
       refrescarCostosFijos();
       refrescarAnalisis();
@@ -2233,15 +2293,17 @@ async function guardarTransaccion() {
   };
 
   if (isEditing) {
-    const index = state.transactions.findIndex((item) => `${item.id}` === `${state.editingTransactionId}`);
+    const existingIndex = state.transactions.findIndex(
+      (item) => `${item.id}` === `${state.editingTransactionId}`
+    );
 
-    if (index === -1) {
+    if (existingIndex === -1) {
       showToast("No se encontró la transacción a actualizar.");
       return;
     }
 
-    const previousTransaction = { ...state.transactions[index] };
-    state.transactions[index] = { ...transactionData };
+    const previousTransactions = state.transactions.map((transaction) => ({ ...transaction }));
+    state.transactions = upsertTransaction(state.transactions, transactionData);
 
     if (shouldSyncWithSupabase()) {
       try {
@@ -2271,11 +2333,17 @@ async function guardarTransaccion() {
 
         const mappedTransaction = mapSupabaseTransaction(response.data);
         if (mappedTransaction) {
-          state.transactions[index] = mappedTransaction;
+          const mappedIndex = state.transactions.findIndex(
+            (item) => `${item.id}` === `${mappedTransaction.id}`
+          );
+
+          if (mappedIndex >= 0) {
+            state.transactions[mappedIndex] = mappedTransaction;
+          }
         }
       } catch (error) {
         console.error("Error al sincronizar la transacción con Supabase:", error);
-        state.transactions[index] = previousTransaction;
+        state.transactions = previousTransactions;
         persistData();
         showToast("No se pudo actualizar la transacción en Supabase.");
         return;
@@ -2291,7 +2359,7 @@ async function guardarTransaccion() {
     return;
     }
 
-  state.transactions.push({ ...transactionData });
+  state.transactions = upsertTransaction(state.transactions, transactionData);
 
   if (shouldSyncWithSupabase()) {
     try {
@@ -2308,7 +2376,13 @@ async function guardarTransaccion() {
 
       const mappedTransaction = mapSupabaseTransaction(data);
       if (mappedTransaction) {
-        state.transactions[state.transactions.length - 1] = mappedTransaction;
+        const mappedIndex = state.transactions.findIndex(
+          (item) => `${item.id}` === `${mappedTransaction.id}`
+        );
+
+        if (mappedIndex >= 0) {
+          state.transactions[mappedIndex] = mappedTransaction;
+        }
       }
     } catch (error) {
       console.error("Error al guardar la transacción en Supabase:", error);
@@ -2434,14 +2508,17 @@ async function eliminarTransaccion(transactionId) {
     return;
   }
 
-  const index = state.transactions.findIndex((item) => `${item.id}` === `${transactionId}`);
+  const transactionToRemove = state.transactions.find(
+    (item) => `${item.id}` === `${transactionId}`
+  );
 
-  if (index === -1) {
+  if (!transactionToRemove) {
     showToast("No se encontró la transacción a eliminar.");
     return;
   }
 
-  const [removedTransaction] = state.transactions.splice(index, 1);
+  const previousTransactions = state.transactions.map((transaction) => ({ ...transaction }));
+  state.transactions = removeTransaction(state.transactions, transactionId);
   state.pendingTransactionDeletionId = null;
 
   if (shouldSyncWithSupabase() && isRemoteIdentifier(transactionId)) {
@@ -2457,7 +2534,7 @@ async function eliminarTransaccion(transactionId) {
       }
     } catch (error) {
       console.error("Error al eliminar la transacción en Supabase:", error);
-      state.transactions.splice(index, 0, removedTransaction);
+      state.transactions = previousTransactions;
       persistData();
       refrescarFlujoCaja();
       refrescarAnalisis();
@@ -3199,33 +3276,51 @@ async function initializeModule() {
     return;
   }
 
-  cacheElements();
-  hideToast();
-  await bootstrapRemoteUser();
-  loadPersistedData();
-  const initialType = elements.transaccionesFields.tipo?.value ?? "ingreso";
-  updateTransactionCategoryOptions(initialType);
+  try {
+    cacheElements();
+    hideToast();
+    await bootstrapRemoteUser();
+    loadPersistedData();
+    const initialType = elements.transaccionesFields.tipo?.value ?? "ingreso";
+    updateTransactionCategoryOptions(initialType);
 
-  if (!state.selectedMonth) {
-    state.selectedMonth = getCurrentMonthValue();
+    if (!state.selectedMonth) {
+      state.selectedMonth = getCurrentMonthValue();
+    }
+
+    applyPreferencesToUI();
+    setupGreeting();
+    updateAdminUI();
+    registerEventListeners();
+
+    await waitForChartLibrary();
+    createCharts();
+    await syncAllDataFromSupabase();
+    refrescarTodosLosPaneles();
+
+    if (elements.appContainer) {
+      elements.appContainer.classList.remove("hidden");
+    }
+
+    requestChartResize();
+  } catch (error) {
+    console.error("No se pudo iniciar el módulo de costos.", error);
+    ensureAppVisibleWithError();
   }
-
-  applyPreferencesToUI();
-  setupGreeting();
-  updateAdminUI();
-  registerEventListeners();
-
-  await waitForChartLibrary();
-  createCharts();
-  await syncAllDataFromSupabase();
-  refrescarTodosLosPaneles();
-
-  if (elements.appContainer) {
-    elements.appContainer.classList.remove("hidden");
-  }
-
-  requestChartResize();
 }
 
-initializeModule();
+function startCostosModule() {
+  initializeModule().catch((error) => {
+    console.error("Fallo durante la inicialización del módulo de costos.", error);
+    ensureAppVisibleWithError();
+  });
+}
+
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startCostosModule, { once: true });
+  } else {
+    startCostosModule();
+  }
+}
 
