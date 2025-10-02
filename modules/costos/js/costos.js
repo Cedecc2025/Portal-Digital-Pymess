@@ -3,6 +3,7 @@
 
 import { supabaseClient } from "../../../lib/supabaseClient.js";
 import { getCurrentUser } from "../../../lib/authGuard.js";
+import { gotoFromModule } from "../../../lib/pathUtil.js";
 
 const STORAGE_KEYS = {
   products: "costosModuleProducts",
@@ -39,12 +40,13 @@ const elements = {
   tabContents: [],
   dropdownButtons: [],
   dropdowns: [],
+  currencyToggleButtons: [],
   fileInput: null,
   currencyDisplay: null,
   currencySelect: null,
   exchangeInput: null,
   exchangeUsdLabel: null,
-  logoutButton: null,
+  dashboardButton: null,
   headerSubtitle: null,
   monthInput: null,
   ingresosLabel: null,
@@ -184,7 +186,9 @@ function loadPersistedData() {
 
   if (preferences) {
     const parsedPreferences = JSON.parse(preferences);
-    state.currentCurrency = parsedPreferences.currency ?? state.currentCurrency;
+    state.currentCurrency = parsedPreferences.currency
+      ? `${parsedPreferences.currency}`.toUpperCase()
+      : state.currentCurrency;
     state.exchangeRate = parsedPreferences.exchangeRate ?? state.exchangeRate;
     state.selectedMonth = parsedPreferences.selectedMonth ?? state.selectedMonth;
   }
@@ -225,7 +229,9 @@ function applyPreferencesToUI() {
   }
 
   updateCurrencyDisplay();
+  updateCurrencyToggleState();
   updateExchangeLabel();
+  updateFormCurrencyDefaults();
 
   if (elements.monthInput) {
     elements.monthInput.value = state.selectedMonth;
@@ -571,13 +577,16 @@ function convertToCurrentCurrency(amount, sourceCurrency) {
 
 // Da formato al monto como texto legible para el usuario.
 function formatCurrency(value, currency = state.currentCurrency) {
-  const formatter = new Intl.NumberFormat("es-CR", {
+  const numericValue = typeof value === "string" ? Number.parseFloat(value) : value;
+  const safeValue = Number.isFinite(numericValue) ? numericValue : 0;
+  const locale = currency === "USD" ? "en-US" : "es-CR";
+  const formatter = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currency,
     minimumFractionDigits: 2
   });
 
-  return formatter.format(value || 0);
+  return formatter.format(safeValue);
 }
 
 // Actualiza las opciones disponibles para la categoría de transacción según el tipo.
@@ -745,12 +754,34 @@ async function handleAction(event) {
   }
 }
 
-// Establece la moneda seleccionada.
-function handleCurrencyChange(event) {
-  state.currentCurrency = event.target.value;
+// Cambia la moneda activa y actualiza la interfaz.
+function setCurrency(newCurrency) {
+  if (!newCurrency) {
+    return;
+  }
+
+  const normalized = `${newCurrency}`.toUpperCase();
+
+  if (normalized === state.currentCurrency) {
+    applyPreferencesToUI();
+    return;
+  }
+
+  state.currentCurrency = normalized;
   persistData();
-  updateCurrencyDisplay();
+  applyPreferencesToUI();
   refrescarTodosLosPaneles();
+}
+
+// Establece la moneda seleccionada desde el selector de configuración.
+function handleCurrencyChange(event) {
+  setCurrency(event.target.value);
+}
+
+// Gestiona el cambio de moneda desde los botones superiores.
+function handleCurrencyToggle(event) {
+  const targetCurrency = event.currentTarget?.dataset?.currencyToggle;
+  setCurrency(targetCurrency);
 }
 
 // Actualiza la tasa de cambio y la etiqueta informativa.
@@ -780,6 +811,12 @@ function handleTransactionTypeChange(event) {
   const newType = event.target.value;
   const currentValue = elements.transaccionesFields.categoria?.value ?? null;
   updateTransactionCategoryOptions(newType, currentValue);
+}
+
+// Redirige al tablero principal del sistema.
+function handleDashboardButtonClick(event) {
+  event.preventDefault();
+  gotoFromModule(import.meta.url, "../../dashboard/index.html");
 }
 
 // Agrega o actualiza un producto en la colección.
@@ -2061,7 +2098,9 @@ function importarDatos(event) {
       state.transactions = Array.isArray(content.transactions) ? content.transactions : [];
 
       if (content.preferences) {
-        state.currentCurrency = content.preferences.currency ?? state.currentCurrency;
+        state.currentCurrency = content.preferences.currency
+          ? `${content.preferences.currency}`.toUpperCase()
+          : state.currentCurrency;
         state.exchangeRate = content.preferences.exchangeRate ?? state.exchangeRate;
         state.selectedMonth = content.preferences.selectedMonth ?? state.selectedMonth;
       }
@@ -2102,6 +2141,47 @@ function updateCurrencyDisplay() {
   elements.currencyDisplay.textContent = `${symbol} ${state.currentCurrency}`;
 }
 
+// Ajusta la apariencia de los botones de selección de moneda.
+function updateCurrencyToggleState() {
+  if (!Array.isArray(elements.currencyToggleButtons)) {
+    return;
+  }
+
+  elements.currencyToggleButtons.forEach((button) => {
+    if (!button) {
+      return;
+    }
+
+    const buttonCurrency = button.dataset?.currencyToggle ?? "";
+    const isActive = buttonCurrency.toUpperCase() === state.currentCurrency;
+
+    if (isActive) {
+      button.classList.add("currency-toggle__button--active");
+      button.setAttribute("aria-pressed", "true");
+    } else {
+      button.classList.remove("currency-toggle__button--active");
+      button.setAttribute("aria-pressed", "false");
+    }
+  });
+}
+
+// Sincroniza los selectores de moneda de los formularios con la moneda global.
+function updateFormCurrencyDefaults() {
+  const defaultCurrency = state.currentCurrency;
+
+  if (!state.editingProductId && elements.productosFields.moneda) {
+    elements.productosFields.moneda.value = defaultCurrency;
+  }
+
+  if (!state.editingCostId && elements.costosFields.moneda) {
+    elements.costosFields.moneda.value = defaultCurrency;
+  }
+
+  if (!state.editingTransactionId && elements.transaccionesFields.moneda) {
+    elements.transaccionesFields.moneda.value = defaultCurrency;
+  }
+}
+
 // Actualiza el texto auxiliar de la tasa de cambio.
 function updateExchangeLabel() {
   if (!elements.exchangeUsdLabel) {
@@ -2139,25 +2219,68 @@ function createCharts() {
             label: "Ingresos",
             data: [],
             borderColor: "#38a169",
-            backgroundColor: "rgba(56, 161, 105, 0.3)",
+            backgroundColor: "rgba(56, 161, 105, 0.25)",
             tension: 0.3,
-            fill: true
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: "#38a169"
           },
           {
             label: "Egresos",
             data: [],
             borderColor: "#e53e3e",
-            backgroundColor: "rgba(229, 62, 62, 0.3)",
+            backgroundColor: "rgba(229, 62, 62, 0.25)",
             tension: 0.3,
-            fill: true
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: "#e53e3e"
           }
         ]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: "index",
+          intersect: false
+        },
         plugins: {
           legend: {
-            position: "top"
+            position: "top",
+            labels: {
+              color: "#2d3748",
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const value = context.parsed?.y ?? 0;
+                return `${context.dataset.label}: ${formatCurrency(value)}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              color: "rgba(226, 232, 240, 0.6)"
+            },
+            ticks: {
+              color: "#4a5568"
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(226, 232, 240, 0.6)"
+            },
+            ticks: {
+              color: "#4a5568",
+              callback: (value) => formatCurrency(value)
+            }
           }
         }
       }
@@ -2173,17 +2296,45 @@ function createCharts() {
           {
             label: "Margen %",
             data: [],
-            backgroundColor: "rgba(128, 90, 213, 0.7)"
+            backgroundColor: "rgba(128, 90, 213, 0.75)",
+            borderRadius: 8,
+            maxBarThickness: 48
           }
         ]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: "#4a5568",
+              autoSkip: false
+            }
+          },
           y: {
             beginAtZero: true,
             ticks: {
               callback: (value) => `${value}%`
+            },
+            grid: {
+              color: "rgba(226, 232, 240, 0.6)"
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const value = context.parsed?.y ?? 0;
+                return `${context.dataset.label}: ${value.toFixed(1)}%`;
+              }
             }
           }
         }
@@ -2199,9 +2350,34 @@ function createCharts() {
         datasets: [
           {
             data: [],
-            backgroundColor: ["#667eea", "#e53e3e"]
+            backgroundColor: ["#667eea", "#e53e3e"],
+            hoverOffset: 12,
+            borderWidth: 0
           }
         ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: "#2d3748"
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.label ?? "";
+                const value = Array.isArray(context.parsed)
+                  ? context.parsed[0] ?? 0
+                  : context.parsed ?? 0;
+                return `${label}: ${formatCurrency(value)}`;
+              }
+            }
+          }
+        }
       }
     });
   }
@@ -2237,6 +2413,9 @@ function registerEventListeners() {
   if (elements.currencySelect) {
     elements.currencySelect.addEventListener("change", handleCurrencyChange);
   }
+  elements.currencyToggleButtons.forEach((button) => {
+    button.addEventListener("click", handleCurrencyToggle);
+  });
   if (elements.exchangeInput) {
     elements.exchangeInput.addEventListener("change", handleExchangeChange);
   }
@@ -2249,6 +2428,9 @@ function registerEventListeners() {
   if (elements.fileInput) {
     elements.fileInput.addEventListener("change", importarDatos);
   }
+  if (elements.dashboardButton) {
+    elements.dashboardButton.addEventListener("click", handleDashboardButtonClick);
+  }
 }
 
 // Obtiene y almacena las referencias a los elementos DOM relevantes.
@@ -2259,12 +2441,15 @@ function cacheElements() {
   elements.tabContents = Array.from(document.querySelectorAll(".tab-content"));
   elements.dropdownButtons = Array.from(document.querySelectorAll("[data-dropdown]"));
   elements.dropdowns = Array.from(document.querySelectorAll(".dropdown"));
+  elements.currencyToggleButtons = Array.from(
+    document.querySelectorAll("[data-currency-toggle]")
+  );
   elements.fileInput = document.querySelector("#fileInput");
   elements.currencyDisplay = document.querySelector("#monedaActual");
   elements.currencySelect = document.querySelector("#selectMoneda");
   elements.exchangeInput = document.querySelector("#tasaCambio");
   elements.exchangeUsdLabel = document.querySelector("#tasaDolar");
-  elements.logoutButton = document.querySelector("#logoutButton");
+  elements.dashboardButton = document.querySelector("#dashboardButton");
   elements.headerSubtitle = document.querySelector(".subtitle");
   elements.monthInput = document.querySelector("#mes-seleccionado");
   elements.ingresosLabel = document.querySelector("#flujo-ingresos");

@@ -30,48 +30,29 @@
           </div>
 
           <div class="header-actions">
-            <div class="dropdown">
-              <button class="btn btn-secondary" data-dropdown="dataMenu">
-                📊 Datos ▼
+            <div
+              class="currency-toggle"
+              role="group"
+              aria-label="Seleccionar moneda principal"
+            >
+              <button
+                class="currency-toggle__button currency-toggle__button--active"
+                type="button"
+                data-currency-toggle="CRC"
+              >
+                ₡ CRC
               </button>
-              <div id="dataMenu" class="dropdown-content">
-                <h3>Gestión de Datos</h3>
-                <button class="btn btn-success" data-action="exportar">
-                  💾 Exportar JSON
-                </button>
-                <label class="btn" for="fileInput">
-                  📁 Importar JSON
-                  <input type="file" id="fileInput" accept=".json" />
-                </label>
-                <button class="btn btn-danger" data-action="limpiar">
-                  🗑️ Limpiar Todo
-                </button>
-              </div>
-            </div>
-            <div class="dropdown">
-              <button class="btn" data-dropdown="currencyMenu">
-                <span id="monedaActual">₡ CRC</span> ▼
+              <button
+                class="currency-toggle__button"
+                type="button"
+                data-currency-toggle="USD"
+              >
+                $ USD
               </button>
-              <div id="currencyMenu" class="dropdown-content">
-                <h3>Configuración de Moneda</h3>
-                <div class="form-group">
-                  <label for="selectMoneda">Moneda Principal</label>
-                  <select id="selectMoneda">
-                    <option value="CRC">₡ Colones (CRC)</option>
-                    <option value="USD">$ Dólares (USD)</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="tasaCambio">Tasa de Cambio</label>
-                  <input type="number" id="tasaCambio" value="520" />
-                  <p class="help-text">
-                    ₡1 = $<span id="tasaDolar">0.0019</span>
-                  </p>
-                </div>
-              </div>
             </div>
-            <button id="logoutButton" class="btn btn-logout" type="button">
-              🚪 Cerrar sesión
+            <span class="currency-display" id="monedaActual">₡ CRC</span>
+            <button id="dashboardButton" class="btn btn-dashboard" type="button">
+              🏠 Volver al Dashboard
             </button>
           </div>
         </div>
