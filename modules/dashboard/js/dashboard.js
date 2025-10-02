@@ -29,8 +29,20 @@ function configureModuleCards() {
         card.setAttribute("href", "../costos/index.html");
         break;
       }
+      case "catalogo": {
+        card.setAttribute("href", "../catalogo/index.html");
+        break;
+      }
       case "estrategias": {
         card.setAttribute("href", "../estrategias/index.html");
+        break;
+      }
+      case "crm": {
+        card.setAttribute("href", "../crm-pro/index.html");
+        break;
+      }
+      case "herramientas": {
+        card.setAttribute("href", "../herramientas-extras/index.html");
         break;
       }
       default: {
