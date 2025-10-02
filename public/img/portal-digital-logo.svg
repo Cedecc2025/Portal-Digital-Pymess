@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">Portal Digital Pymess logo</title>
+  <desc id="desc">Minimal blue illustration of a globe with orbital paths and the text Portal Digital Pymess</desc>
+  <defs>
+    <linearGradient id="gradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#48c7ff" />
+      <stop offset="1" stop-color="#0077ff" />
+    </linearGradient>
+    <style>
+      .word-mark { font-family: 'Poppins', 'Segoe UI', sans-serif; letter-spacing: 0.28em; text-transform: uppercase; }
+    </style>
+  </defs>
+  <g fill="none" stroke="url(#gradient)" stroke-width="6" stroke-linecap="round">
+    <circle cx="160" cy="92" r="62" />
+    <ellipse cx="160" cy="92" rx="98" ry="38" transform="rotate(-14 160 92)" />
+    <ellipse cx="160" cy="92" rx="98" ry="38" transform="rotate(14 160 92)" />
+    <ellipse cx="160" cy="92" rx="52" ry="100" />
+  </g>
+  <g fill="#48c7ff">
+    <circle cx="97" cy="63" r="8" />
+    <circle cx="220" cy="65" r="8" />
+    <circle cx="118" cy="120" r="8" />
+    <circle cx="214" cy="132" r="8" />
+  </g>
+  <g fill="#091c3a" text-anchor="middle">
+    <text x="160" y="190" font-size="28" font-family="'Poppins','Segoe UI',sans-serif" font-weight="600" letter-spacing="0.18em">PORTAL DIGITAL</text>
+    <text x="160" y="214" font-size="18" font-family="'Poppins','Segoe UI',sans-serif" letter-spacing="0.34em">PYMESS</text>
+  </g>
+</svg>
