@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Marketing Digital - PYME</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark: #1a1a2e;
+            --text: #eaeaea;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: var(--dark);
+            font-size: 28px;
+        }
+
+        .header .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .tools-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .tool-card h3 {
+            color: var(--dark);
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-card p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .tool-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tool-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .calendar-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .prompts-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            background: #e0e7ff;
+            border-color: #667eea;
+        }
+
+        .post-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .posts-list {
+            display: grid;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .post-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .post-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .post-info h4 {
+            color: var(--dark);
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .post-info p {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .post-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .prompt-categories {
+            display: grid;
+            gap: 20px;
+        }
+
+        .prompt-category {
+            background: #f8f9ff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .category-header:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .category-content {
+            padding: 15px;
+            display: none;
+        }
+
+        .category-content.active {
+            display: block;
+        }
+
+        .prompt-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-item:hover {
+            transform: translateX(5px);
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .prompt-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            line-height: 25px;
+            border-radius: 50%;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-item:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .search-box {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px;
+            margin: -25px -25px 20px -25px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+            display: block;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Dashboard Marketing Digital PYME</h1>
+            <span class="badge">Versión Premium</span>
+        </div>
+
+        <!-- Novedades de IA Section -->
+        <div class="tools-section" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); border: 2px solid #fdcb6e;">
+            <h2 class="section-title" style="color: #2d3436;">🔥 NOVEDADES DE IA - 2025</h2>
+            <div class="tools-grid">
+                <div class="tool-card" style="background: white; border: 2px solid #ff6b6b;">
+                    <h3 style="color: #ff6b6b;">🔥 Firebase Studio</h3>
+                    <p><strong>¿Para qué sirve?</strong> Crea aplicaciones web y móviles con base de datos en tiempo real, autenticación y hosting gratuito de Google.</p>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <a href="https://studio.firebase.google.com/" target="_blank" class="tool-btn" style="background: #ff6b6b;">Usar Firebase →</a>
+                        <a href="https://www.youtube.com/watch?v=85XS4P0abUI&t=982s" target="_blank" class="tool-btn" style="background: #ff9ff3;">📹 Tutorial</a>
+                    </div>
+                </div>
+
+                <div class="tool-card" style="background: white; border: 2px solid #54a0ff;">
+                    <h3 style="color: #54a0ff;">💬 Chat Z.AI</h3>
+                    <p><strong>¿Para qué sirve?</strong> Chatbot avanzado con múltiples personalidades y modelos de IA. Ideal para brainstorming creativo y asistencia especializada.</p>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <a href="https://chat.z.ai/" target="_blank" class="tool-btn" style="background: #54a0ff;">Probar Chat →</a>
+                        <a href="https://www.youtube.com/watch?v=OEQCDgMpNBw&t=1398s" target="_blank" class="tool-btn" style="background: #48dbfb;">📹 Tutorial</a>
+                    </div>
+                </div>
+
+                <div class="tool-card" style="background: white; border: 2px solid #a29bfe;">
+                    <h3 style="color: #a29bfe;">🧠 Qwen AI</h3>
+                    <p><strong>¿Para qué sirve?</strong> Modelo de IA chino gratuito que compite con GPT-4. Excelente para análisis de datos, código y razonamiento matemático.</p>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <a href="https://qwen.ai/home" target="_blank" class="tool-btn" style="background: #a29bfe;">Usar Qwen →</a>
+                        <a href="https://www.youtube.com/watch?v=YYhZf8hdyKM&t=392s" target="_blank" class="tool-btn" style="background: #d63031;">📹 Tutorial</a>
+                    </div>
+                </div>
+
+                <div class="tool-card" style="background: #f8f9fa; border: 2px dashed #95a5a6; display: flex; align-items: center; justify-content: center; min-height: 180px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 48px; color: #bdc3c7;">➕</div>
+                        <h3 style="color: #95a5a6;">Próximamente</h3>
+                        <p style="color: #95a5a6;">Nuevas herramientas de IA cada semana</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Herramientas Extra Section -->
+        <div class="tools-section">
+            <h2 class="section-title">✨ Herramientas Extra Premium</h2>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <h3>✨ Sistema de Publicaciones</h3>
+                    <p>Crea y programa publicaciones profesionales con IA</p>
+                    <p style="color: #6366f1; font-weight: bold;">🔑 Código: INGENIUST-ACTIVATE</p>
+                    <a href="https://www.doaibrand.com/dashboard/calendar" target="_blank" class="tool-btn">Acceder →</a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>📁 Catálogo Digital</h3>
+                    <p>Accede a todos los recursos y plantillas disponibles</p>
+                    <a href="https://drive.google.com/drive/folders/1Ohf-GRoiniBXzwcaMB_T7304ph9_-WfH?usp=sharing" target="_blank" class="tool-btn">Ver Catálogo →</a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>🌐 Crea tu Página Web</h3>
+                    <p>Opciones gratuitas para tu negocio</p>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <a href="https://www.webnode.com/es/" target="_blank" class="tool-btn" style="font-size: 12px; padding: 8px 12px;">Webnode</a>
+                        <a href="https://es.wix.com/" target="_blank" class="tool-btn" style="font-size: 12px; padding: 8px 12px;">Wix</a>
+                        <a href="https://sites.google.com/" target="_blank" class="tool-btn" style="font-size: 12px; padding: 8px 12px;">Google</a>
+                        <a href="https://www.webstarts.com/" target="_blank" class="tool-btn" style="font-size: 12px; padding: 8px 12px;">WebStarts</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h3>🔥 +25 Herramientas Exclusivas</h3>
+                    <p>Acceso a herramientas únicas que nadie más tiene</p>
+                    <a href="https://docs.google.com/document/d/1hrrmNAsoUAVLXWDqNZIda-gfKsA3Ch3p/edit?usp=sharing&ouid=112919261768882704716&rtpof=true&sd=true" target="_blank" class="tool-btn">Descubrir →</a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>🎨 Plantillas Premium Canva</h3>
+                    <p>+1000 plantillas editables para redes sociales</p>
+                    <a href="https://drive.google.com/drive/folders/1BcdkQLwj8vPPrbMvGwJfIy_zm-0IdHvl?usp=sharing" target="_blank" class="tool-btn">Ver Plantillas →</a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>🤖 Herramientas IA Gratis</h3>
+                    <p>Genera contenido con inteligencia artificial</p>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <a href="https://chat.openai.com" target="_blank" class="tool-btn" style="font-size: 12px; padding: 8px 12px;">ChatGPT</a>
+                        <a href="https://gemini.google.com" target="_blank" class="tool-btn" style="font-size: 12px; padding: 8px 12px;">Gemini</a>
+                        <a href="https://claude.ai" target="_blank" class="tool-btn" style="font-size: 12px; padding: 8px 12px;">Claude</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h3>💬 Chatbot Web</h3>
+                    <p>Implementa un chatbot inteligente en tu sitio web para atención 24/7</p>
+                    <a href="https://drive.google.com/drive/folders/1goHCSP0Tienhwne62IYhDvUNt0mQPn-6?usp=sharing" target="_blank" class="tool-btn">Configurar Chatbot →</a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>💰 Calculadora de Costos</h3>
+                    <p>Herramientas para calcular precios, márgenes y rentabilidad</p>
+                    <a href="https://drive.google.com/drive/folders/15lEE0LnDjZuenHCRHYfMalxB3MUH3oPr?usp=sharing" target="_blank" class="tool-btn">Ver Calculadoras →</a>
+                </div>
+
+                <div class="tool-card">
+                    <h3>📊 Sistema CRM</h3>
+                    <p>Gestiona clientes, ventas y relaciones comerciales de forma profesional</p>
+                    <a href="https://drive.google.com/drive/folders/1D1R2EOs6PVdk-iu_I-7uf3_e0Gt2uTFe?usp=sharing" target="_blank" class="tool-btn">Acceder a CRM →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="main-content">
+            <!-- Calendario Simple -->
+            <div class="calendar-section">
+                <h2 class="section-title">📅 Organizador de Publicaciones</h2>
+                
+                <!-- Upload Area -->
+                <div class="upload-area" onclick="document.getElementById('imageUpload').click();" 
+                     ondrop="handleDrop(event)" 
+                     ondragover="handleDragOver(event)" 
+                     ondragleave="handleDragLeave(event)">
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <div style="font-size: 48px;">📸</div>
+                    <p style="font-weight: 600; color: #374151; margin: 10px 0;">Arrastra tu imagen aquí</p>
+                    <p style="color: #6b7280; font-size: 14px;">o haz clic para seleccionar</p>
+                    <p style="color: #9ca3af; font-size: 12px; margin-top: 10px;">Formatos: JPG, PNG, GIF (Max 5MB)</p>
+                </div>
+
+                <img id="previewImage" class="preview-image" style="display: none;">
+
+                <!-- Simple Form -->
+                <form class="post-form">
+                    <div class="form-group">
+                        <label>Fecha de Publicación</label>
+                        <input type="date" id="postDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Red Social</label>
+                        <select id="network">
+                            <option value="instagram">📷 Instagram</option>
+                            <option value="facebook">👤 Facebook</option>
+                            <option value="linkedin">💼 LinkedIn</option>
+                            <option value="twitter">🐦 Twitter/X</option>
+                            <option value="tiktok">🎵 TikTok</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="description" rows="3" placeholder="Texto de tu publicación..."></textarea>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="addPost()">➕ Agregar Publicación</button>
+                </form>
+
+                <!-- Posts List -->
+                <h3 style="margin: 20px 0 15px 0; color: #374151;">📋 Publicaciones Guardadas</h3>
+                <div class="posts-list" id="postsList">
+                    <!-- Las publicaciones se mostrarán aquí -->
+                </div>
+            </div>
+
+            <!-- Prompts Section -->
+            <div class="prompts-section">
+                <div class="search-box">
+                    <h2 style="margin-bottom: 15px; color: #1f2937;">💡 200 Prompts de Marketing</h2>
+                    <input type="text" placeholder="🔍 Buscar prompt..." onkeyup="searchPrompts(event)">
+                </div>
+
+                <div class="prompt-categories">
+                    <!-- Categoría 1: Contenido General -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>📝 Contenido General (30 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">1</span>
+                                Crea 5 titulos atractivos para un post sobre [tu producto/servicio] que generen curiosidad
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">2</span>
+                                Escribe un hook de apertura impactante para captar atención en los primeros 3 segundos sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">3</span>
+                                Genera 10 ideas de contenido viral para [nicho] que se puedan crear en menos de 1 hora
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">4</span>
+                                Crea un calendario de contenido mensual para [tipo de negocio] con 30 publicaciones variadas
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">5</span>
+                                Escribe 5 llamadas a la acción (CTA) persuasivas para [objetivo específico]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">6</span>
+                                Convierte este texto aburrido en contenido engaging: [pega tu texto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">7</span>
+                                Crea una historia de marca en 3 párrafos que conecte emocionalmente con [audiencia objetivo]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">8</span>
+                                Genera 20 hashtags relevantes y de tendencia para [industria/nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">9</span>
+                                Escribe un micro-blog de 150 palabras sobre [tema] que eduque y entretenga
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">10</span>
+                                Crea 5 preguntas provocativas para generar engagement sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">11</span>
+                                Desarrolla un storytelling de 3 actos para presentar [producto/servicio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">12</span>
+                                Genera 10 titulares tipo "clickbait ético" para [contenido]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">13</span>
+                                Escribe un guión para video de 30 segundos sobre [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">14</span>
+                                Crea 5 analogías creativas para explicar [concepto complejo] de forma simple
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">15</span>
+                                Genera contenido AIDA (Atención, Interés, Deseo, Acción) para [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">16</span>
+                                Escribe 10 micro-copys para botones de conversión en [contexto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">17</span>
+                                Crea un carrusel de 10 slides sobre [tema] con texto para cada imagen
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">18</span>
+                                Desarrolla 5 ángulos diferentes para hablar del mismo [producto/tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">19</span>
+                                Genera un FAQ creativo con 10 preguntas y respuestas sobre [negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">20</span>
+                                Escribe 5 testimonios ficticios pero realistas para [producto/servicio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">21</span>
+                                Crea contenido para una campaña de intriga de 7 días para [lanzamiento]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">22</span>
+                                Genera 15 ideas de contenido evergreen para [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">23</span>
+                                Escribe copy para 5 anuncios diferentes del mismo [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">24</span>
+                                Crea un elevator pitch de 30 segundos para [negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">25</span>
+                                Desarrolla 10 líneas de asunto irresistibles para email sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">26</span>
+                                Genera contenido para stories que desaparecen en 24h sobre [evento/promoción]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">27</span>
+                                Escribe 5 formas creativas de presentar estadísticas sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">28</span>
+                                Crea un mensaje de bienvenida memorable para nuevos seguidores de [marca]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">29</span>
+                                Genera 10 ideas de colaboración con otros negocios en [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">30</span>
+                                Escribe un manifiesto de marca en 200 palabras para [empresa]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría 2: Instagram -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>📷 Instagram (30 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">31</span>
+                                Crea 10 ideas de Reels virales para [nicho] con gancho, desarrollo y CTA
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">32</span>
+                                Escribe captions de Instagram con emojis para 5 posts sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">33</span>
+                                Genera un carrusel educativo de 10 slides sobre [tema] con diseño minimalista
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">34</span>
+                                Crea 30 hashtags de nicho para aumentar alcance en [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">35</span>
+                                Escribe guiones para 5 Stories interactivas con encuestas sobre [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">36</span>
+                                Desarrolla una estrategia de contenido para Highlights de [marca]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">37</span>
+                                Genera ideas para 10 posts de antes/después sobre [transformación]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">38</span>
+                                Crea copy para bio de Instagram optimizada con keywords para [negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">39</span>
+                                Escribe 10 ideas de contenido behind-the-scenes para humanizar [marca]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">40</span>
+                                Desarrolla un reto de 7 días para Instagram sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">41</span>
+                                Genera contenido para IGTV de 5 minutos sobre [tutorial]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">42</span>
+                                Crea 15 preguntas para Stories de "Pregúntame lo que quieras" sobre [expertise]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">43</span>
+                                Escribe captions motivacionales para lunes de [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">44</span>
+                                Desarrolla una serie de posts educativos de 5 partes sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">45</span>
+                                Genera ideas para colaboraciones con influencers micro en [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">46</span>
+                                Crea contenido para Reels usando trends actuales adaptados a [negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">47</span>
+                                Escribe 10 frases inspiradoras con diseño de quotes para [audiencia]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">48</span>
+                                Desarrolla contenido UGC (User Generated Content) para [campaña]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">49</span>
+                                Genera un calendario de contenido temático para Instagram de 30 días
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">50</span>
+                                Crea estrategia de Instagram Shopping para [productos]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">51</span>
+                                Escribe guiones para Reels tutoriales de 15 segundos sobre [habilidad]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">52</span>
+                                Desarrolla contenido para carrusel comparativo sobre [opciones]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">53</span>
+                                Genera ideas de contenido para el feed que mantenga estética coherente
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">54</span>
+                                Crea copy para anuncios de Instagram Stories de [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">55</span>
+                                Escribe respuestas profesionales a comentarios negativos en Instagram
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">56</span>
+                                Desarrolla estrategia de Guides de Instagram para [negocio local]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">57</span>
+                                Genera contenido para Live de Instagram sobre [evento]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">58</span>
+                                Crea serie de memes relevantes para [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">59</span>
+                                Escribe CTAs creativos para aumentar saves y shares
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">60</span>
+                                Desarrolla contenido para destacar testimonios de clientes en Instagram
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría 3: Facebook -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>👤 Facebook (25 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">61</span>
+                                Crea posts largos para Facebook que generen debate sobre [tema controversial]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">62</span>
+                                Escribe copy para Facebook Ads con diferentes objetivos para [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">63</span>
+                                Genera contenido para grupo de Facebook sobre [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">64</span>
+                                Crea eventos de Facebook atractivos para [tipo de evento]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">65</span>
+                                Desarrolla estrategia de Facebook Live semanal sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">66</span>
+                                Escribe posts para Facebook Marketplace de [productos]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">67</span>
+                                Genera encuestas interactivas para aumentar engagement en Facebook
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">68</span>
+                                Crea contenido para Facebook Stories de negocio local
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">69</span>
+                                Escribe copy para retargeting en Facebook de [carrito abandonado]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">70</span>
+                                Desarrolla serie de videos nativos para Facebook sobre [tutoriales]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">71</span>
+                                Genera contenido para Facebook Watch sobre [serie temática]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">72</span>
+                                Crea posts nostálgicos de "Recuerdas cuando..." para [generación]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">73</span>
+                                Escribe descripciones para álbumes de fotos de [evento/producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">74</span>
+                                Desarrolla contenido para Facebook Shops de [catálogo]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">75</span>
+                                Genera respuestas automáticas para Messenger de [negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">76</span>
+                                Crea concursos virales para Facebook con mecánica simple
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">77</span>
+                                Escribe posts informativos largos estilo LinkedIn para Facebook
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">78</span>
+                                Desarrolla contenido para Facebook Dating de [servicio de citas]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">79</span>
+                                Genera ideas para Facebook Fundraisers de [causa]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">80</span>
+                                Crea contenido para promocionar app en Facebook
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">81</span>
+                                Escribe posts de Facebook que aprovechen días festivos para [venta]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">82</span>
+                                Desarrolla contenido para Facebook Gaming de [videojuego/stream]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">83</span>
+                                Genera posts de "Completa la frase" para máximo engagement
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">84</span>
+                                Crea contenido para Facebook Campus de [universidad]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">85</span>
+                                Escribe copy para Facebook Instant Articles sobre [blog posts]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría 4: LinkedIn -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>💼 LinkedIn (25 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">86</span>
+                                Escribe un post de LinkedIn sobre lecciones aprendidas en [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">87</span>
+                                Crea contenido thought leadership sobre tendencias en [sector]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">88</span>
+                                Genera un artículo de LinkedIn de 1000 palabras sobre [expertise]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">89</span>
+                                Desarrolla caso de estudio profesional sobre [proyecto exitoso]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">90</span>
+                                Escribe actualización de LinkedIn anunciando [logro profesional]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">91</span>
+                                Crea posts de LinkedIn con datos y estadísticas sobre [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">92</span>
+                                Genera contenido para LinkedIn Newsletter sobre [tema especializado]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">93</span>
+                                Escribe descripción optimizada para perfil de LinkedIn de [profesión]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">94</span>
+                                Desarrolla serie de posts sobre transformación digital en [sector]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">95</span>
+                                Crea contenido para LinkedIn Events sobre [webinar/conferencia]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">96</span>
+                                Genera posts motivacionales profesionales para lunes en LinkedIn
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">97</span>
+                                Escribe contenido B2B para generar leads en [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">98</span>
+                                Desarrolla posts de LinkedIn sobre cultura empresarial de [empresa]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">99</span>
+                                Crea contenido para LinkedIn Polls sobre [tema de industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">100</span>
+                                Genera posts de "Estamos contratando" atractivos para [posición]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">101</span>
+                                Escribe recomendaciones profesionales para LinkedIn
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">102</span>
+                                Desarrolla contenido para LinkedIn Learning sobre [habilidad]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">103</span>
+                                Crea posts de LinkedIn compartiendo fracasos y aprendizajes
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">104</span>
+                                Genera contenido para LinkedIn Company Page de [empresa]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">105</span>
+                                Escribe posts de LinkedIn sobre trabajo remoto y productividad
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">106</span>
+                                Desarrolla contenido para LinkedIn Showcase Pages
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">107</span>
+                                Crea posts celebrando hitos de empleados/empresa
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">108</span>
+                                Genera contenido educativo sobre [tecnología emergente]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">109</span>
+                                Escribe posts de LinkedIn estilo storytelling corporativo
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">110</span>
+                                Desarrolla contenido para LinkedIn SlideShare sobre [presentación]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría 5: TikTok -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>🎵 TikTok (25 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">111</span>
+                                Crea 10 ideas de TikToks virales usando trends actuales para [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">112</span>
+                                Escribe guiones de 15 segundos con hook fuerte sobre [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">113</span>
+                                Genera ideas de challenges para TikTok de [marca]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">114</span>
+                                Desarrolla serie educativa "Lo que no sabías sobre..." para [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">115</span>
+                                Crea contenido de TikTok estilo "POV" para [situación]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">116</span>
+                                Escribe ideas para TikToks de transformación/antes y después
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">117</span>
+                                Genera contenido "Day in the life" para [profesión/negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">118</span>
+                                Desarrolla TikToks de recetas/tutoriales rápidos de [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">119</span>
+                                Crea guiones para TikTok duets y reacciones sobre [tema trending]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">120</span>
+                                Escribe contenido para TikTok Shop de [productos]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">121</span>
+                                Genera ideas de contenido ASMR para [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">122</span>
+                                Desarrolla serie de "Storytime" enganchante sobre [experiencia]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">123</span>
+                                Crea contenido de comedia/parodia para [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">124</span>
+                                Escribe guiones para TikTok Live vendiendo [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">125</span>
+                                Genera contenido "Cosas que no sabías que necesitabas" para [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">126</span>
+                                Desarrolla TikToks de "Hazlo conmigo" para [actividad]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">127</span>
+                                Crea contenido de bailes adaptados a [mensaje de marca]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">128</span>
+                                Escribe ideas para TikToks de "Outfit of the day" de [marca de ropa]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">129</span>
+                                Genera contenido de "Life hacks" para [problema común]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">130</span>
+                                Desarrolla TikToks de "Adivina el precio" para [productos]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">131</span>
+                                Crea contenido "Satisfying" visual para [proceso/producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">132</span>
+                                Escribe guiones para TikToks de "Expectativa vs Realidad"
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">133</span>
+                                Genera ideas de TikToks con mascotas para [marca]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">134</span>
+                                Desarrolla contenido de "Errores comunes" en [actividad]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">135</span>
+                                Crea TikToks de unboxing creativos para [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría 6: Email Marketing -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>📧 Email Marketing (20 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">136</span>
+                                Escribe 10 líneas de asunto que generen 50%+ de apertura para [campaña]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">137</span>
+                                Crea secuencia de bienvenida de 5 emails para [negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">138</span>
+                                Genera email de reactivación para suscriptores inactivos
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">139</span>
+                                Desarrolla campaña de email para Black Friday de [productos]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">140</span>
+                                Escribe emails de carrito abandonado que conviertan
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">141</span>
+                                Crea newsletter semanal engaging para [industria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">142</span>
+                                Genera email de venta suave usando storytelling
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">143</span>
+                                Desarrolla emails de upsell y cross-sell post-compra
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">144</span>
+                                Escribe email de disculpa por error en [situación]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">145</span>
+                                Crea campaña de email para lanzamiento de producto
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">146</span>
+                                Genera emails de testimonios y casos de éxito
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">147</span>
+                                Desarrolla emails de cumpleaños personalizados
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">148</span>
+                                Escribe emails de referidos con incentivos
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">149</span>
+                                Crea emails de contenido educativo sin venta directa
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">150</span>
+                                Genera email de última oportunidad con urgencia
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">151</span>
+                                Desarrolla emails segmentados por comportamiento
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">152</span>
+                                Escribe emails de win-back para clientes perdidos
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">153</span>
+                                Crea emails de encuesta post-compra
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">154</span>
+                                Genera emails de preventa exclusiva para VIPs
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">155</span>
+                                Desarrolla serie de emails para webinar
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría 7: YouTube -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>📺 YouTube (20 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">156</span>
+                                Crea títulos de YouTube optimizados para SEO sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">157</span>
+                                Escribe guiones de 10 minutos con alta retención para [contenido]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">158</span>
+                                Genera ideas de thumbnails clickables para [video]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">159</span>
+                                Desarrolla descripciones de YouTube con keywords para [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">160</span>
+                                Crea estructura de playlist temática sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">161</span>
+                                Escribe intros de 15 segundos que enganchen
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">162</span>
+                                Genera contenido para YouTube Shorts de [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">163</span>
+                                Desarrolla serie documental para YouTube sobre [tema]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">164</span>
+                                Crea CTAs efectivos para suscripciones y likes
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">165</span>
+                                Escribe guiones para videos de unboxing de [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">166</span>
+                                Genera ideas de colaboraciones para YouTube
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">167</span>
+                                Desarrolla contenido para YouTube Community Tab
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">168</span>
+                                Crea videos de "Top 10" sobre [categoría]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">169</span>
+                                Escribe guiones para tutoriales paso a paso
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">170</span>
+                                Genera contenido para YouTube Live sobre [evento]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">171</span>
+                                Desarrolla videos de reacción sobre [tema trending]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">172</span>
+                                Crea contenido de "Día en mi vida" para vlog
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">173</span>
+                                Escribe guiones para videos de comparación
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">174</span>
+                                Genera ideas de videos evergreen para [nicho]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">175</span>
+                                Desarrolla contenido Q&A para YouTube
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoría 8: Estrategias Avanzadas -->
+                    <div class="prompt-category">
+                        <div class="category-header" onclick="toggleCategory(this)">
+                            <span>🚀 Estrategias Avanzadas (25 prompts)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="category-content">
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">176</span>
+                                Crea funnel completo de ventas para [producto] con copy para cada etapa
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">177</span>
+                                Desarrolla estrategia omnicanal integrada para [marca]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">178</span>
+                                Genera matriz de contenido 90 días para [objetivo de negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">179</span>
+                                Escribe copy para test A/B en [plataforma]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">180</span>
+                                Crea estrategia de influencer marketing para [presupuesto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">181</span>
+                                Desarrolla plan de crisis management para redes sociales
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">182</span>
+                                Genera estrategia de growth hacking para [startup]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">183</span>
+                                Escribe copy para landing page de alta conversión
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">184</span>
+                                Crea estrategia de retargeting multicapa para [embudo]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">185</span>
+                                Desarrolla programa de embajadores de marca
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">186</span>
+                                Genera estrategia de contenido generado por usuarios
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">187</span>
+                                Escribe secuencia de nurturing para B2B
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">188</span>
+                                Crea estrategia de SEO local para [negocio]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">189</span>
+                                Desarrolla campaña de marketing viral para [producto]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">190</span>
+                                Genera estrategia de precios psicológicos
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">191</span>
+                                Escribe copy usando principios de neuromarketing
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">192</span>
+                                Crea estrategia de gamificación para [app/web]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">193</span>
+                                Desarrolla programa de fidelización innovador
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">194</span>
+                                Genera estrategia de marketing conversacional
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">195</span>
+                                Escribe copy para chatbot de ventas
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">196</span>
+                                Crea estrategia de marketing de guerrilla
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">197</span>
+                                Desarrolla campaña de co-marketing con [marca complementaria]
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">198</span>
+                                Genera estrategia de marketing estacional
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">199</span>
+                                Escribe copy para campaña de remarketing dinámico
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                            <div class="prompt-item" onclick="copyPrompt(this)">
+                                <span class="prompt-number">200</span>
+                                Crea estrategia completa de transformación digital para PYME tradicional
+                                <button class="copy-btn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let posts = [];
+        let currentImageData = null;
+
+        // Cargar datos guardados
+        function loadSavedData() {
+            const savedPosts = localStorage.getItem('simplePosts');
+            if (savedPosts) {
+                posts = JSON.parse(savedPosts);
+                renderPosts();
+            }
+        }
+
+        // Manejar upload de imagen
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageData = e.target.result;
+                    document.getElementById('previewImage').src = currentImageData;
+                    document.getElementById('previewImage').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Drag and Drop
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageData = e.target.result;
+                    document.getElementById('previewImage').src = currentImageData;
+                    document.getElementById('previewImage').style.display = 'block';
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        }
+
+        // Agregar publicación
+        function addPost() {
+            const date = document.getElementById('postDate').value;
+            const network = document.getElementById('network').value;
+            const description = document.getElementById('description').value;
+            
+            if (!date || !description) {
+                alert('Por favor completa la fecha y descripción');
+                return;
+            }
+            
+            if (!currentImageData) {
+                alert('Por favor sube una imagen');
+                return;
+            }
+            
+            const post = {
+                id: Date.now(),
+                date: date,
+                network: network,
+                description: description,
+                image: currentImageData
+            };
+            
+            posts.push(post);
+            posts.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            localStorage.setItem('simplePosts', JSON.stringify(posts));
+            renderPosts();
+            clearForm();
+            alert('✅ Publicación agregada exitosamente');
+        }
+
+        // Renderizar publicaciones
+        function renderPosts() {
+            const container = document.getElementById('postsList');
+            
+            if (posts.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #9ca3af;">No hay publicaciones guardadas</p>';
+                return;
+            }
+            
+            container.innerHTML = posts.map(post => `
+                <div class="post-item">
+                    <img src="${post.image}" alt="Post image">
+                    <div class="post-info">
+                        <h4>${formatDate(post.date)}</h4>
+                        <p>${getNetworkEmoji(post.network)} ${post.description.substring(0, 50)}...</p>
+                    </div>
+                    <div class="post-actions">
+                        <button class="btn-delete" onclick="deletePost(${post.id})">Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Eliminar publicación
+        function deletePost(id) {
+            if (confirm('¿Seguro que quieres eliminar esta publicación?')) {
+                posts = posts.filter(p => p.id !== id);
+                localStorage.setItem('simplePosts', JSON.stringify(posts));
+                renderPosts();
+            }
+        }
+
+        // Limpiar formulario
+        function clearForm() {
+            document.getElementById('postDate').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('previewImage').style.display = 'none';
+            currentImageData = null;
+        }
+
+        // Formatear fecha
+        function formatDate(dateString) {
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        // Obtener emoji de red social
+        function getNetworkEmoji(network) {
+            const emojis = {
+                instagram: '📷',
+                facebook: '👤',
+                linkedin: '💼',
+                twitter: '🐦',
+                tiktok: '🎵'
+            };
+            return emojis[network] || '📱';
+        }
+
+        // Toggle categorías de prompts
+        function toggleCategory(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('span:last-child');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                arrow.textContent = '▼';
+            } else {
+                content.classList.add('active');
+                arrow.textContent = '▲';
+            }
+        }
+
+        // Copiar prompt
+        function copyPrompt(element) {
+            const text = element.textContent.replace(/^\d+/, '').replace('Copiar', '').trim();
+            navigator.clipboard.writeText(text);
+            
+            const copyBtn = element.querySelector('.copy-btn');
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = '✅ Copiado';
+            copyBtn.style.background = '#10b981';
+            
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.background = '#10b981';
+            }, 2000);
+        }
+
+        // Buscar prompts
+        function searchPrompts(event) {
+            const searchTerm = event.target.value.toLowerCase();
+            const promptItems = document.querySelectorAll('.prompt-item');
+            
+            promptItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Expandir categorías con resultados
+            document.querySelectorAll('.prompt-category').forEach(category => {
+                const visibleItems = category.querySelectorAll('.prompt-item:not([style*="display: none"])');
+                if (visibleItems.length > 0 && searchTerm) {
+                    category.querySelector('.category-content').classList.add('active');
+                    category.querySelector('.category-header span:last-child').textContent = '▲';
+                }
+            });
+        }
+
+        // Inicializar
+        window.onload = function() {
+            loadSavedData();
+            
+            // Establecer fecha actual por defecto
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('postDate').value = today;
+        };
+    </script>
+</body>
+</html>
