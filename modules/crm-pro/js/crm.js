@@ -198,30 +198,52 @@ function mapActividad(row) {
 }
 
 async function loadInitialData() {
-  try {
-    const [clientes, oportunidades, tareas, actividades] = await Promise.all([
-      fetchClientes(),
-      fetchOportunidades(),
-      fetchTareas(),
-      fetchActividades()
-    ]);
+  const operations = [
+    { key: "clientes", fetcher: fetchClientes },
+    { key: "oportunidades", fetcher: fetchOportunidades },
+    { key: "tareas", fetcher: fetchTareas },
+    { key: "actividades", fetcher: fetchActividades }
+  ];
 
-    state.clientes = clientes;
-    state.oportunidades = oportunidades;
-    state.tareas = tareas;
-    state.actividades = actividades.sort(
-      (a, b) => new Date(b.fecha) - new Date(a.fecha)
-    );
+  const results = await Promise.allSettled(
+    operations.map((operation) => operation.fetcher())
+  );
 
-    actualizarTodasLasVistas();
-    cargarClientesEnSelect();
-    actualizarDashboard();
-    actualizarEstadisticasAlmacenamiento();
-  } catch (error) {
-    console.error("Error al cargar datos de Supabase", error);
+  const failedSections = [];
+
+  results.forEach((result, index) => {
+    const { key } = operations[index];
+
+    if (result.status === "fulfilled") {
+      const value = Array.isArray(result.value) ? result.value : [];
+
+      if (key === "actividades") {
+        state[key] = value.sort(
+          (a, b) => new Date(b.fecha) - new Date(a.fecha)
+        );
+      } else {
+        state[key] = value;
+      }
+    } else {
+      failedSections.push(key);
+      console.error(`Error al cargar ${key} desde Supabase`, result.reason);
+      state[key] = [];
+    }
+  });
+
+  actualizarTodasLasVistas();
+  cargarClientesEnSelect();
+  actualizarDashboard();
+  actualizarEstadisticasAlmacenamiento();
+
+  if (failedSections.length > 0) {
+    const sectionsLabel = failedSections
+      .map((key) => key.charAt(0).toUpperCase() + key.slice(1))
+      .join(", ");
+
     mostrarNotificacion(
-      "Ocurrió un problema al cargar la información desde Supabase.",
-      "danger"
+      `No fue posible cargar ${sectionsLabel} desde Supabase. Reintenta más tarde.`,
+      "warning"
     );
   }
 }
