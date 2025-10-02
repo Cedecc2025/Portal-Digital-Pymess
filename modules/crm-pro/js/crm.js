@@ -35,6 +35,8 @@ const DOM = {
   oportunidadModalTitle: null,
   oportunidadSubmitButton: null,
   tareaForm: null,
+  tareaModalTitle: null,
+  tareaSubmitButton: null,
   buscarClienteInput: null,
   buscarOportunidadInput: null,
   buscarTareaInput: null,
@@ -47,6 +49,7 @@ let currentUserId = null;
 let currentUsername = null;
 let editingClienteId = null;
 let editingOportunidadId = null;
+let editingTareaId = null;
 
 requireAuth();
 
@@ -91,6 +94,8 @@ function initializeDomReferences() {
     'button[type="submit"]'
   );
   DOM.tareaForm = document.getElementById("tareaForm");
+  DOM.tareaModalTitle = document.querySelector("#tareaModal .modal-title");
+  DOM.tareaSubmitButton = DOM.tareaForm?.querySelector('button[type="submit"]');
   DOM.buscarClienteInput = document.getElementById("buscarCliente");
   DOM.buscarOportunidadInput = document.getElementById("buscarOportunidad");
   DOM.buscarTareaInput = document.getElementById("buscarTarea");
@@ -401,6 +406,8 @@ function closeModal(modalId) {
     setOportunidadModalMode("create");
   } else if (modalId === "tareaModal" && DOM.tareaForm) {
     DOM.tareaForm.reset();
+    editingTareaId = null;
+    setTareaModalMode("create");
   }
 }
 
@@ -443,6 +450,20 @@ function setOportunidadModalMode(mode) {
   }
 }
 
+function setTareaModalMode(mode) {
+  if (!DOM.tareaModalTitle || !DOM.tareaSubmitButton) {
+    return;
+  }
+
+  if (mode === "edit") {
+    DOM.tareaModalTitle.textContent = "Editar Tarea";
+    DOM.tareaSubmitButton.textContent = "Actualizar";
+  } else {
+    DOM.tareaModalTitle.textContent = "Nueva Tarea";
+    DOM.tareaSubmitButton.textContent = "Guardar";
+  }
+}
+
 function openClienteModal() {
   editingClienteId = null;
   if (DOM.clienteForm) {
@@ -460,6 +481,16 @@ function openOportunidadModal() {
   setOportunidadModalMode("create");
   cargarClientesEnSelect();
   openModal("oportunidadModal");
+}
+
+function openTareaModal() {
+  editingTareaId = null;
+  if (DOM.tareaForm) {
+    DOM.tareaForm.reset();
+  }
+  setTareaModalMode("create");
+  cargarClientesEnSelect();
+  openModal("tareaModal");
 }
 
 function editarCliente(id) {
@@ -1060,13 +1091,14 @@ async function guardarTarea(event) {
   const estado = DOM.tareaForm.querySelector("#tareaEstado")?.value ?? "Pendiente";
   const fechaLimite = DOM.tareaForm.querySelector("#tareaFechaLimite")?.value ?? "";
   const descripcion = DOM.tareaForm.querySelector("#tareaDescripcion")?.value ?? "";
+  const isEditing = editingTareaId !== null;
+  const timestamp = new Date().toISOString();
 
   try {
-    const { data, error } = await supabaseClient
-      .from(TABLES.tareas)
-      .insert([
-        {
-          user_id: currentUserId,
+    if (isEditing) {
+      const { data, error } = await supabaseClient
+        .from(TABLES.tareas)
+        .update({
           titulo,
           cliente_id: clienteId,
           cliente_nombre: cliente?.nombre ?? (clienteId ? "Cliente" : "Sin cliente"),
@@ -1074,33 +1106,133 @@ async function guardarTarea(event) {
           estado,
           fecha_limite: fechaLimite || null,
           descripcion: descripcion || null,
-          created_at: new Date().toISOString()
+          updated_at: timestamp
+        })
+        .eq("user_id", currentUserId)
+        .eq("id", editingTareaId)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const tareaActualizada = mapTarea(data);
+      state.tareas = state.tareas.map((t) =>
+        t.id === tareaActualizada.id ? tareaActualizada : t
+      );
+
+      mostrarTareas();
+      actualizarDashboard();
+      actualizarEstadisticasAlmacenamiento();
+      mostrarIndicadorGuardado();
+      closeModal("tareaModal");
+      editingTareaId = null;
+
+      await registrarActividad(
+        "Tarea actualizada",
+        `Se actualizó la tarea ${tareaActualizada.titulo}`,
+        {
+          tareaId: tareaActualizada.id,
+          clienteId: tareaActualizada.clienteId
         }
-      ])
-      .select()
-      .single();
+      );
 
-    if (error) {
-      throw error;
+      mostrarNotificacion("Tarea actualizada exitosamente", "success");
+    } else {
+      const { data, error } = await supabaseClient
+        .from(TABLES.tareas)
+        .insert([
+          {
+            user_id: currentUserId,
+            titulo,
+            cliente_id: clienteId,
+            cliente_nombre:
+              cliente?.nombre ?? (clienteId ? "Cliente" : "Sin cliente"),
+            prioridad,
+            estado,
+            fecha_limite: fechaLimite || null,
+            descripcion: descripcion || null,
+            created_at: timestamp
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const tarea = mapTarea(data);
+      state.tareas = [tarea, ...state.tareas];
+
+      mostrarTareas();
+      actualizarDashboard();
+      actualizarEstadisticasAlmacenamiento();
+      mostrarIndicadorGuardado();
+      closeModal("tareaModal");
+
+      await registrarActividad("Tarea creada", `Nueva tarea: ${tarea.titulo}`, {
+        tareaId: tarea.id,
+        clienteId: tarea.clienteId
+      });
+
+      mostrarNotificacion("Tarea creada exitosamente", "success");
     }
-
-    const tarea = mapTarea(data);
-    state.tareas = [tarea, ...state.tareas];
-
-    mostrarTareas();
-    actualizarDashboard();
-    mostrarIndicadorGuardado();
-    closeModal("tareaModal");
-
-    await registrarActividad("Tarea creada", `Nueva tarea: ${tarea.titulo}`, {
-      tareaId: tarea.id,
-      clienteId: tarea.clienteId
-    });
-
-    mostrarNotificacion("Tarea creada exitosamente", "success");
   } catch (error) {
     console.error("Error al guardar tarea", error);
     mostrarNotificacion("No fue posible guardar la tarea.", "danger");
+  }
+}
+
+function editarTarea(id) {
+  if (!DOM.tareaForm) {
+    return;
+  }
+
+  const tarea = state.tareas.find((t) => t.id === id);
+
+  if (!tarea) {
+    mostrarNotificacion(
+      "No fue posible cargar la información de la tarea.",
+      "danger"
+    );
+    return;
+  }
+
+  editingTareaId = id;
+  DOM.tareaForm.reset();
+  setTareaModalMode("edit");
+  cargarClientesEnSelect();
+  openModal("tareaModal");
+
+  const tituloInput = DOM.tareaForm.querySelector("#tareaTitulo");
+  const clienteSelect = DOM.tareaForm.querySelector("#tareaCliente");
+  const prioridadSelect = DOM.tareaForm.querySelector("#tareaPrioridad");
+  const estadoSelect = DOM.tareaForm.querySelector("#tareaEstado");
+  const fechaLimiteInput = DOM.tareaForm.querySelector("#tareaFechaLimite");
+  const descripcionTextarea = DOM.tareaForm.querySelector("#tareaDescripcion");
+
+  if (tituloInput) {
+    tituloInput.value = tarea.titulo ?? "";
+  }
+  if (clienteSelect) {
+    clienteSelect.value =
+      tarea.clienteId !== null && tarea.clienteId !== undefined
+        ? String(tarea.clienteId)
+        : "";
+  }
+  if (prioridadSelect) {
+    prioridadSelect.value = tarea.prioridad ?? "Media";
+  }
+  if (estadoSelect) {
+    estadoSelect.value = tarea.estado ?? "Pendiente";
+  }
+  if (fechaLimiteInput) {
+    fechaLimiteInput.value = tarea.fechaLimite ?? "";
+  }
+  if (descripcionTextarea) {
+    descripcionTextarea.value = tarea.descripcion ?? "";
   }
 }
 
@@ -1249,6 +1381,7 @@ function renderTareas(tareas, emptyMessage) {
         <td>${tarea.fechaLimite || "-"}</td>
         <td>
           <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="editarTarea(${tarea.id})">Editar</button>
             <button class="btn btn-success" onclick="cambiarEstadoTarea(${tarea.id})">✓</button>
             <button class="btn btn-danger" onclick="eliminarTarea(${tarea.id})">Eliminar</button>
           </div>
@@ -1890,6 +2023,7 @@ window.showSection = showSection;
 window.openModal = openModal;
 window.openClienteModal = openClienteModal;
 window.openOportunidadModal = openOportunidadModal;
+window.openTareaModal = openTareaModal;
 window.closeModal = closeModal;
 window.guardarCliente = guardarCliente;
 window.editarCliente = editarCliente;
@@ -1902,6 +2036,7 @@ window.eliminarOportunidad = eliminarOportunidad;
 window.buscarOportunidades = buscarOportunidades;
 window.filtrarOportunidades = filtrarOportunidades;
 window.guardarTarea = guardarTarea;
+window.editarTarea = editarTarea;
 window.cambiarEstadoTarea = cambiarEstadoTarea;
 window.eliminarTarea = eliminarTarea;
 window.buscarTareas = buscarTareas;
