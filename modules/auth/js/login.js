@@ -43,6 +43,11 @@ const ACTIVE_MODULES = [
     name: "CRM Pro PYME",
     description: "Controla clientes, oportunidades y tareas con modo offline permanente.",
     icon: "📊"
+  },
+  {
+    name: "Herramientas Extra",
+    description: "Accede a recursos premium de marketing y automatizaciones potenciadas con IA.",
+    icon: "🛠️"
   }
 ];
 const KPI_ROTATION_INTERVAL = 1400;
