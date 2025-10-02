@@ -4,15 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Sistema Modular</title>
+    <link rel="icon" type="image/svg+xml" href="./public/img/portal-digital-favicon.svg" />
     <link rel="stylesheet" href="./public/css/global.css" />
     <link rel="stylesheet" href="./modules/auth/css/login.css" />
   </head>
   <body>
     <main class="login-container">
       <section class="login-card">
-        <header>
-          <h2>Acceso al Sistema</h2>
-          <p>Ingresa tus credenciales para continuar</p>
+        <header class="login-header">
+          <img
+            src="./public/img/portal-digital-logo.svg"
+            alt="Portal Digital Pymess"
+            class="login-logo"
+            width="180"
+            height="120"
+          />
+          <div class="login-header__copy">
+            <h1 class="login-title">Portal Digital PyMEs</h1>
+            <h2>Acceso al Sistema</h2>
+            <p>Ingresa tus credenciales para continuar</p>
+          </div>
         </header>
         <form id="loginForm" novalidate>
           <div class="form-group">

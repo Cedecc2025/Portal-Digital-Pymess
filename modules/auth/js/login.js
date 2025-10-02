@@ -23,6 +23,8 @@ let navigationHandler = (relativeTarget) => {
   gotoFromModule(import.meta.url, relativeTarget);
 };
 
+const SESSION_STORAGE_KEY = "sistemaModularSesion";
+
 const ACTIVE_MODULES = [
   {
     name: "Costos",
@@ -33,11 +35,6 @@ const ACTIVE_MODULES = [
     name: "Estrategias de Ventas",
     description: "Diseña campañas comerciales con métricas claras y accionables.",
     icon: "🚀"
-  },
-  {
-    name: "Gestión de Tareas",
-    description: "Organiza pendientes, responsables y fechas límite por proyecto.",
-    icon: "🗒️"
   },
   {
     name: "CRM Pro PYME",
@@ -85,7 +82,34 @@ export function initializeForm(feedbackElements = {}) {
     generalElement.textContent = "";
   }
 
+  hydrateRememberPreferences();
   startModuleRotation();
+}
+
+function hydrateRememberPreferences(storageKey = SESSION_STORAGE_KEY) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const storedSessionRaw = window.localStorage.getItem(storageKey);
+
+  if (!storedSessionRaw) {
+    return;
+  }
+
+  try {
+    const storedSession = JSON.parse(storedSessionRaw);
+
+    if (storedSession && storedSession.username && usernameInput) {
+      usernameInput.value = storedSession.username;
+    }
+
+    if (rememberMeInput) {
+      rememberMeInput.checked = true;
+    }
+  } catch (error) {
+    console.warn("No fue posible restaurar las preferencias del usuario.", error);
+  }
 }
 
 // Valida si el username cumple los criterios.
