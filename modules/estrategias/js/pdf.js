@@ -1,20 +1,20 @@
 // pdf.js
 // Genera un reporte PDF profesional a partir del estado de la estrategia.
 
+import { loadJsPdf } from "../../../lib/assetLoader.js";
 import { MARKETING_CHANNELS } from "./constants.js";
 
 /**
  * Construye el documento PDF de la estrategia utilizando jsPDF.
  * @param {import('./stateManager.js').StrategyState} state Estado completo del asistente.
  */
-export function generateStrategyPdf(state) {
+export async function generateStrategyPdf(state) {
   try {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert("No fue posible cargar el generador de PDF. Verifica tu conexión e inténtalo de nuevo.");
-      return;
+    const jsPDF = await loadJsPdf();
+    if (typeof jsPDF !== "function") {
+      throw new Error("Constructor jsPDF inválido");
     }
 
-    const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const margin = 15;
     let cursorY = margin;
@@ -69,7 +69,7 @@ export function generateStrategyPdf(state) {
     doc.save("estrategia-marketing.pdf");
   } catch (error) {
     console.error("Error al generar el PDF", error);
-    alert("No se pudo generar el PDF. Intenta nuevamente.");
+    throw error;
   }
 }
 
