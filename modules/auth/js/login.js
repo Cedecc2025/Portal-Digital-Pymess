@@ -38,6 +38,11 @@ const ACTIVE_MODULES = [
     name: "Gestión de Tareas",
     description: "Organiza pendientes, responsables y fechas límite por proyecto.",
     icon: "🗒️"
+  },
+  {
+    name: "CRM Pro PYME",
+    description: "Controla clientes, oportunidades y tareas con modo offline permanente.",
+    icon: "📊"
   }
 ];
 const KPI_ROTATION_INTERVAL = 1400;
