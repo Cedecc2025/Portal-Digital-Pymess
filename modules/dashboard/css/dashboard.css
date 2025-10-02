@@ -65,23 +65,25 @@ body {
 }
 
 .modules-grid {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3vw, 28px);
+  width: 100%;
 }
 
 .module-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
-  padding: 28px;
+  padding: clamp(24px, 4vw, 32px);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: clamp(16px, 3vw, 22px);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-decoration: none;
   color: inherit;
+  width: 100%;
 }
 
 .module-card__icon {
@@ -95,7 +97,7 @@ body {
 .module-card__content {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: clamp(8px, 2vw, 12px);
 }
 
 .module-card:hover {
@@ -139,7 +141,7 @@ body {
   }
 
   .modules-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: clamp(18px, 4vw, 24px);
   }
 }
 
@@ -171,12 +173,12 @@ body {
   }
 
   .modules-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 18px;
+    gap: clamp(16px, 6vw, 22px);
   }
 
   .module-card {
     padding: clamp(20px, 6vw, 26px);
+    gap: clamp(14px, 5vw, 18px);
   }
 
   .module-card__icon {
@@ -188,10 +190,6 @@ body {
 @media (max-width: 420px) {
   .dashboard-container {
     border-radius: 16px;
-  }
-
-  .modules-grid {
-    grid-template-columns: 1fr;
   }
 
   .header-actions {
