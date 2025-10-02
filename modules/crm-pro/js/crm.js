@@ -206,6 +206,27 @@ async function fetchClientes() {
   return (data ?? []).map(mapCliente);
 }
 
+async function refreshClientes({ suppressErrorNotification = false } = {}) {
+  try {
+    const clientes = await fetchClientes();
+    state.clientes = clientes;
+    mostrarClientes();
+    cargarClientesEnSelect();
+    actualizarDashboard();
+    actualizarEstadisticasAlmacenamiento();
+    return clientes;
+  } catch (error) {
+    console.error("Error al sincronizar clientes", error);
+    if (!suppressErrorNotification) {
+      mostrarNotificacion(
+        "No fue posible sincronizar los clientes con Supabase.",
+        "danger"
+      );
+    }
+    throw error;
+  }
+}
+
 async function fetchOportunidades() {
   const { data, error } = await supabaseClient
     .from(TABLES.oportunidades)
@@ -371,11 +392,7 @@ async function guardarCliente(event) {
     }
 
     const cliente = mapCliente(data);
-    state.clientes = [cliente, ...state.clientes];
-
-    mostrarClientes();
-    actualizarDashboard();
-    cargarClientesEnSelect();
+    await refreshClientes({ suppressErrorNotification: true });
     mostrarIndicadorGuardado();
     closeModal("clienteModal");
 
@@ -425,15 +442,12 @@ async function eliminarCliente(id) {
 
     const cliente = state.clientes.find((c) => c.id === id);
 
-    state.clientes = state.clientes.filter((c) => c.id !== id);
     state.oportunidades = state.oportunidades.filter((o) => o.clienteId !== id);
     state.tareas = state.tareas.filter((t) => t.clienteId !== id);
 
-    mostrarClientes();
+    await refreshClientes({ suppressErrorNotification: true });
     mostrarOportunidades();
     mostrarTareas();
-    actualizarDashboard();
-    actualizarEstadisticasAlmacenamiento();
 
     await registrarActividad(
       "Cliente eliminado",
