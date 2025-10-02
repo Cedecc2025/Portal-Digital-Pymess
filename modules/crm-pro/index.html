@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>CRM Pro PYME - Sistema Offline Permanente</title>
+    <link rel="stylesheet" href="../../public/css/global.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .save-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--success);
+            color: var(--white);
+            border-radius: 20px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: var(--light);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            color: var(--dark);
+        }
+
+        .nav-tab:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .main-content {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--white);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--light);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secondary);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: start;
+            gap: 15px;
+            padding: 15px;
+            border-left: 3px solid var(--primary);
+            background: var(--light);
+            margin-bottom: 15px;
+            border-radius: 10px;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .activity-meta {
+            color: var(--secondary);
+            font-size: 12px;
+        }
+
+        .data-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        .storage-info {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: var(--white);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .storage-info-icon {
+            font-size: 24px;
+        }
+
+        .storage-info-text {
+            flex: 1;
+        }
+
+        .storage-info-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .storage-info-detail {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .section-title {
+                font-size: 20px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--success);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9999;
+            animation: slideInRight 0.3s;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span>📊</span>
+                <span>CRM Pro</span>
+            </div>
+            <div class="save-indicator" id="saveIndicator">
+                <span>✓</span>
+                <span>Guardado automáticamente</span>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showSection(event, 'dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="showSection(event, 'clientes')">Clientes</button>
+                <button class="nav-tab" onclick="showSection(event, 'oportunidades')">Oportunidades</button>
+                <button class="nav-tab" onclick="showSection(event, 'tareas')">Tareas</button>
+                <button class="nav-tab" onclick="showSection(event, 'actividades')">Actividades</button>
+                <button class="nav-tab" onclick="showSection(event, 'configuracion')">⚙️</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Dashboard -->
+            <div id="dashboard" class="section active">
+                <div class="storage-info">
+                    <div class="storage-info-icon">💾</div>
+                    <div class="storage-info-text">
+                        <div class="storage-info-title">Sincronización con Supabase</div>
+                        <div class="storage-info-detail">Los datos se guardan automáticamente en la nube de Supabase y puedes exportar copias de seguridad locales cuando las necesites.</div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2 class="section-title">Dashboard</h2>
+                    <span id="currentDateTime"></span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalClientes">0</div>
+                        <div class="stat-label">Total Clientes</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <div class="stat-value" id="oportunidadesAbiertas">0</div>
+                        <div class="stat-label">Oportunidades Abiertas</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <div class="stat-value" id="tareasPendientes">0</div>
+                        <div class="stat-label">Tareas Pendientes</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                        <div class="stat-value">$<span id="valorTotal">0</span></div>
+                        <div class="stat-label">Valor Total Pipeline</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 15px;">Actividad Reciente</h3>
+                <div id="actividadReciente">
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <p>No hay actividad reciente</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clientes -->
+            <div id="clientes" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Gestión de Clientes</h2>
+                    <button class="btn btn-primary" onclick="openClienteModal()">
+                        <span>+</span> Nuevo Cliente
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="buscarCliente" placeholder="Buscar por nombre, email o teléfono..." onkeyup="buscarClientes()">
+                    <select class="form-select" style="width: auto;" onchange="filtrarClientes(this.value)">
+                        <option value="">Todos los tipos</option>
+                        <option value="Prospecto">Prospectos</option>
+                        <option value="Cliente">Clientes</option>
+                        <option value="VIP">VIP</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Empresa</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaClientes">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <div class="empty-icon">👥</div>
+                                    <p>No hay clientes registrados</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Oportunidades -->
+            <div id="oportunidades" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Pipeline de Ventas</h2>
+                    <button class="btn btn-primary" onclick="openOportunidadModal()">
+                        <span>+</span> Nueva Oportunidad
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="buscarOportunidad" placeholder="Buscar oportunidad..." onkeyup="buscarOportunidades()">
+                    <select class="form-select" style="width: auto;" onchange="filtrarOportunidades(this.value)">
+                        <option value="">Todas las etapas</option>
+                        <option value="Prospección">Prospección</option>
+                        <option value="Calificación">Calificación</option>
+                        <option value="Propuesta">Propuesta</option>
+                        <option value="Negociación">Negociación</option>
+                        <option value="Cerrada Ganada">Cerrada Ganada</option>
+                        <option value="Cerrada Perdida">Cerrada Perdida</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Cliente</th>
+                                <th>Valor</th>
+                                <th>Etapa</th>
+                                <th>Probabilidad</th>
+                                <th>Fecha Cierre</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaOportunidades">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <div class="empty-icon">💼</div>
+                                    <p>No hay oportunidades registradas</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tareas -->
+            <div id="tareas" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Gestión de Tareas</h2>
+                    <button class="btn btn-primary" onclick="openTareaModal()">
+                        <span>+</span> Nueva Tarea
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="buscarTarea" placeholder="Buscar tarea..." onkeyup="buscarTareas()">
+                    <select class="form-select" style="width: auto;" onchange="filtrarTareas(this.value)">
+                        <option value="">Todos los estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En Progreso">En Progreso</option>
+                        <option value="Completada">Completada</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Cliente</th>
+                                <th>Prioridad</th>
+                                <th>Estado</th>
+                                <th>Fecha Límite</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaTareas">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <div class="empty-icon">✅</div>
+                                    <p>No hay tareas registradas</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Actividades -->
+            <div id="actividades" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Historial de Actividades</h2>
+                </div>
+
+                <div id="listaActividades">
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>No hay actividades registradas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración -->
+            <div id="configuracion" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Configuración y Datos</h2>
+                </div>
+
+                <div class="storage-info">
+                    <div class="storage-info-icon">🔒</div>
+                    <div class="storage-info-text">
+                        <div class="storage-info-title">Datos Seguros y Privados</div>
+                        <div class="storage-info-detail">Todos tus datos están almacenados localmente en este dispositivo. Nadie más tiene acceso a ellos.</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 20px 0;">Gestión de Datos</h3>
+                
+                <div style="display: grid; gap: 15px; max-width: 600px;">
+                    <button class="btn btn-success" onclick="exportarDatos()">
+                        💾 Crear Copia de Seguridad (Exportar JSON)
+                    </button>
+                    
+                    <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">
+                        📁 Restaurar desde Copia de Seguridad (Importar JSON)
+                    </button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importarDatos(event)">
+                    
+                    <button class="btn btn-danger" onclick="limpiarDatos()">
+                        🗑️ Limpiar Todos los Datos
+                    </button>
+                </div>
+
+                <h3 style="margin: 30px 0 20px;">Estadísticas de Almacenamiento</h3>
+                <div id="storageStats" style="background: var(--light); padding: 20px; border-radius: 10px;">
+                    Calculando...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales -->
+    <!-- Modal Cliente -->
+    <div id="clienteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo Cliente</h3>
+                <button class="close-btn" onclick="closeModal('clienteModal')">&times;</button>
+            </div>
+            <form id="clienteForm" onsubmit="guardarCliente(event)">
+                <div class="form-group">
+                    <label class="form-label">Nombre Completo *</label>
+                    <input type="text" class="form-input" id="clienteNombre" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-input" id="clienteEmail" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Teléfono</label>
+                    <input type="tel" class="form-input" id="clienteTelefono">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Empresa</label>
+                    <input type="text" class="form-input" id="clienteEmpresa">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo de Cliente</label>
+                    <select class="form-select" id="clienteTipo">
+                        <option value="Prospecto">Prospecto</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="VIP">VIP</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notas</label>
+                    <textarea class="form-textarea" id="clienteNotas"></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('clienteModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Oportunidad -->
+    <div id="oportunidadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nueva Oportunidad</h3>
+                <button class="close-btn" onclick="closeModal('oportunidadModal')">&times;</button>
+            </div>
+            <form id="oportunidadForm" onsubmit="guardarOportunidad(event)">
+                <div class="form-group">
+                    <label class="form-label">Título *</label>
+                    <input type="text" class="form-input" id="oportunidadTitulo" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cliente *</label>
+                    <select class="form-select" id="oportunidadCliente" required>
+                        <option value="">Seleccionar cliente...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Valor Estimado *</label>
+                    <input type="number" class="form-input" id="oportunidadValor" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Etapa</label>
+                    <select class="form-select" id="oportunidadEtapa">
+                        <option value="Prospección">Prospección</option>
+                        <option value="Calificación">Calificación</option>
+                        <option value="Propuesta">Propuesta</option>
+                        <option value="Negociación">Negociación</option>
+                        <option value="Cerrada Ganada">Cerrada Ganada</option>
+                        <option value="Cerrada Perdida">Cerrada Perdida</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Probabilidad (%)</label>
+                    <input type="number" class="form-input" id="oportunidadProbabilidad" min="0" max="100" value="50">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fecha de Cierre Esperada</label>
+                    <input type="date" class="form-input" id="oportunidadFechaCierre">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción</label>
+                    <textarea class="form-textarea" id="oportunidadDescripcion"></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('oportunidadModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tarea -->
+    <div id="tareaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nueva Tarea</h3>
+                <button class="close-btn" onclick="closeModal('tareaModal')">&times;</button>
+            </div>
+            <form id="tareaForm" onsubmit="guardarTarea(event)">
+                <div class="form-group">
+                    <label class="form-label">Título *</label>
+                    <input type="text" class="form-input" id="tareaTitulo" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cliente Relacionado</label>
+                    <select class="form-select" id="tareaCliente">
+                        <option value="">Sin cliente asociado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Prioridad</label>
+                    <select class="form-select" id="tareaPrioridad">
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Urgente">Urgente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" id="tareaEstado">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En Progreso">En Progreso</option>
+                        <option value="Completada">Completada</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fecha Límite</label>
+                    <input type="date" class="form-input" id="tareaFechaLimite">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción</label>
+                    <textarea class="form-textarea" id="tareaDescripcion"></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('tareaModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Botones de Acción Flotantes -->
+    <div class="data-actions">
+        <button class="fab btn-success" onclick="exportarDatos()" title="Exportar Datos">
+            💾
+        </button>
+        <button class="fab btn-warning" onclick="document.getElementById('importFile').click()" title="Importar Datos">
+            📁
+        </button>
+    </div>
+
+    <script type="module" src="../../lib/supabaseClient.js"></script>
+    <script type="module" src="../../lib/authGuard.js"></script>
+    <script type="module" src="./js/crm.js"></script>
+</body>
+</html>
