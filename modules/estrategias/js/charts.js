@@ -1,6 +1,8 @@
 // charts.js
 // Crea visualizaciones simples para los KPIs utilizando Chart.js.
 
+import { loadChartJs } from "../../../lib/assetLoader.js";
+
 let trackingChart = null;
 
 // Destruye un gráfico previo si existe.
@@ -12,7 +14,7 @@ function disposeChart() {
 }
 
 // Dibuja el gráfico de barras con los datos de tracking mensual.
-export function renderTrackingChart(canvasElement, months) {
+export async function renderTrackingChart(canvasElement, months) {
   disposeChart();
   if (!canvasElement) {
     return;
@@ -27,38 +29,43 @@ export function renderTrackingChart(canvasElement, months) {
     month.metrics.reduce((acc, metric) => acc + Number(metric.target ?? 0), 0)
   );
 
-  trackingChart = new window.Chart(canvasElement.getContext("2d"), {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Resultado",
-          backgroundColor: "#3b82f6",
-          borderRadius: 6,
-          data: totals
-        },
-        {
-          label: "Meta",
-          backgroundColor: "#10b981",
-          borderRadius: 6,
-          data: targets
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: "bottom"
-        }
+  try {
+    const Chart = await loadChartJs();
+    trackingChart = new Chart(canvasElement.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Resultado",
+            backgroundColor: "#3b82f6",
+            borderRadius: 6,
+            data: totals
+          },
+          {
+            label: "Meta",
+            backgroundColor: "#10b981",
+            borderRadius: 6,
+            data: targets
+          }
+        ]
       },
-      scales: {
-        y: {
-          beginAtZero: true
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom"
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
         }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error("No se pudo renderizar el gráfico de seguimiento", error);
+  }
 }

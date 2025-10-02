@@ -4,6 +4,7 @@
 import { supabaseClient } from "../../../lib/supabaseClient.js";
 import { getCurrentUser } from "../../../lib/authGuard.js";
 import { gotoFromModule } from "../../../lib/pathUtil.js";
+import { loadChartJs } from "../../../lib/assetLoader.js";
 
 const STORAGE_KEYS = {
   products: "costosModuleProducts",
@@ -111,6 +112,23 @@ const SUPABASE_TABLES = {
   transactions: "flujo_caja",
   users: "usuarios"
 };
+
+let ChartConstructor = null;
+
+async function ensureChartLibrary() {
+  if (ChartConstructor) {
+    return ChartConstructor;
+  }
+
+  try {
+    ChartConstructor = await loadChartJs();
+    return ChartConstructor;
+  } catch (error) {
+    ChartConstructor = null;
+    console.error("No se pudo cargar Chart.js", error);
+    throw error;
+  }
+}
 
 // Desplaza suavemente el elemento indicado para que quede visible al usuario.
 function scrollElementIntoView(targetElement) {
@@ -1872,7 +1890,7 @@ function updateSaldoCardColor(saldo) {
 
 // Actualiza el gráfico de flujo de caja utilizando Chart.js.
 function actualizarGraficoFlujo(transactions) {
-  if (!elements.charts.flujo || !window.Chart) {
+  if (!elements.charts.flujo) {
     return;
   }
 
@@ -1983,7 +2001,7 @@ function updateEstadoCardColor(resultado) {
 
 // Actualiza el gráfico de márgenes por producto.
 function actualizarGraficoMargen(margenes) {
-  if (!elements.charts.margen || !window.Chart) {
+  if (!elements.charts.margen) {
     return;
   }
 
@@ -1997,7 +2015,7 @@ function actualizarGraficoMargen(margenes) {
 
 // Actualiza el gráfico del punto de equilibrio.
 function actualizarGraficoEquilibrio(unidades, ventas, costosFijos) {
-  if (!elements.charts.equilibrio || !window.Chart) {
+  if (!elements.charts.equilibrio) {
     return;
   }
 
@@ -2200,20 +2218,22 @@ function getCurrentMonthValue() {
 }
 
 // Inicializa las instancias de Chart.js necesarias.
-function createCharts() {
-  if (!window.Chart) {
-    return;
-  }
+async function createCharts() {
+  try {
+    const Chart = await ensureChartLibrary();
+    if (!Chart) {
+      return;
+    }
 
-  const flujoContext = document.getElementById("flujoChart");
-  const margenContext = document.getElementById("margenChart");
-  const equilibrioContext = document.getElementById("equilibrioChart");
+    const flujoContext = document.getElementById("flujoChart");
+    const margenContext = document.getElementById("margenChart");
+    const equilibrioContext = document.getElementById("equilibrioChart");
 
-  if (flujoContext) {
-    elements.charts.flujo = new window.Chart(flujoContext, {
-      type: "line",
-      data: {
-        labels: [],
+    if (flujoContext) {
+      elements.charts.flujo = new Chart(flujoContext, {
+        type: "line",
+        data: {
+          labels: [],
         datasets: [
           {
             label: "Ingresos",
@@ -2285,13 +2305,13 @@ function createCharts() {
         }
       }
     });
-  }
+    }
 
-  if (margenContext) {
-    elements.charts.margen = new window.Chart(margenContext, {
-      type: "bar",
-      data: {
-        labels: [],
+    if (margenContext) {
+      elements.charts.margen = new Chart(margenContext, {
+        type: "bar",
+        data: {
+          labels: [],
         datasets: [
           {
             label: "Margen %",
@@ -2340,13 +2360,13 @@ function createCharts() {
         }
       }
     });
-  }
+    }
 
-  if (equilibrioContext) {
-    elements.charts.equilibrio = new window.Chart(equilibrioContext, {
-      type: "doughnut",
-      data: {
-        labels: ["Equilibrio", "Costos"],
+    if (equilibrioContext) {
+      elements.charts.equilibrio = new Chart(equilibrioContext, {
+        type: "doughnut",
+        data: {
+          labels: ["Equilibrio", "Costos"],
         datasets: [
           {
             data: [],
@@ -2380,6 +2400,9 @@ function createCharts() {
         }
       }
     });
+    }
+  } catch (error) {
+    console.error("No se pudieron inicializar los gráficos financieros", error);
   }
 }
 
@@ -2501,23 +2524,6 @@ function cacheElements() {
   };
 }
 
-// Espera a que Chart.js esté disponible antes de crear gráficos.
-function waitForChartLibrary() {
-  return new Promise((resolve) => {
-    if (window.Chart) {
-      resolve();
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      if (window.Chart) {
-        window.clearInterval(intervalId);
-        resolve();
-      }
-    }, 50);
-  });
-}
-
 // Inicializa el módulo asegurando que todos los recursos estén listos.
 async function initializeModule() {
   if (typeof document === "undefined") {
@@ -2539,8 +2545,7 @@ async function initializeModule() {
   setupGreeting();
   registerEventListeners();
 
-  await waitForChartLibrary();
-  createCharts();
+  await createCharts();
   await syncAllDataFromSupabase();
   refrescarTodosLosPaneles();
 

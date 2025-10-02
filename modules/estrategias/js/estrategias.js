@@ -847,9 +847,17 @@ function renderTrackingStep(state) {
   contentArea.querySelector("#addMonth").addEventListener("click", () => {
     addDynamicRow(".tracking-list", renderMonthRow());
   });
-  renderTrackingChart(contentArea.querySelector("#trackingChart"), state.monthlyTracking.months.length ? state.monthlyTracking.months : [
-    { label: "2024-01", metrics: state.kpis.map((kpi) => ({ kpi: kpi.name, target: kpi.target, actual: 0 })) }
-  ]);
+  void renderTrackingChart(
+    contentArea.querySelector("#trackingChart"),
+    state.monthlyTracking.months.length
+      ? state.monthlyTracking.months
+      : [
+          {
+            label: "2024-01",
+            metrics: state.kpis.map((kpi) => ({ kpi: kpi.name, target: kpi.target, actual: 0 }))
+          }
+        ]
+  );
 }
 
 // Renderiza el paso final con resumen y acciones.
@@ -908,11 +916,18 @@ function renderReportStep(state) {
       console.error(error);
     }
   });
-  contentArea.querySelector("#downloadPdf").addEventListener("click", () => {
-    generateStrategyPdf(state);
+  contentArea.querySelector("#downloadPdf").addEventListener("click", async () => {
     const message = contentArea.querySelector("#confirmationMessage");
-    if (message) {
-      message.textContent = "📄 Reporte PDF generado correctamente.";
+    try {
+      await generateStrategyPdf(state);
+      if (message) {
+        message.textContent = "📄 Reporte PDF generado correctamente.";
+      }
+    } catch (error) {
+      console.error("No se pudo generar el PDF", error);
+      if (message) {
+        message.textContent = "❌ No se pudo generar el reporte en PDF.";
+      }
     }
   });
   contentArea.querySelector("#goDashboard").addEventListener("click", () => {
