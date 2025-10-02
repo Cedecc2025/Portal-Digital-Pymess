@@ -30,27 +30,29 @@
           </div>
 
           <div class="header-actions">
-            <div class="dropdown">
-              <button class="btn btn-secondary" data-dropdown="dataMenu">
-                📊 Datos ▼
+            <div
+              class="currency-toggle"
+              role="group"
+              aria-label="Seleccionar moneda principal"
+            >
+              <button
+                class="currency-toggle__button currency-toggle__button--active"
+                type="button"
+                data-currency-toggle="CRC"
+              >
+                ₡ CRC
               </button>
-              <div id="dataMenu" class="dropdown-content">
-                <h3>Gestión de Datos</h3>
-                <button class="btn btn-success" data-action="exportar">
-                  💾 Exportar JSON
-                </button>
-                <label class="btn" for="fileInput">
-                  📁 Importar JSON
-                  <input type="file" id="fileInput" accept=".json" />
-                </label>
-                <button class="btn btn-danger" data-action="limpiar">
-                  🗑️ Limpiar Todo
-                </button>
-              </div>
+              <button
+                class="currency-toggle__button"
+                type="button"
+                data-currency-toggle="USD"
+              >
+                $ USD
+              </button>
             </div>
             <div class="dropdown">
-              <button class="btn" data-dropdown="currencyMenu">
-                <span id="monedaActual">₡ CRC</span> ▼
+              <button class="btn btn-secondary" data-dropdown="currencyMenu">
+                ⚙️ Configuración (<span id="monedaActual">₡ CRC</span>) ▼
               </button>
               <div id="currencyMenu" class="dropdown-content">
                 <h3>Configuración de Moneda</h3>
@@ -70,8 +72,8 @@
                 </div>
               </div>
             </div>
-            <button id="logoutButton" class="btn btn-logout" type="button">
-              🚪 Cerrar sesión
+            <button id="dashboardButton" class="btn btn-dashboard" type="button">
+              🏠 Volver al Dashboard
             </button>
           </div>
         </div>
