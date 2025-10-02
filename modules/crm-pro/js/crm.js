@@ -232,9 +232,9 @@ async function loadInitialData() {
       const value = Array.isArray(result.value) ? result.value : [];
 
       if (key === "actividades") {
-        state[key] = value.sort(
-          (a, b) => new Date(b.fecha) - new Date(a.fecha)
-        );
+        state[key] = value
+          .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+          .slice(0, 100);
       } else {
         state[key] = value;
       }
@@ -294,6 +294,34 @@ async function refreshClientes({ suppressErrorNotification = false } = {}) {
       );
     }
     throw error;
+  }
+}
+
+async function refreshActividades({ suppressErrorNotification = false } = {}) {
+  if (!currentUserId) {
+    return [];
+  }
+
+  try {
+    const actividades = await fetchActividades();
+
+    state.actividades = actividades.slice(0, 100);
+    mostrarActividades();
+    mostrarActividadReciente();
+    actualizarEstadisticasAlmacenamiento();
+
+    return state.actividades;
+  } catch (error) {
+    console.error("Error al sincronizar actividades", error);
+
+    if (!suppressErrorNotification) {
+      mostrarNotificacion(
+        "No fue posible sincronizar el historial de actividades.",
+        "warning"
+      );
+    }
+
+    return state.actividades;
   }
 }
 
@@ -1428,33 +1456,40 @@ async function registrarActividad(tipo, descripcion, metadata = {}) {
     return;
   }
 
+  const {
+    clienteId = null,
+    oportunidadId = null,
+    tareaId = null,
+    suppressNotification = false
+  } = metadata;
+
   try {
-    const { data, error } = await supabaseClient
-      .from(TABLES.actividades)
-      .insert([
-        {
-          user_id: currentUserId,
-          tipo,
-          descripcion,
-          fecha: new Date().toISOString(),
-          cliente_id: metadata.clienteId ?? null,
-          oportunidad_id: metadata.oportunidadId ?? null,
-          tarea_id: metadata.tareaId ?? null
-        }
-      ])
-      .select()
-      .single();
+    const { error } = await supabaseClient.from(TABLES.actividades).insert([
+      {
+        user_id: currentUserId,
+        tipo,
+        descripcion,
+        fecha: new Date().toISOString(),
+        cliente_id: clienteId,
+        oportunidad_id: oportunidadId,
+        tarea_id: tareaId
+      }
+    ]);
 
     if (error) {
       throw error;
     }
 
-    const actividad = mapActividad(data);
-    state.actividades = [actividad, ...state.actividades].slice(0, 100);
-    mostrarActividades();
-    mostrarActividadReciente();
+    await refreshActividades({ suppressErrorNotification: true });
   } catch (error) {
     console.error("No fue posible registrar la actividad", error);
+
+    if (!suppressNotification) {
+      mostrarNotificacion(
+        "No fue posible registrar la actividad en Supabase.",
+        "warning"
+      );
+    }
   }
 }
 
