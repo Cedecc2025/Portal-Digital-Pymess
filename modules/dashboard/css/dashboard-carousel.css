@@ -1,8 +1,8 @@
 :root {
   --card-max: 1080px;
   --viewport-max: 920px;
-  --gutter: 56px;
-  --edge: 14px;
+  --gutter: clamp(28px, 6vw, 56px);
+  --edge: clamp(10px, 3vw, 14px);
 }
 
 .tasks-card {
@@ -411,7 +411,7 @@
 @media (max-width: 480px) {
   :root {
     --viewport-max: 420px;
-    --gutter: 44px;
+    --gutter: clamp(24px, 8vw, 44px);
   }
 
   .tasks-card {
@@ -433,5 +433,21 @@
 
   .task-card__assignments {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --viewport-max: 340px;
+    --gutter: clamp(20px, 10vw, 32px);
+  }
+
+  .carousel-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .tasks-card {
+    padding: 12px 10px 48px;
   }
 }

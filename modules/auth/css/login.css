@@ -11,7 +11,7 @@ body {
   align-items: center;
   justify-content: center;
   color: #1f2937;
-  padding: 24px;
+  padding: clamp(16px, 4vw, 32px);
 }
 
 .login-container {
@@ -23,7 +23,7 @@ body {
 
 .login-card {
   background-color: #ffffff;
-  padding: 48px 44px;
+  padding: clamp(32px, 5vw, 48px) clamp(24px, 4vw, 44px);
   border-radius: 28px;
   width: min(480px, 100%);
   margin: 0 auto;
@@ -31,7 +31,7 @@ body {
   border: 1px solid rgba(37, 99, 235, 0.16);
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: clamp(24px, 4vw, 32px);
   position: relative;
   overflow: hidden;
 }
@@ -47,7 +47,7 @@ body {
 .login-header {
   display: grid;
   grid-template-columns: 140px 1fr;
-  gap: 24px;
+  gap: clamp(16px, 3vw, 24px);
   align-items: center;
 }
 
@@ -206,7 +206,7 @@ body {
 
 .primary-button {
   width: 100%;
-  padding: 16px;
+  padding: clamp(14px, 3.5vw, 16px);
   border-radius: 16px;
   background: linear-gradient(135deg, #1d4ed8, #2563eb);
   border: none;
@@ -315,14 +315,6 @@ body {
 }
 
 @media (max-width: 960px) {
-  body {
-    padding: 16px;
-  }
-
-  .login-card {
-    padding: 40px 28px;
-  }
-
   .login-header {
     grid-template-columns: 1fr;
     text-align: center;
@@ -332,27 +324,56 @@ body {
   .login-header__copy {
     align-items: center;
   }
+}
 
-  .login-title {
-    letter-spacing: 0.3em;
+@media (max-width: 680px) {
+  body {
+    padding: clamp(12px, 6vw, 20px);
+  }
+
+  .login-card {
+    border-radius: 24px;
+  }
+
+  .module-kpi {
+    padding: clamp(18px, 5vw, 24px);
+  }
+
+  .module-highlight {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .module-icon {
+    justify-content: center;
   }
 }
 
 @media (max-width: 520px) {
   .login-card {
-    padding: 32px 22px;
-    gap: 26px;
+    padding: clamp(24px, 8vw, 32px) clamp(18px, 6vw, 24px);
+    gap: 24px;
   }
 
   .form-group input {
     padding: 12px 14px;
   }
+}
 
-  .primary-button {
-    padding: 14px;
+@media (max-width: 420px) {
+  .login-card {
+    border-radius: 20px;
   }
 
-  .module-kpi {
-    padding: 20px;
+  .login-logo {
+    width: 120px;
+  }
+
+  .login-card h2 {
+    font-size: 1.6rem;
+  }
+
+  .primary-button {
+    font-size: 0.95rem;
   }
 }
