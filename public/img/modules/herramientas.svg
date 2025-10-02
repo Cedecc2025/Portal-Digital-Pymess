@@ -1,1 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title"><title>Icono Herramientas</title><defs><linearGradient id="gradHerramientas" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#0f766e"/></linearGradient></defs><rect x="8" y="10" width="48" height="44" rx="14" fill="url(#gradHerramientas)"/><path d="M24 22l6 6-4 4-6-6-4 4 10 10 16-16-4-4 4-4" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Icono Herramientas</title>
+  <defs>
+    <linearGradient id="herramientasBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="toolMetal" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#d1d5db" />
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#herramientasBg)" />
+  <rect x="18" y="30" width="28" height="16" rx="4" fill="#065f46" opacity="0.3" />
+  <rect x="18" y="28" width="28" height="16" rx="4" fill="#065f46" />
+  <path d="M20 34h24" stroke="#34d399" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+  <path d="M20 38h24" stroke="#34d399" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+  <path d="M28 16l2 2-4 4 8 8 4-4 2 2c1.5 1.5 1.5 3.9 0 5.4l-1.5 1.5c-1.5 1.5-3.9 1.5-5.4 0L24 27.4c-2.1-2.1-2.1-5.5 0-7.6L27.4 16c1.5-1.5 3.9-1.5 5.4 0z" fill="url(#toolMetal)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round" />
+  <path d="M36 22l6 6" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" opacity="0.4" />
+  <path d="M24 44h16" stroke="#bbf7d0" stroke-width="2" stroke-linecap="round" />
+  <circle cx="24" cy="36" r="1.8" fill="#bbf7d0" />
+  <circle cx="32" cy="36" r="1.8" fill="#bbf7d0" />
+  <circle cx="40" cy="36" r="1.8" fill="#bbf7d0" />
+</svg>

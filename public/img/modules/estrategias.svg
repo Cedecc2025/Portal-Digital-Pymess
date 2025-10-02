@@ -1,1 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title"><title>Icono Estrategias</title><defs><linearGradient id="gradEstrategias" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs><circle cx="32" cy="32" r="26" fill="url(#gradEstrategias)"/><path d="M20 38l8-8 6 6 10-10" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="21" cy="39" r="4" fill="#fff"/><circle cx="32" cy="28" r="4" fill="#fff"/><circle cx="44" cy="26" r="4" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Icono Estrategias</title>
+  <defs>
+    <linearGradient id="estrategiasBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c" />
+      <stop offset="100%" stop-color="#f97316" />
+    </linearGradient>
+    <linearGradient id="estrategiasArrow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed" />
+      <stop offset="100%" stop-color="#fed7aa" />
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#estrategiasBg)" />
+  <circle cx="32" cy="32" r="16" fill="none" stroke="#fff7ed" stroke-width="3" stroke-dasharray="6 4" stroke-linecap="round" />
+  <circle cx="32" cy="32" r="10" fill="none" stroke="#fef3c7" stroke-width="2" />
+  <circle cx="32" cy="32" r="4" fill="#fef3c7" />
+  <path d="M20 44l8-14 4 6 12-18" fill="none" stroke="#fff7ed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M32 28l11-11" stroke="#fef3c7" stroke-width="3" stroke-linecap="round" opacity="0.7" />
+  <path d="M41 18l7-2-2 7" fill="none" stroke="#fff7ed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M41.5 18l8-2.2-2.3 7.8-5.7-5.6z" fill="url(#estrategiasArrow)" stroke="#fff7ed" stroke-width="1.6" stroke-linejoin="round" />
+  <path d="M24 37l-4 7" stroke="#fed7aa" stroke-width="2" stroke-linecap="round" opacity="0.85" />
+</svg>
