@@ -170,6 +170,15 @@ body {
   color: #ffffff;
 }
 
+.currency-display {
+  background: #edf2f7;
+  border-radius: 999px;
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.18);
+  color: var(--color-subtle);
+  font-weight: 600;
+  padding: 8px 16px;
+}
+
 .tabs {
   border-bottom: 1px solid #e2e8f0;
   display: flex;
