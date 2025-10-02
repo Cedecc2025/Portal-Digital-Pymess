@@ -2,11 +2,12 @@
  * Estilos para la pantalla de registro de usuarios. */
 
 body {
-  background: linear-gradient(135deg, #14532d, #0f172a);
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #0f172a;
 }
 
 .register-container {
@@ -18,26 +19,40 @@ body {
 }
 
 .register-card {
-  background-color: rgba(15, 23, 42, 0.92);
+  background-color: rgba(255, 255, 255, 0.95);
   padding: 44px 40px;
   border-radius: 24px;
-  width: min(460px, 100%);
-  box-shadow: 0 30px 60px rgba(2, 6, 23, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  width: min(480px, 100%);
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
-.register-card header {
-  margin-bottom: 24px;
+.register-header {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 28px;
 }
 
-.register-card h1 {
-  margin: 0 0 8px;
-  font-size: 28px;
+.register-logo {
+  width: 160px;
+  height: auto;
 }
 
-.register-card p {
+.register-header__copy h1 {
+  margin: 0 0 4px;
+  font-size: 26px;
+}
+
+.register-header__copy h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.register-header__copy p {
   margin: 0;
-  color: rgba(226, 232, 240, 0.8);
+  color: #475569;
 }
 
 .form-group {
@@ -53,23 +68,31 @@ body {
 
 .form-group input {
   padding: 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background-color: rgba(15, 23, 42, 0.7);
-  color: #e2e8f0;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background-color: rgba(248, 250, 252, 0.9);
+  color: #0f172a;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: #94a3b8;
 }
 
 .form-group input:focus {
-  outline: 2px solid #34d399;
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+  background-color: #fff;
 }
 
 .primary-button {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #34d399, #10b981);
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
   border: none;
-  color: #0f172a;
+  color: #fff;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -77,7 +100,12 @@ body {
 
 .primary-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.3);
+}
+
+.primary-button:focus-visible {
+  outline: 2px solid rgba(14, 165, 233, 0.5);
+  outline-offset: 3px;
 }
 
 .feedback {
@@ -85,7 +113,7 @@ body {
   margin-top: 8px;
   min-height: 18px;
   font-size: 0.85rem;
-  color: #fca5a5;
+  color: #dc2626;
 }
 
 footer {
@@ -94,7 +122,7 @@ footer {
 }
 
 .link {
-  color: #34d399;
+  color: #2563eb;
   text-decoration: none;
   font-weight: 600;
 }
@@ -104,16 +132,25 @@ footer {
 }
 
 .link:focus {
-  outline: 2px solid rgba(52, 211, 153, 0.6);
+  outline: 2px solid rgba(37, 99, 235, 0.4);
   outline-offset: 2px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
   .register-container {
     padding: 24px;
   }
 
   .register-card {
-    padding: 32px 24px;
+    padding: 36px 24px;
+  }
+
+  .register-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .register-logo {
+    width: 140px;
   }
 }
