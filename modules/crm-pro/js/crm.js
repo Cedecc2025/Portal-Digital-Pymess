@@ -47,6 +47,19 @@ let editingClienteId = null;
 
 requireAuth();
 
+function normalizeUserId(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const numericValue = Number(value);
+  if (Number.isFinite(numericValue)) {
+    return numericValue;
+  }
+
+  return value;
+}
+
 function initializeDomReferences() {
   if (typeof document === "undefined") {
     return;
@@ -97,12 +110,13 @@ function attachGlobalListeners() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function bootstrapCrmModule() {
   initializeDomReferences();
   attachGlobalListeners();
 
   currentUsername = getCurrentUsername();
-  currentUserId = await resolveCurrentUserId();
+  const resolvedUserId = await resolveCurrentUserId();
+  currentUserId = normalizeUserId(resolvedUserId);
 
   if (!currentUserId) {
     mostrarNotificacion(
@@ -115,7 +129,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadInitialData();
   actualizarFechaHora();
   setInterval(actualizarFechaHora, 1000);
-});
+}
+
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootstrapCrmModule, {
+      once: true
+    });
+  } else {
+    bootstrapCrmModule();
+  }
+}
 
 function mapCliente(row) {
   return {
@@ -190,6 +214,7 @@ async function loadInitialData() {
     );
 
     actualizarTodasLasVistas();
+    cargarClientesEnSelect();
     actualizarDashboard();
     actualizarEstadisticasAlmacenamiento();
   } catch (error) {
