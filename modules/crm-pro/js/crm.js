@@ -32,6 +32,8 @@ const DOM = {
   clienteModalTitle: null,
   clienteSubmitButton: null,
   oportunidadForm: null,
+  oportunidadModalTitle: null,
+  oportunidadSubmitButton: null,
   tareaForm: null,
   buscarClienteInput: null,
   buscarOportunidadInput: null,
@@ -44,6 +46,7 @@ const DOM = {
 let currentUserId = null;
 let currentUsername = null;
 let editingClienteId = null;
+let editingOportunidadId = null;
 
 requireAuth();
 
@@ -81,6 +84,12 @@ function initializeDomReferences() {
     'button[type="submit"]'
   );
   DOM.oportunidadForm = document.getElementById("oportunidadForm");
+  DOM.oportunidadModalTitle = document.querySelector(
+    "#oportunidadModal .modal-title"
+  );
+  DOM.oportunidadSubmitButton = DOM.oportunidadForm?.querySelector(
+    'button[type="submit"]'
+  );
   DOM.tareaForm = document.getElementById("tareaForm");
   DOM.buscarClienteInput = document.getElementById("buscarCliente");
   DOM.buscarOportunidadInput = document.getElementById("buscarOportunidad");
@@ -388,6 +397,8 @@ function closeModal(modalId) {
     setClienteModalMode("create");
   } else if (modalId === "oportunidadModal" && DOM.oportunidadForm) {
     DOM.oportunidadForm.reset();
+    editingOportunidadId = null;
+    setOportunidadModalMode("create");
   } else if (modalId === "tareaModal" && DOM.tareaForm) {
     DOM.tareaForm.reset();
   }
@@ -418,6 +429,20 @@ function setClienteModalMode(mode) {
   }
 }
 
+function setOportunidadModalMode(mode) {
+  if (!DOM.oportunidadModalTitle || !DOM.oportunidadSubmitButton) {
+    return;
+  }
+
+  if (mode === "edit") {
+    DOM.oportunidadModalTitle.textContent = "Editar Oportunidad";
+    DOM.oportunidadSubmitButton.textContent = "Actualizar";
+  } else {
+    DOM.oportunidadModalTitle.textContent = "Nueva Oportunidad";
+    DOM.oportunidadSubmitButton.textContent = "Guardar";
+  }
+}
+
 function openClienteModal() {
   editingClienteId = null;
   if (DOM.clienteForm) {
@@ -425,6 +450,16 @@ function openClienteModal() {
   }
   setClienteModalMode("create");
   openModal("clienteModal");
+}
+
+function openOportunidadModal() {
+  editingOportunidadId = null;
+  if (DOM.oportunidadForm) {
+    DOM.oportunidadForm.reset();
+  }
+  setOportunidadModalMode("create");
+  cargarClientesEnSelect();
+  openModal("oportunidadModal");
 }
 
 function editarCliente(id) {
@@ -450,6 +485,75 @@ function editarCliente(id) {
 
   setClienteModalMode("edit");
   openModal("clienteModal");
+}
+
+function editarOportunidad(id) {
+  if (!DOM.oportunidadForm) {
+    return;
+  }
+
+  const oportunidad = state.oportunidades.find((op) => op.id === id);
+
+  if (!oportunidad) {
+    mostrarNotificacion(
+      "No fue posible cargar la información de la oportunidad.",
+      "danger"
+    );
+    return;
+  }
+
+  editingOportunidadId = id;
+  DOM.oportunidadForm.reset();
+  setOportunidadModalMode("edit");
+  openModal("oportunidadModal");
+
+  const tituloInput = DOM.oportunidadForm.querySelector("#oportunidadTitulo");
+  const clienteSelect = DOM.oportunidadForm.querySelector(
+    "#oportunidadCliente"
+  );
+  const valorInput = DOM.oportunidadForm.querySelector("#oportunidadValor");
+  const etapaSelect = DOM.oportunidadForm.querySelector("#oportunidadEtapa");
+  const probabilidadInput = DOM.oportunidadForm.querySelector(
+    "#oportunidadProbabilidad"
+  );
+  const fechaCierreInput = DOM.oportunidadForm.querySelector(
+    "#oportunidadFechaCierre"
+  );
+  const descripcionTextarea = DOM.oportunidadForm.querySelector(
+    "#oportunidadDescripcion"
+  );
+
+  if (tituloInput) {
+    tituloInput.value = oportunidad.titulo ?? "";
+  }
+  if (clienteSelect) {
+    clienteSelect.value =
+      oportunidad.clienteId !== null && oportunidad.clienteId !== undefined
+        ? String(oportunidad.clienteId)
+        : "";
+  }
+  if (valorInput) {
+    valorInput.value =
+      oportunidad.valor !== undefined && oportunidad.valor !== null
+        ? String(oportunidad.valor)
+        : "";
+  }
+  if (etapaSelect) {
+    etapaSelect.value = oportunidad.etapa ?? "Prospección";
+  }
+  if (probabilidadInput) {
+    probabilidadInput.value =
+      oportunidad.probabilidad !== undefined &&
+      oportunidad.probabilidad !== null
+        ? String(oportunidad.probabilidad)
+        : "0";
+  }
+  if (fechaCierreInput) {
+    fechaCierreInput.value = oportunidad.fechaCierre ?? "";
+  }
+  if (descripcionTextarea) {
+    descripcionTextarea.value = oportunidad.descripcion ?? "";
+  }
 }
 
 async function guardarCliente(event) {
@@ -703,9 +807,9 @@ async function guardarOportunidad(event) {
 
   const titulo = DOM.oportunidadForm.querySelector("#oportunidadTitulo")?.value.trim();
   const clienteIdValue = DOM.oportunidadForm.querySelector("#oportunidadCliente")?.value;
-  const valor = Number(
-    DOM.oportunidadForm.querySelector("#oportunidadValor")?.value ?? 0
-  );
+  const valorInputValue =
+    DOM.oportunidadForm.querySelector("#oportunidadValor")?.value ?? 0;
+  const valor = Number(valorInputValue);
 
   if (!titulo || !clienteIdValue) {
     mostrarNotificacion(
@@ -718,54 +822,103 @@ async function guardarOportunidad(event) {
   const clienteId = Number(clienteIdValue);
   const cliente = state.clientes.find((c) => c.id === clienteId);
   const etapa = DOM.oportunidadForm.querySelector("#oportunidadEtapa")?.value ?? "Prospección";
-  const probabilidad = Number(
-    DOM.oportunidadForm.querySelector("#oportunidadProbabilidad")?.value ?? 0
-  );
+  const probabilidadInputValue =
+    DOM.oportunidadForm.querySelector("#oportunidadProbabilidad")?.value ?? 0;
+  const probabilidad = Number(probabilidadInputValue);
   const fechaCierre = DOM.oportunidadForm.querySelector("#oportunidadFechaCierre")?.value ?? "";
   const descripcion = DOM.oportunidadForm.querySelector("#oportunidadDescripcion")?.value ?? "";
+  const isEditing = editingOportunidadId !== null;
+  const timestamp = new Date().toISOString();
 
   try {
-    const { data, error } = await supabaseClient
-      .from(TABLES.oportunidades)
-      .insert([
-        {
-          user_id: currentUserId,
+    if (isEditing) {
+      const { data, error } = await supabaseClient
+        .from(TABLES.oportunidades)
+        .update({
           titulo,
           cliente_id: clienteId,
           cliente_nombre: cliente?.nombre ?? "",
-          valor: valor || 0,
+          valor: Number.isFinite(valor) ? valor : 0,
           etapa,
-          probabilidad,
+          probabilidad: Number.isFinite(probabilidad) ? probabilidad : 0,
           fecha_cierre: fechaCierre || null,
           descripcion: descripcion || null,
-          created_at: new Date().toISOString()
-        }
-      ])
-      .select()
-      .single();
+          updated_at: timestamp
+        })
+        .eq("user_id", currentUserId)
+        .eq("id", editingOportunidadId)
+        .select()
+        .single();
 
-    if (error) {
-      throw error;
-    }
-
-    const oportunidad = mapOportunidad(data);
-    state.oportunidades = [oportunidad, ...state.oportunidades];
-
-    mostrarOportunidades();
-    actualizarDashboard();
-    mostrarIndicadorGuardado();
-    closeModal("oportunidadModal");
-
-    await registrarActividad(
-      "Oportunidad creada",
-      `Nueva oportunidad: ${oportunidad.titulo} - $${oportunidad.valor.toLocaleString()}`,
-      {
-        oportunidadId: oportunidad.id,
-        clienteId: clienteId
+      if (error) {
+        throw error;
       }
-    );
 
-    mostrarNotificacion("Oportunidad creada exitosamente", "success");
+      const oportunidadActualizada = mapOportunidad(data);
+      state.oportunidades = state.oportunidades.map((op) =>
+        op.id === oportunidadActualizada.id ? oportunidadActualizada : op
+      );
+
+      mostrarOportunidades();
+      actualizarDashboard();
+      actualizarEstadisticasAlmacenamiento();
+      mostrarIndicadorGuardado();
+      closeModal("oportunidadModal");
+
+      await registrarActividad(
+        "Oportunidad actualizada",
+        `Se actualizó la oportunidad ${oportunidadActualizada.titulo}`,
+        {
+          oportunidadId: oportunidadActualizada.id,
+          clienteId: oportunidadActualizada.clienteId ?? null
+        }
+      );
+
+      mostrarNotificacion("Oportunidad actualizada exitosamente", "success");
+    } else {
+      const { data, error } = await supabaseClient
+        .from(TABLES.oportunidades)
+        .insert([
+          {
+            user_id: currentUserId,
+            titulo,
+            cliente_id: clienteId,
+            cliente_nombre: cliente?.nombre ?? "",
+            valor: Number.isFinite(valor) ? valor : 0,
+            etapa,
+            probabilidad: Number.isFinite(probabilidad) ? probabilidad : 0,
+            fecha_cierre: fechaCierre || null,
+            descripcion: descripcion || null,
+            created_at: timestamp
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const oportunidad = mapOportunidad(data);
+      state.oportunidades = [oportunidad, ...state.oportunidades];
+
+      mostrarOportunidades();
+      actualizarDashboard();
+      actualizarEstadisticasAlmacenamiento();
+      mostrarIndicadorGuardado();
+      closeModal("oportunidadModal");
+
+      await registrarActividad(
+        "Oportunidad creada",
+        `Nueva oportunidad: ${oportunidad.titulo} - $${oportunidad.valor.toLocaleString()}`,
+        {
+          oportunidadId: oportunidad.id,
+          clienteId: clienteId
+        }
+      );
+
+      mostrarNotificacion("Oportunidad creada exitosamente", "success");
+    }
   } catch (error) {
     console.error("Error al guardar oportunidad", error);
     mostrarNotificacion("No fue posible guardar la oportunidad.", "danger");
@@ -865,6 +1018,7 @@ function renderOportunidades(oportunidades, emptyMessage) {
         <td>${op.fechaCierre || "-"}</td>
         <td>
           <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="editarOportunidad(${op.id})">Editar</button>
             <button class="btn btn-danger" onclick="eliminarOportunidad(${op.id})">Eliminar</button>
           </div>
         </td>
@@ -1245,6 +1399,7 @@ function getActividadIcon(tipo) {
     "Cliente actualizado": "✏️",
     "Cliente eliminado": "❌",
     "Oportunidad creada": "💼",
+    "Oportunidad actualizada": "✏️",
     "Oportunidad eliminada": "🗑️",
     "Tarea creada": "📝",
     "Tarea actualizada": "✏️",
@@ -1734,6 +1889,7 @@ function getClienteKey(cliente) {
 window.showSection = showSection;
 window.openModal = openModal;
 window.openClienteModal = openClienteModal;
+window.openOportunidadModal = openOportunidadModal;
 window.closeModal = closeModal;
 window.guardarCliente = guardarCliente;
 window.editarCliente = editarCliente;
@@ -1741,6 +1897,7 @@ window.eliminarCliente = eliminarCliente;
 window.buscarClientes = buscarClientes;
 window.filtrarClientes = filtrarClientes;
 window.guardarOportunidad = guardarOportunidad;
+window.editarOportunidad = editarOportunidad;
 window.eliminarOportunidad = eliminarOportunidad;
 window.buscarOportunidades = buscarOportunidades;
 window.filtrarOportunidades = filtrarOportunidades;
