@@ -29,6 +29,8 @@ const DOM = {
   storageStats: null,
   currentDateTime: null,
   clienteForm: null,
+  clienteModalTitle: null,
+  clienteSubmitButton: null,
   oportunidadForm: null,
   tareaForm: null,
   buscarClienteInput: null,
@@ -41,6 +43,7 @@ const DOM = {
 
 let currentUserId = null;
 let currentUsername = null;
+let editingClienteId = null;
 
 requireAuth();
 
@@ -58,6 +61,12 @@ function initializeDomReferences() {
   DOM.storageStats = document.getElementById("storageStats");
   DOM.currentDateTime = document.getElementById("currentDateTime");
   DOM.clienteForm = document.getElementById("clienteForm");
+  DOM.clienteModalTitle = document.querySelector(
+    "#clienteModal .modal-title"
+  );
+  DOM.clienteSubmitButton = DOM.clienteForm?.querySelector(
+    'button[type="submit"]'
+  );
   DOM.oportunidadForm = document.getElementById("oportunidadForm");
   DOM.tareaForm = document.getElementById("tareaForm");
   DOM.buscarClienteInput = document.getElementById("buscarCliente");
@@ -328,6 +337,8 @@ function closeModal(modalId) {
 
   if (modalId === "clienteModal" && DOM.clienteForm) {
     DOM.clienteForm.reset();
+    editingClienteId = null;
+    setClienteModalMode("create");
   } else if (modalId === "oportunidadModal" && DOM.oportunidadForm) {
     DOM.oportunidadForm.reset();
   } else if (modalId === "tareaModal" && DOM.tareaForm) {
@@ -344,6 +355,54 @@ function mostrarIndicadorGuardado() {
   setTimeout(() => {
     DOM.saveIndicator?.classList.remove("show");
   }, 2000);
+}
+
+function setClienteModalMode(mode) {
+  if (!DOM.clienteModalTitle || !DOM.clienteSubmitButton) {
+    return;
+  }
+
+  if (mode === "edit") {
+    DOM.clienteModalTitle.textContent = "Editar Cliente";
+    DOM.clienteSubmitButton.textContent = "Actualizar";
+  } else {
+    DOM.clienteModalTitle.textContent = "Nuevo Cliente";
+    DOM.clienteSubmitButton.textContent = "Guardar";
+  }
+}
+
+function openClienteModal() {
+  editingClienteId = null;
+  if (DOM.clienteForm) {
+    DOM.clienteForm.reset();
+  }
+  setClienteModalMode("create");
+  openModal("clienteModal");
+}
+
+function editarCliente(id) {
+  if (!DOM.clienteForm) {
+    return;
+  }
+
+  const cliente = state.clientes.find((c) => c.id === id);
+
+  if (!cliente) {
+    mostrarNotificacion("No fue posible cargar la información del cliente.", "danger");
+    return;
+  }
+
+  editingClienteId = id;
+
+  DOM.clienteForm.querySelector("#clienteNombre").value = cliente.nombre ?? "";
+  DOM.clienteForm.querySelector("#clienteEmail").value = cliente.email ?? "";
+  DOM.clienteForm.querySelector("#clienteTelefono").value = cliente.telefono ?? "";
+  DOM.clienteForm.querySelector("#clienteEmpresa").value = cliente.empresa ?? "";
+  DOM.clienteForm.querySelector("#clienteTipo").value = cliente.tipo ?? "Prospecto";
+  DOM.clienteForm.querySelector("#clienteNotas").value = cliente.notas ?? "";
+
+  setClienteModalMode("edit");
+  openModal("clienteModal");
 }
 
 async function guardarCliente(event) {
@@ -368,39 +427,83 @@ async function guardarCliente(event) {
   const empresa = DOM.clienteForm.querySelector("#clienteEmpresa")?.value.trim() ?? "";
   const tipo = DOM.clienteForm.querySelector("#clienteTipo")?.value ?? "Prospecto";
   const notas = DOM.clienteForm.querySelector("#clienteNotas")?.value ?? "";
+  const isEditing = editingClienteId !== null;
+  const timestamp = new Date().toISOString();
 
   try {
-    const { data, error } = await supabaseClient
-      .from(TABLES.clientes)
-      .insert([
-        {
-          user_id: currentUserId,
+    if (isEditing) {
+      const { data, error } = await supabaseClient
+        .from(TABLES.clientes)
+        .update({
           nombre,
           email,
           telefono: telefono || null,
           empresa: empresa || null,
           tipo,
           notas: notas || null,
-          created_at: new Date().toISOString()
+          updated_at: timestamp
+        })
+        .eq("user_id", currentUserId)
+        .eq("id", editingClienteId)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const clienteActualizado = mapCliente(data);
+      await refreshClientes({ suppressErrorNotification: true });
+      mostrarIndicadorGuardado();
+      closeModal("clienteModal");
+
+      await registrarActividad(
+        "Cliente actualizado",
+        `Se actualizó el cliente ${clienteActualizado.nombre}`,
+        {
+          clienteId: clienteActualizado.id
         }
-      ])
-      .select()
-      .single();
+      );
 
-    if (error) {
-      throw error;
+      mostrarNotificacion("Cliente actualizado exitosamente", "success");
+    } else {
+      const { data, error } = await supabaseClient
+        .from(TABLES.clientes)
+        .insert([
+          {
+            user_id: currentUserId,
+            nombre,
+            email,
+            telefono: telefono || null,
+            empresa: empresa || null,
+            tipo,
+            notas: notas || null,
+            created_at: timestamp,
+            updated_at: timestamp
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const cliente = mapCliente(data);
+      await refreshClientes({ suppressErrorNotification: true });
+      mostrarIndicadorGuardado();
+      closeModal("clienteModal");
+
+      await registrarActividad(
+        "Cliente creado",
+        `Se agregó el cliente ${cliente.nombre}`,
+        {
+          clienteId: cliente.id
+        }
+      );
+
+      mostrarNotificacion("Cliente agregado exitosamente", "success");
     }
-
-    const cliente = mapCliente(data);
-    await refreshClientes({ suppressErrorNotification: true });
-    mostrarIndicadorGuardado();
-    closeModal("clienteModal");
-
-    await registrarActividad("Cliente creado", `Se agregó el cliente ${cliente.nombre}`, {
-      clienteId: cliente.id
-    });
-
-    mostrarNotificacion("Cliente agregado exitosamente", "success");
   } catch (error) {
     console.error("Error al guardar cliente", error);
     mostrarNotificacion("No fue posible guardar el cliente. Intenta nuevamente.", "danger");
@@ -534,6 +637,7 @@ function renderClientes(clientes, emptyMessage) {
         <td><span class="badge badge-info">${cliente.tipo}</span></td>
         <td>
           <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="editarCliente(${cliente.id})">Editar</button>
             <button class="btn btn-danger" onclick="eliminarCliente(${cliente.id})">Eliminar</button>
           </div>
         </td>
@@ -1091,6 +1195,7 @@ function mostrarActividadReciente() {
 function getActividadIcon(tipo) {
   const iconos = {
     "Cliente creado": "👤",
+    "Cliente actualizado": "✏️",
     "Cliente eliminado": "❌",
     "Oportunidad creada": "💼",
     "Oportunidad eliminada": "🗑️",
@@ -1581,8 +1686,10 @@ function getClienteKey(cliente) {
 
 window.showSection = showSection;
 window.openModal = openModal;
+window.openClienteModal = openClienteModal;
 window.closeModal = closeModal;
 window.guardarCliente = guardarCliente;
+window.editarCliente = editarCliente;
 window.eliminarCliente = eliminarCliente;
 window.buscarClientes = buscarClientes;
 window.filtrarClientes = filtrarClientes;
