@@ -7,7 +7,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 20px;
+  padding: clamp(24px, 5vw, 48px) clamp(16px, 4vw, 32px);
   color: #0f172a;
   overflow-x: hidden;
 }
@@ -16,11 +16,11 @@ body {
   width: min(1100px, 100%);
   background-color: #ffffff;
   border-radius: 24px;
-  padding: 40px;
+  padding: clamp(28px, 4vw, 40px);
   box-shadow: 0 30px 70px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: clamp(24px, 3vw, 32px);
 }
 
 .dashboard-header {
@@ -45,6 +45,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .logout-button {
@@ -65,22 +66,24 @@ body {
 
 .modules-grid {
   display: grid;
-  gap: 24px;
+  gap: clamp(20px, 3vw, 28px);
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  width: 100%;
 }
 
 .module-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
-  padding: 28px;
+  padding: clamp(24px, 4vw, 32px);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: clamp(16px, 3vw, 22px);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-decoration: none;
   color: inherit;
+  width: 100%;
 }
 
 .module-card__icon {
@@ -94,7 +97,7 @@ body {
 .module-card__content {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: clamp(8px, 2vw, 12px);
 }
 
 .module-card:hover {
@@ -128,18 +131,75 @@ body {
   box-shadow: 0 15px 30px rgba(37, 99, 235, 0.25);
 }
 
+@media (max-width: 1024px) {
+  body {
+    padding: clamp(20px, 5vw, 36px) clamp(14px, 4vw, 24px);
+  }
+
+  .dashboard-container {
+    border-radius: 20px;
+  }
+
+  .modules-grid {
+    gap: clamp(18px, 4vw, 24px);
+  }
+}
+
+@media (max-width: 900px) {
+  .modules-grid {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 32px 24px;
+    padding: clamp(24px, 6vw, 32px);
   }
 
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
   }
 
   .header-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  body {
+    padding: clamp(18px, 7vw, 28px) clamp(12px, 6vw, 20px);
+  }
+
+  .dashboard-container {
+    border-radius: 18px;
+    padding: clamp(20px, 7vw, 26px);
+  }
+
+  .modules-grid {
+    gap: clamp(16px, 6vw, 22px);
+  }
+
+  .module-card {
+    padding: clamp(20px, 6vw, 26px);
+    gap: clamp(14px, 5vw, 18px);
+  }
+
+  .module-card__icon {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard-container {
+    border-radius: 16px;
+  }
+
+  .header-actions {
+    gap: 10px;
   }
 }

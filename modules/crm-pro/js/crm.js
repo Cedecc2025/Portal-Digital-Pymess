@@ -840,12 +840,12 @@ function renderClientes(clientes, emptyMessage) {
     .map(
       (cliente) => `
       <tr>
-        <td><strong>${cliente.nombre}</strong></td>
-        <td>${cliente.email}</td>
-        <td>${cliente.telefono || "-"}</td>
-        <td>${cliente.empresa || "-"}</td>
-        <td><span class="badge badge-info">${cliente.tipo}</span></td>
-        <td>
+        <td data-label="Nombre"><strong>${cliente.nombre}</strong></td>
+        <td data-label="Email">${cliente.email}</td>
+        <td data-label="Teléfono">${cliente.telefono || "-"}</td>
+        <td data-label="Empresa">${cliente.empresa || "-"}</td>
+        <td data-label="Tipo"><span class="badge badge-info">${cliente.tipo}</span></td>
+        <td data-label="Acciones">
           <div class="action-buttons">
             <button class="btn btn-secondary" onclick="editarCliente(${cliente.id})">Editar</button>
             <button class="btn btn-danger" onclick="eliminarCliente(${cliente.id})">Eliminar</button>
@@ -1069,13 +1069,13 @@ function renderOportunidades(oportunidades, emptyMessage) {
     .map(
       (op) => `
       <tr>
-        <td><strong>${op.titulo}</strong></td>
-        <td>${op.clienteNombre}</td>
-        <td>$${Number(op.valor ?? 0).toLocaleString()}</td>
-        <td><span class="badge ${getEtapaBadgeClass(op.etapa)}">${op.etapa}</span></td>
-        <td>${op.probabilidad}%</td>
-        <td>${op.fechaCierre || "-"}</td>
-        <td>
+        <td data-label="Título"><strong>${op.titulo}</strong></td>
+        <td data-label="Cliente">${op.clienteNombre}</td>
+        <td data-label="Valor">$${Number(op.valor ?? 0).toLocaleString()}</td>
+        <td data-label="Etapa"><span class="badge ${getEtapaBadgeClass(op.etapa)}">${op.etapa}</span></td>
+        <td data-label="Probabilidad">${op.probabilidad}%</td>
+        <td data-label="Cierre">${op.fechaCierre || "-"}</td>
+        <td data-label="Acciones">
           <div class="action-buttons">
             <button class="btn btn-secondary" onclick="editarOportunidad(${op.id})">Editar</button>
             <button class="btn btn-danger" onclick="eliminarOportunidad(${op.id})">Eliminar</button>
@@ -1402,12 +1402,12 @@ function renderTareas(tareas, emptyMessage) {
     .map(
       (tarea) => `
       <tr>
-        <td><strong>${tarea.titulo}</strong></td>
-        <td>${tarea.clienteNombre}</td>
-        <td><span class="badge ${getPrioridadBadgeClass(tarea.prioridad)}">${tarea.prioridad}</span></td>
-        <td><span class="badge ${getEstadoBadgeClass(tarea.estado)}">${tarea.estado}</span></td>
-        <td>${tarea.fechaLimite || "-"}</td>
-        <td>
+        <td data-label="Tarea"><strong>${tarea.titulo}</strong></td>
+        <td data-label="Cliente">${tarea.clienteNombre}</td>
+        <td data-label="Prioridad"><span class="badge ${getPrioridadBadgeClass(tarea.prioridad)}">${tarea.prioridad}</span></td>
+        <td data-label="Estado"><span class="badge ${getEstadoBadgeClass(tarea.estado)}">${tarea.estado}</span></td>
+        <td data-label="Fecha límite">${tarea.fechaLimite || "-"}</td>
+        <td data-label="Acciones">
           <div class="action-buttons">
             <button class="btn btn-secondary" onclick="editarTarea(${tarea.id})">Editar</button>
             <button class="btn btn-success" onclick="cambiarEstadoTarea(${tarea.id})">✓</button>

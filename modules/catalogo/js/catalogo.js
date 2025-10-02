@@ -1395,10 +1395,10 @@
             if (recentSales.length > 0) {
                 recentSalesTable.innerHTML = recentSales.map(sale => `
                     <tr>
-                        <td>${new Date(sale.date).toLocaleDateString('es-CR')}</td>
-                        <td>${sale.client.name}</td>
-                        <td>₡${sale.total.toLocaleString()}</td>
-                        <td><span style="background: ${sale.status === 'Completado' ? 'var(--success)' : 'var(--warning)'}; color: white; padding: 3px 8px; border-radius: 5px; font-size: 12px;">${sale.status}</span></td>
+                        <td data-label="Fecha">${new Date(sale.date).toLocaleDateString('es-CR')}</td>
+                        <td data-label="Cliente">${sale.client.name}</td>
+                        <td data-label="Total">₡${sale.total.toLocaleString()}</td>
+                        <td data-label="Estado"><span style="background: ${sale.status === 'Completado' ? 'var(--success)' : 'var(--warning)'}; color: white; padding: 3px 8px; border-radius: 5px; font-size: 12px;">${sale.status}</span></td>
                     </tr>
                 `).join('');
             }
@@ -1416,12 +1416,12 @@
                 const sourceIcon = sale.source === 'WhatsApp Manual' ? '📱' : '🛒';
                 return `
                     <tr data-sale-id="${sale.id}">
-                        <td>${sourceIcon} #${sale.id.slice(-6)}</td>
-                        <td>${new Date(sale.date).toLocaleDateString('es-CR')}</td>
-                        <td>${sale.client.name}</td>
-                        <td>₡${sale.total.toLocaleString()}</td>
-                        <td><span style="background: ${sale.status === 'Completado' ? 'var(--success)' : 'var(--warning)'}; color: white; padding: 3px 8px; border-radius: 5px; font-size: 12px;">${sale.status}</span></td>
-                        <td>
+                        <td data-label="Pedido">${sourceIcon} #${sale.id.slice(-6)}</td>
+                        <td data-label="Fecha">${new Date(sale.date).toLocaleDateString('es-CR')}</td>
+                        <td data-label="Cliente">${sale.client.name}</td>
+                        <td data-label="Total">₡${sale.total.toLocaleString()}</td>
+                        <td data-label="Estado"><span style="background: ${sale.status === 'Completado' ? 'var(--success)' : 'var(--warning)'}; color: white; padding: 3px 8px; border-radius: 5px; font-size: 12px;">${sale.status}</span></td>
+                        <td data-label="Acciones">
                             <button class="btn-primary btn-success" onclick="markAsComplete('${sale.id}')" style="padding: 5px 10px; font-size: 12px;" ${sale.status === 'Completado' ? 'disabled' : ''}>✓ Completar</button>
                         </td>
                     </tr>
@@ -1449,11 +1449,11 @@
             
             clientsTable.innerHTML = appData.clients.map(client => `
                 <tr>
-                    <td>${client.name}</td>
-                    <td>${client.phone}</td>
-                    <td>${client.address || '-'}</td>
-                    <td>${client.purchases}</td>
-                    <td>₡${client.totalSpent.toLocaleString()}</td>
+                    <td data-label="Nombre">${client.name}</td>
+                    <td data-label="Teléfono">${client.phone}</td>
+                    <td data-label="Dirección">${client.address || '-'}</td>
+                    <td data-label="Compras">${client.purchases}</td>
+                    <td data-label="Total">₡${client.totalSpent.toLocaleString()}</td>
                 </tr>
             `).join('');
         }
@@ -1468,15 +1468,15 @@
             
             inventoryTable.innerHTML = appData.products.map(product => `
                 <tr>
-                    <td>${product.name}</td>
-                    <td>${product.category}</td>
-                    <td>
+                    <td data-label="Producto">${product.name}</td>
+                    <td data-label="Categoría">${product.category}</td>
+                    <td data-label="Stock">
                         <span style="background: ${product.stock === 0 ? 'var(--danger)' : product.stock <= 5 ? 'var(--warning)' : 'var(--success)'}; color: white; padding: 3px 8px; border-radius: 5px;">
                             ${product.stock}
                         </span>
                     </td>
-                    <td>₡${product.price.toLocaleString()}</td>
-                    <td>
+                    <td data-label="Precio">₡${product.price.toLocaleString()}</td>
+                    <td data-label="Acciones">
                         <button class="btn-primary" onclick="editProduct('${product.id}')" style="padding: 5px 10px; font-size: 12px;">✏️ Editar</button>
                         <button class="btn-primary btn-danger" onclick="deleteProduct('${product.id}')" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;">🗑️ Eliminar</button>
                     </td>

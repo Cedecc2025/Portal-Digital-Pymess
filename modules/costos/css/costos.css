@@ -17,7 +17,7 @@ body {
   color: var(--color-text);
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
   margin: 0;
-  padding: 40px 20px;
+  padding: clamp(24px, 5vw, 48px) clamp(16px, 4vw, 32px);
 }
 
 .hidden {
@@ -26,7 +26,8 @@ body {
 
 .container {
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: 1180px;
+  width: min(100%, 1180px);
 }
 
 .card {
@@ -34,7 +35,7 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
   margin-bottom: 30px;
-  padding: 32px;
+  padding: clamp(24px, 3.5vw, 36px);
 }
 
 .header {
@@ -513,36 +514,119 @@ body {
   padding: 16px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   body {
-    padding: 20px 12px;
+    padding: clamp(20px, 5vw, 36px) clamp(14px, 4vw, 24px);
   }
 
   .header {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: clamp(20px, 6vw, 28px);
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .module-card {
+    padding: clamp(18px, 5vw, 24px);
+  }
+
+  .module-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .module-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    gap: 8px;
+  }
+
+  .tab {
+    flex: 1 0 auto;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: clamp(18px, 6vw, 24px) clamp(12px, 5vw, 20px);
   }
 
   .header-actions {
     align-items: stretch;
+  }
+
+  .header-actions .dropdown,
+  .header-actions .btn-dashboard,
+  .btn {
     width: 100%;
   }
 
   .currency-toggle {
     width: 100%;
-    justify-content: space-between;
   }
 
   .currency-toggle__button {
     flex: 1;
   }
 
-  .header-actions .dropdown,
-  .header-actions .btn-dashboard {
-    width: 100%;
+  .tabs {
+    flex-direction: column;
+    align-items: stretch;
   }
 
+  .login-card {
+    padding: clamp(20px, 7vw, 26px);
+  }
+}
+
+@media (max-width: 360px) {
   .card {
-    padding: 24px;
+    padding: clamp(16px, 8vw, 22px);
+  }
+
+  .metric-card {
+    padding: clamp(16px, 7vw, 22px);
   }
 }
