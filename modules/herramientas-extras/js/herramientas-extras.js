@@ -362,3 +362,92 @@ function initialize() {
 }
 
 document.addEventListener("DOMContentLoaded", initialize);
+// Slider functionality
+let currentSlide = 0;
+let totalSlides = 0;
+let slideWidth = 340; // 320px card + 20px margin
+
+function getVisibleSlides() {
+  const containerWidth = document.querySelector('.slider-container')?.offsetWidth || 1200;
+  if (window.innerWidth <= 768) {
+    return 1;
+  } else if (window.innerWidth <= 1024) {
+    return Math.floor(containerWidth / slideWidth) || 2;
+  } else {
+    return Math.floor(containerWidth / slideWidth) || 3;
+  }
+}
+
+function moveSlider(direction) {
+  const slider = document.getElementById('aiSlider');
+  if (!slider) return;
+
+  const visibleSlides = getVisibleSlides();
+  const maxSlide = Math.max(0, totalSlides - visibleSlides);
+  
+  currentSlide += direction;
+  
+  if (currentSlide < 0) {
+    currentSlide = 0;
+  } else if (currentSlide > maxSlide) {
+    currentSlide = maxSlide;
+  }
+  
+  const translateX = -(currentSlide * slideWidth);
+  slider.style.transform = `translateX(${translateX}px)`;
+  
+  updateSliderButtons();
+}
+
+function updateSliderButtons() {
+  const prevBtn = document.querySelector('.prev-btn');
+  const nextBtn = document.querySelector('.next-btn');
+  
+  if (prevBtn) {
+    prevBtn.disabled = currentSlide === 0;
+  }
+  
+  if (nextBtn) {
+    const visibleSlides = getVisibleSlides();
+    const maxSlide = Math.max(0, totalSlides - visibleSlides);
+    nextBtn.disabled = currentSlide >= maxSlide;
+  }
+}
+
+function initializeSlider() {
+  const slider = document.getElementById('aiSlider');
+  if (!slider) return;
+  
+  totalSlides = slider.children.length;
+  updateSliderButtons();
+  
+  // Auto-slide every 6 seconds
+  setInterval(() => {
+    const visibleSlides = getVisibleSlides();
+    const maxSlide = Math.max(0, totalSlides - visibleSlides);
+    if (currentSlide >= maxSlide) {
+      currentSlide = -1;
+    }
+    moveSlider(1);
+  }, 6000);
+}
+
+// Make moveSlider globally available
+window.moveSlider = moveSlider;
+
+// Initialize slider when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initializeSlider, 200);
+});
+
+// Update slider on window resize
+window.addEventListener('resize', () => {
+  updateSliderButtons();
+  // Recalculate position without moving
+  const slider = document.getElementById('aiSlider');
+  if (slider) {
+    const translateX = -(currentSlide * slideWidth);
+    slider.style.transform = `translateX(${translateX}px)`;
+  }
+});
+
